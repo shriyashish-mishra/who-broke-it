@@ -36,7 +36,7 @@ func TestStatusAndCheckRender(t *testing.T) {
 		v.Blocked = append(v.Blocked, engine.BlockedTask{Task: model.Task{ID: "TASK-1" + string(rune('0'+i)), Title: "x"}, WaitingFor: []string{"TASK-002"}})
 	}
 	v.Attention = []string{"⚠ BillingStatus changed"}
-	out := Status(v)
+	out := ansiRe.ReplaceAllString(Status(v), "") // colours depend on the terminal; the content must not
 	for _, want := range []string{"WHO BROKE IT?", "PROJECT: demo", "25%", "READY", "TASK-002", "… and 3 more", "ATTENTION", "BillingStatus changed"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("status missing %q", want)
@@ -44,11 +44,11 @@ func TestStatusAndCheckRender(t *testing.T) {
 	}
 	rep := engine.CheckReport{Task: "TASK-7", Base: "main", Head: "HEAD", Files: []string{"a"}, Findings: []engine.Finding{
 		{Level: "error", Code: "SCOPE", Message: "a is outside | scope", File: "a"}, {Level: "warn", Code: "NO_HANDOFF", Message: "m"}}}
-	gh := CheckGitHub(rep)
+	gh := ansiRe.ReplaceAllString(CheckGitHub(rep), "")
 	if !strings.Contains(gh, "::error title=SCOPE,file=a::a is outside | scope") || !strings.Contains(gh, "::warning title=NO_HANDOFF::m") || !strings.Contains(gh, "FAIL") {
 		t.Fatalf("github format:\n%s", gh)
 	}
-	md := CheckMarkdown(rep)
+	md := ansiRe.ReplaceAllString(CheckMarkdown(rep), "")
 	if !strings.Contains(md, "❌ FAIL") || !strings.Contains(md, `a is outside \| scope`) {
 		t.Fatalf("markdown must escape table pipes:\n%s", md)
 	}
