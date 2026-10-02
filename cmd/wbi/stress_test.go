@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 	"testing"
@@ -19,7 +20,7 @@ func TestManyProcessesShareOneDatabase(t *testing.T) {
 		t.Skip("stress test")
 	}
 	bin := filepath.Join(t.TempDir(), "wbi")
-	if runtime := os.Getenv("GOOS"); runtime == "windows" {
+	if runtime.GOOS == "windows" {
 		bin += ".exe"
 	}
 	if out, err := exec.Command("go", "build", "-o", bin, ".").CombinedOutput(); err != nil {
