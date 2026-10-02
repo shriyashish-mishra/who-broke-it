@@ -145,6 +145,8 @@ jobs:
           require-approval: true  # high-impact tasks need an approving review
 ```
 
+**See it live:** [wbi-action-demo](https://github.com/shriyashish-mishra/wbi-action-demo) has real open PRs: one clean (passes), one that edits restricted billing code and bypasses `BillingService` (fails), one that bumps a contract it doesn't own (fails), and one high-impact migration waiting for human approval (fails until approved). Each shows inline annotations and a job summary.
+
 The PR's task comes from the branch name (`wbi/TASK-7`), a `WBI-Task:` commit trailer, or `--task`. Findings appear as inline annotations. Locally: `wbi check --base main`.
 
 ## What it does
@@ -160,6 +162,7 @@ The PR's task comes from the branch name (`wbi/TASK-7`), a `WBI-Task:` commit tr
 | Blame / why | `wbi blame`, `wbi why` | Commit trailers (`WBI-Task`, `WBI-Agent`) → task → requirement → ADR; includes **unmerged** branches |
 | Drift | `wbi drift` | Product (requirement × layer matrix), architecture (constitution forbid-rules, incl. unmerged branches), context (stale contract versions) |
 | Simulation | `wbi simulate` | Waves, critical path, parallelizable tasks, overlapping scopes, missing deps, approval gate |
+| Pull requests | `wbi pr <task>` | Opens a PR (via `gh`) whose body is built from the handoff: requirement, files changed (from git), contract changes, verification, acceptance, affected tasks, labels (`high-impact`, `contract-change`) |
 | Merge gate | `wbi check`, GitHub Action | Diff vs. the task's scope, contract ownership/versioning, constitution, plan integrity; optional handoff + human-approval gates |
 | Cross-machine sync | `wbi sync` (automatic once enabled) | Git-native: an append-only event log on `refs/wbi/sync`; atomic claims via push compare-and-swap |
 | MCP | `wbi mcp` | 18 `wbi_*` tools over stdio; same engine as the CLI |

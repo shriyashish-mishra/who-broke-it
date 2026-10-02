@@ -199,8 +199,7 @@ func (e *Engine) SubmitHandoff(taskID string, o HandoffOpts) (*HandoffResult, er
 		Tests: tests, Limitations: o.Limitations, Attested: o.Attest, Affected: aff, Branch: st.Branch, PR: o.PR, Commits: commits,
 	}
 	h.Normalize()
-	js, _ := json.Marshal(h)
-	_, _ = e.DB.Exec(`INSERT OR REPLACE INTO handoffs (task_id,json,ts) VALUES (?,?,?)`, t.ID, string(js), nowMs())
+	e.saveHandoffRow(h)
 	if err := wstore.SaveHandoff(h); err != nil {
 		return nil, err
 	}
@@ -465,3 +464,10 @@ func containsInt(s []int, v int) bool {
 	}
 	return false
 }
+
+func (e *Engine) saveHandoffRow(h model.Handoff) {
+	js, _ := json.Marshal(h)
+	_, _ = e.DB.Exec(`INSERT OR REPLACE INTO handoffs (task_id,json,ts) VALUES (?,?,?)`, h.TaskID, string(js), nowMs())
+}
+
+func storeAt(root string) *store.Store { return &store.Store{Root: root} }

@@ -434,3 +434,31 @@ func TestTaskBranchNameIsWbiSlashTaskID(t *testing.T) {
 		t.Fatalf("worktree is on %q", got)
 	}
 }
+
+func TestBuildPRFromHandoff(t *testing.T) {
+	_, e := testutil.PlannedRepo(t)
+	if _, err := e.BuildPR("TASK-007"); err == nil || !strings.Contains(err.Error(), "no handoff") {
+		t.Fatalf("a PR needs a handoff first: %v", err)
+	}
+	through(t, e, "TASK-001", "TASK-002", "TASK-004")
+	finish(t, e, "TASK-007", claude, map[string]string{"src/api/billing/status.ts": "export type S = 'paused'"}, func(o *engine.HandoffOpts) {
+		o.Contracts = []string{"BillingStatus=now supports paused"}
+		o.Limitations = []string{"Refund API not implemented"}
+	})
+	d, err := e.BuildPR("TASK-007")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if d.Branch != "wbi/TASK-007" || d.Base != "main" || d.Title != "TASK-007: Billing API" {
+		t.Fatalf("draft header: %+v", d)
+	}
+	for _, want := range []string{"**Requirement:** REQ-002", "`src/api/billing/status.ts`", "**BillingStatus** → v2: now supports paused", "Refund API not implemented", "High-impact change (security, public-api)", "claude@maya", "Downstream tasks affected"} {
+		if !strings.Contains(d.Body, want) {
+			t.Errorf("PR body missing %q:\n%s", want, d.Body)
+		}
+	}
+	got := strings.Join(d.Labels, ",")
+	if !strings.Contains(got, "contract-change") || !strings.Contains(got, "high-impact") {
+		t.Fatalf("labels %s", got)
+	}
+}

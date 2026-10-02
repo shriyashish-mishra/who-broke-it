@@ -50,7 +50,7 @@ runs:
         set -euo pipefail
         base="$INPUT_BASE"; [ -n "$base" ] || base="origin/${BASE_REF:-main}"
         git rev-parse --verify --quiet "$base" >/dev/null || { echo "::error::cannot resolve $base. Use actions/checkout with fetch-depth: 0"; exit 1; }
-        args=(check --base "$base" --head HEAD --format github)
+        args=(check --base "$base" --head HEAD)
         [ -z "${HEAD_REF:-}" ] || args+=(--branch "$HEAD_REF")
         [ "$REQUIRE_TASK" = true ] && args+=(--require-task)
         [ "$REQUIRE_HANDOFF" = true ] && args+=(--require-handoff)
@@ -58,4 +58,6 @@ runs:
           args+=(--require-approval)
           if [ -n "${PR_NUMBER:-}" ] && [ "$(gh pr view "$PR_NUMBER" --json reviewDecision -q .reviewDecision 2>/dev/null || true)" = APPROVED ]; then args+=(--approved); fi
         fi
-        wbi "${args[@]}"
+        # human-readable summary on the run page; the annotations (below) show up inline on the PR
+        if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then wbi "${args[@]}" --format markdown >> "$GITHUB_STEP_SUMMARY" || true; fi
+        wbi "${args[@]}" --format github

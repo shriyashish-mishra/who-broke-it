@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"runtime/debug"
 	"strconv"
 	"strings"
@@ -34,7 +35,7 @@ func init() {
 	}
 }
 
-var boolFlags = map[string]bool{"force": true, "json": true, "worktree": true, "mermaid": true, "dot": true, "approve": true, "prompt": true, "no-hook": true, "mark-read": true, "help": true, "version": true, "all": true, "require-task": true, "require-handoff": true, "require-approval": true, "approved": true}
+var boolFlags = map[string]bool{"force": true, "json": true, "worktree": true, "mermaid": true, "dot": true, "approve": true, "prompt": true, "no-hook": true, "mark-read": true, "help": true, "version": true, "all": true, "require-task": true, "require-handoff": true, "require-approval": true, "approved": true, "draft": true, "dry-run": true, "no-push": true}
 var multiFlags = map[string]bool{"contract": true, "limitation": true}
 
 type args struct {
@@ -106,6 +107,7 @@ func help() string {
   wbi inbox   wbi ack <id>              contract changes that affect you
 
 %s
+  wbi pr <id> [--draft] [--dry-run]     open a PR whose body comes from the task's handoff (needs gh)
   wbi blame <path>                      who changed it, under which task, what it affects
   wbi why <path>                        requirement → task → agent → commit → PR
   wbi blast <contract|TASK-id|path>     blast radius
@@ -510,6 +512,8 @@ func execute(e *engine.Engine, cmd string, a args, ident engine.AgentOpts, rest 
 			return err
 		}
 		p(fmt.Sprintf("%s %s recorded: %s", render.Green("✓"), d.ID, d.Title))
+	case "pr":
+		return prCmd(e, a, restArg(0))
 	case "check":
 		rep, err := e.Check(engine.CheckOpts{Base: a.get("base"), Head: a.get("head"), Branch: a.get("branch"), Task: a.get("task"),
 			RequireTask: a.has("require-task"), RequireHandoff: a.has("require-handoff"), RequireApproval: a.has("require-approval"), Approved: a.has("approved")})
@@ -521,6 +525,8 @@ func execute(e *engine.Engine, cmd string, a args, ident engine.AgentOpts, rest 
 			printJSON(rep)
 		case "github":
 			fmt.Print(render.CheckGitHub(*rep))
+		case "markdown":
+			fmt.Print(render.CheckMarkdown(*rep))
 		default:
 			fmt.Print(render.Check(*rep))
 		}
@@ -749,4 +755,60 @@ func syncCmd(e *engine.Engine, a args, rest []string) error {
 		return nil
 	}
 	return model.Errf("usage: wbi sync [init [--remote origin] [--ref refs/wbi/sync] | status | now]")
+}
+
+func prCmd(e *engine.Engine, a args, taskID string) error {
+	d, err := e.BuildPR(taskID)
+	if err != nil {
+		return err
+	}
+	if a.has("dry-run") {
+		fmt.Printf("# %s   (%s → %s, labels: %s)\n\n%s", d.Title, d.Branch, d.Base, strings.Join(d.Labels, ", "), d.Body)
+		return nil
+	}
+	if _, err := exec.LookPath("gh"); err != nil {
+		return model.Errf("the GitHub CLI (gh) is required to open PRs; use --dry-run to print the body")
+	}
+	dir := e.Root()
+	if wt := e.State(strings.ToUpper(taskID)).Worktree; wt != "" {
+		dir = wt
+	}
+	if !a.has("no-push") {
+		if out, err := exec.Command("git", "-C", dir, "push", "-u", "origin", d.Branch).CombinedOutput(); err != nil {
+			return model.Errf("pushing %s failed: %s", d.Branch, strings.TrimSpace(string(out)))
+		}
+	}
+	args := []string{"pr", "create", "--head", d.Branch, "--base", d.Base, "--title", d.Title, "--body-file", "-"}
+	if a.has("draft") {
+		args = append(args, "--draft")
+	}
+	cmd := exec.Command("gh", args...)
+	cmd.Dir = dir
+	cmd.Stdin = strings.NewReader(d.Body)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return model.Errf("gh pr create failed: %s", strings.TrimSpace(string(out)))
+	}
+	url := strings.TrimSpace(string(out))
+	if i := strings.LastIndex(url, "/pull/"); i >= 0 {
+		if n, err := strconv.Atoi(strings.TrimSpace(url[i+len("/pull/"):])); err == nil {
+			e.SetPR(taskID, n)
+		}
+	}
+	for _, l := range d.Labels { // best effort: create the label if the repo lacks it, then apply it
+		_ = exec.Command("gh", "label", "create", l, "--force", "--color", labelColor(l)).Run()
+		_ = exec.Command("gh", "pr", "edit", url, "--add-label", l).Run()
+	}
+	fmt.Printf("%s opened %s\n", render.Green("✓"), url)
+	return nil
+}
+
+func labelColor(l string) string {
+	switch l {
+	case "high-impact":
+		return "d93f0b"
+	case "contract-change":
+		return "fbca04"
+	}
+	return "6f42c1"
 }

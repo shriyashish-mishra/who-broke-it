@@ -475,3 +475,31 @@ func CheckGitHub(r engine.CheckReport) string {
 	fmt.Fprintf(&b, "wbi check %s: %s (%d finding(s), %d file(s))\n", r.Task, status, len(r.Findings), len(r.Files))
 	return b.String()
 }
+
+// CheckMarkdown renders the report for $GITHUB_STEP_SUMMARY.
+func CheckMarkdown(r engine.CheckReport) string {
+	var b strings.Builder
+	status := "✅ PASS"
+	if !r.OK {
+		status = "❌ FAIL"
+	}
+	task := r.Task
+	if task == "" {
+		task = "no task"
+	}
+	fmt.Fprintf(&b, "## Who Broke It? merge gate: %s\n\n`%s` · `%s...%s` · %d file(s) changed\n\n", status, task, r.Base, r.Head, len(r.Files))
+	if len(r.Findings) == 0 {
+		b.WriteString("Nothing to report. Nobody broke it.\n")
+		return b.String()
+	}
+	b.WriteString("| | Code | Finding | File |\n|---|---|---|---|\n")
+	for _, f := range r.Findings {
+		icon := map[string]string{"error": "❌", "warn": "⚠️", "notice": "ℹ️"}[f.Level]
+		file := ""
+		if f.File != "" {
+			file = "`" + f.File + "`"
+		}
+		fmt.Fprintf(&b, "| %s | `%s` | %s | %s |\n", icon, f.Code, strings.ReplaceAll(f.Message, "|", "\\|"), file)
+	}
+	return b.String()
+}
