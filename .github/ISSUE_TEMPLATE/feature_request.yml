@@ -1,0 +1,22 @@
+name: Feature request
+description: Propose a change. Please read the scope note first.
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        wbi is deliberately small: a coordination layer, not an agent, not a tracker, not a hosted platform. Requests that make the existing workflow (plan, claim, intent, handoff, verify, PR, merge gate, sync) more reliable or easier to understand are the best fit.
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem you hit
+      description: What were you doing, and what went wrong or was missing? A real situation beats a hypothetical.
+    validations: { required: true }
+  - type: textarea
+    id: idea
+    attributes:
+      label: What you'd like
+  - type: textarea
+    id: alt
+    attributes:
+      label: What you do today instead

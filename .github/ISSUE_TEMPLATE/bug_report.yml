@@ -1,0 +1,45 @@
+name: Bug report
+description: Something wbi did that it should not have, or failed to do.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you ran, what you expected, what you got. Paste output as text, not a screenshot.
+    validations: { required: true }
+  - type: input
+    id: version
+    attributes:
+      label: wbi version
+      description: Output of `wbi version`.
+    validations: { required: true }
+  - type: dropdown
+    id: os
+    attributes:
+      label: OS
+      options: [macOS, Linux, Windows]
+    validations: { required: true }
+  - type: dropdown
+    id: surface
+    attributes:
+      label: How were you using it?
+      options: [CLI by hand, CLI driven by an agent, MCP server, GitHub Action (wbi check), Cross-machine sync, Dashboard, Other]
+    validations: { required: true }
+  - type: input
+    id: agent
+    attributes:
+      label: Agent and version (if one was involved)
+      placeholder: "Claude Code 2.1.287"
+  - type: textarea
+    id: repro
+    attributes:
+      label: Minimal reproduction
+      description: A fresh `git init` repo with `wbi init` + `wbi plan` is ideal. For sync problems include `wbi sync status` from each clone.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before filing
+      options:
+        - label: I am on the latest release (`wbi version`)
+        - label: This is not a security issue (those go through the private advisory link in SECURITY.md)

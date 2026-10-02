@@ -1,0 +1,9 @@
+# Everything is reviewed by the maintainer. The trust-sensitive files are listed so a future second
+# maintainer cannot miss that they need extra care.
+*                                    @shriyashish-mishra
+/internal/replicate/                 @shriyashish-mishra
+/internal/state/replication.go       @shriyashish-mishra
+/internal/engine/check.go            @shriyashish-mishra
+/action.yml                          @shriyashish-mishra
+/install.sh                          @shriyashish-mishra
+/.github/workflows/                  @shriyashish-mishra

@@ -67,4 +67,4 @@ Nothing changes for agents: the same CLI / MCP calls work. When `wbi sync init` 
 
 ## Contributing an adapter
 
-Adapters are small: a guidance file template (`internal/engine/adapters.go: Targets`) and an MCP config snippet. PRs welcome for Aider, OpenCode, Continue, Zed, Windsurf, Copilot agent mode, etc.
+Adapters are one registry entry each; see [ADAPTERS.md](ADAPTERS.md). Only Claude Code is verified; the rest are integration targets that need someone to run them (use the "I ran another agent" issue template).

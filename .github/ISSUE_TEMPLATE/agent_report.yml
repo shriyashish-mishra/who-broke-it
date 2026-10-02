@@ -1,0 +1,43 @@
+name: I ran another agent through wbi
+description: Verified (or tried to verify) Codex, Gemini CLI, Cursor, OpenCode, Aider or anything else. This is the most valuable report you can send.
+labels: [adapter, verification]
+title: "[agent] <tool and version>: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Only Claude Code is verified end to end today (see `docs/REAL-AGENTS.md`). Every other adapter is a documented integration target. A real run, including failures, is how that changes. Negative results are just as useful.
+  - type: input
+    id: agent
+    attributes:
+      label: Agent and version
+      placeholder: "Codex CLI 0.x / Gemini CLI 0.x / Cursor 1.x"
+    validations: { required: true }
+  - type: dropdown
+    id: transport
+    attributes:
+      label: Transport you tried
+      options: [MCP (wbi mcp), CLI protocol (instructions file + shell), Both]
+    validations: { required: true }
+  - type: textarea
+    id: did
+    attributes:
+      label: What the agent did
+      description: "Did it find and follow the instructions file? Claim a task, declare intent, commit in the worktree, hand off? Paste the prompt you gave it."
+    validations: { required: true }
+  - type: textarea
+    id: broke
+    attributes:
+      label: What broke or confused it
+      description: Friction counts: wrong file location, unclear instructions, missing MCP tool, sandbox restrictions, identity problems.
+  - type: textarea
+    id: config
+    attributes:
+      label: Config you used
+      description: The output of `wbi adapters mcp <agent>` and where you put it, or the instruction file the agent read.
+  - type: checkboxes
+    id: ok
+    attributes:
+      label: Permission
+      options:
+        - label: You may quote this in docs/REAL-AGENTS.md (credited by GitHub handle)
