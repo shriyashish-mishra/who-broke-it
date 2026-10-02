@@ -2,12 +2,12 @@
 package main
 
 import (
-	"runtime/debug"
 	"crypto/sha1"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
+	"runtime/debug"
 	"strconv"
 	"strings"
 	"time"
