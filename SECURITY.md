@@ -2,7 +2,7 @@
 
 ## Reporting a vulnerability
 
-Please **do not** open a public issue. Use GitHub's private vulnerability reporting ("Security" tab → "Report a vulnerability") on this repository, or contact the maintainers privately. We aim to acknowledge within 3 business days.
+Please **do not** open a public issue. Use GitHub's private vulnerability reporting: [report a vulnerability](https://github.com/shriyashish-mishra/who-broke-it/security/advisories/new) (it is enabled on this repository). We aim to acknowledge within 3 business days.
 
 ## Threat model notes (v0.x)
 
@@ -15,4 +15,4 @@ Please **do not** open a public issue. Use GitHub's private vulnerability report
 
 ## Supported versions
 
-Pre-1.0: only the latest release receives fixes.
+Pre-1.0: only the latest release receives fixes. Release artifacts are published with `checksums.txt`, and `install.sh` verifies it and refuses to install on a mismatch. Sync signing and the allow-list were tested adversarially against real GitHub (see [docs/VERIFICATION.md](docs/VERIFICATION.md)); there has been no independent security audit.

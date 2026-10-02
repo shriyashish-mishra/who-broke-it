@@ -149,7 +149,7 @@
   </div>
   <p class="center"><button class="btn" id="racebtn" type="button">▶ Both claim TASK-003 at once</button></p>
   <div class="term" data-key="race" data-cmd="wbi sync   # what Bob actually saw" style="max-width:760px;margin:16px auto 0"></div>
-  <p class="fine center mono" style="margin-top:14px">Signed batches · team allow-list · offline-tolerant · compaction</p>
+  <p class="fine center mono" style="margin-top:14px">Signed batches · team allow-list · offline-tolerant · compaction · <a href="https://github.com/shriyashish-mishra/who-broke-it/blob/main/docs/VERIFICATION.md">verified against real GitHub</a></p>
 </section>
 
 <!-- ============================ JUDGE -->
@@ -189,17 +189,18 @@
 <!-- ============================ HONESTY -->
 <section id="trust" class="block alt">
   <h2 class="center">What's proven, and what isn't</h2>
-  <p class="lead center">Open-source tools lie by omission. Here is the whole truth.</p>
+  <p class="lead center">Open-source tools lie by omission. Here is the whole truth. (<a href="https://github.com/shriyashish-mishra/who-broke-it/blob/main/docs/VERIFICATION.md">Full evidence and how to re-run it</a>)</p>
   <div class="truth">
     <div><h3 class="g">✓ Verified</h3><ul>
       <li><b>Claude Code</b> run end to end over MCP <em>and</em> the CLI protocol. It found five real problems we then fixed.</li>
       <li>Linux, macOS and Windows CI, including a 24-process database stress test.</li>
-      <li>Sync raced on a <b>real GitHub</b> repo: exactly one claim wins, every time we tried.</li>
+      <li>Sync run against <b>real GitHub</b> with two clones: signed batches, a forged batch rejected, the team allow-list, <code>--force-with-lease</code> compaction, and concurrent claim races with exactly one winner every time (17/17 checks).</li>
       <li>The merge gate on real pull requests, installable via <code>curl</code>, Homebrew and <code>go install</code>.</li>
       <li>Every transcript on this page is captured from a real run.</li></ul></div>
     <div><h3 class="y">◌ Integration targets (not run)</h3><ul>
       <li><b>Codex CLI, Gemini CLI, Cursor, OpenCode, Aider.</b> The adapter architecture supports them, and the files follow their docs, but nobody has run those agents through wbi yet. <a href="https://github.com/shriyashish-mishra/who-broke-it/blob/main/docs/ADAPTERS.md">Help verify one →</a></li>
       <li>GitLab, Bitbucket and self-hosted git for sync: untested.</li>
+      <li>Slack and Discord notifications: tested against local webhook mocks, not the real services.</li>
       <li>Linear and Jira sync: not built (generic webhooks are).</li>
       <li>Authorized teammates are trusted with each other: signatures stop outsiders and forgery, not insiders.</li></ul></div>
   </div>

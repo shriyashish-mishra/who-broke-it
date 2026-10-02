@@ -1,14 +1,15 @@
 # Who Broke It?
 
-### The coordination layer for AI-native engineering teams. One repo. Humans. AI agents. Zero excuses.
+[![ci](https://github.com/shriyashish-mishra/who-broke-it/actions/workflows/ci.yml/badge.svg)](https://github.com/shriyashish-mishra/who-broke-it/actions/workflows/ci.yml)
+[![release](https://img.shields.io/github/v/release/shriyashish-mishra/who-broke-it?display_name=tag)](https://github.com/shriyashish-mishra/who-broke-it/releases/latest)
+[![license](https://img.shields.io/github/license/shriyashish-mishra/who-broke-it)](LICENSE)
+![platforms](https://img.shields.io/badge/linux%20%C2%B7%20macos%20%C2%B7%20windows-tested%20in%20CI-informational)
 
-> **The agents write the code. Who Broke It? coordinates the engineering.**
+### One repo. Humans. AI agents. Zero excuses.
 
-Your team now has Claude Code, Codex, Gemini CLI, Cursor and a few humans all committing to one repo. The agents are good at writing code. Nobody is good at answering:
+**The open-source coordination layer for AI-native engineering teams.** Your agents write the code. Who Broke It? (`wbi`) keeps the engineering from falling apart: a shared task graph, intent and conflict detection, blast radius, verified handoffs, pull requests built from them, and a merge gate. One static binary. No server. No account.
 
-*Who owns this? What depends on it? What did that agent just change that breaks mine? Is it actually done?*
-
-`wbi` keeps a **living Engineering Graph** in your repo (goal → requirements → components → tasks → contracts → agents → intents → files → commits → PRs) and uses it to coordinate any mix of humans and AI agents. It does not write code, it is not a Jira clone, and it is not tied to any vendor.
+**[Website](https://shriyashish-mishra.github.io/who-broke-it/)** · **[Live dashboard](https://shriyashish-mishra.github.io/who-broke-it/demo-dashboard.html)** · **[Demo repo with real PRs](https://github.com/shriyashish-mishra/wbi-action-demo)** · [Docs](docs/) · [What is verified](docs/VERIFICATION.md)
 
 ```text
 $ wbi blame src/api/billing/
@@ -22,18 +23,14 @@ Last significant changes:
 → 3 downstream task(s) affected: TASK-008, TASK-009, TASK-016
 ```
 
-## 30-second explanation
+Your team now has Claude Code, Codex, Gemini CLI, Cursor and a few humans all committing to one repo. The agents are good at writing code. Nobody is good at answering *who owns this, what depends on it, what did that agent just change that breaks mine, and is it actually done?* That is what this answers, from files that live in your repo.
 
-1. **`wbi plan "<goal>"`** inspects your repo and produces a task graph: requirements, components, contracts (the interfaces tasks share), dependencies, allowed/restricted paths, acceptance criteria, risks.
-2. **Each task is a work packet.** `wbi start TASK-007 --worktree` gives an agent its own branch/worktree and everything it needs: scope, contracts, constitution rules, upstream handoffs. No rediscovering the project.
-3. **Agents declare intent before editing.** `wbi intent declare MODIFY src/api/billing/**` is checked against other agents, task ownership and contract ownership *before* code is written. Not after the merge conflict.
-4. **Handoffs are structured, and "done" is verified.** `wbi handoff` records what changed, tests and contract changes, notifies affected tasks, then the Judge checks scope, contracts, constitution, tests and acceptance criteria. Agents don't get to say DONE.
-5. **Everything is traceable.** `wbi blame`, `wbi why`, `wbi blast`, `wbi drift` answer: what changed, who/which agent, under which task and requirement, what it affects.
+> **Status:** v0.2, pre-1.0. Proven end to end with **Claude Code**; Codex, Gemini CLI, Cursor, OpenCode and Aider are integration targets that nobody has run yet ([ADAPTERS.md](docs/ADAPTERS.md)). Everything else is listed, with evidence, in [VERIFICATION.md](docs/VERIFICATION.md).
 
 ## Install
 
 ```bash
-# macOS / Linux: verified download of the latest release
+# macOS / Linux: downloads the latest release and verifies its checksum
 curl -fsSL https://raw.githubusercontent.com/shriyashish-mishra/who-broke-it/main/install.sh | sh
 
 brew install shriyashish-mishra/tap/wbi                                        # Homebrew
@@ -42,32 +39,63 @@ go install github.com/shriyashish-mishra/who-broke-it/cmd/wbi@latest           #
 # From source: git clone https://github.com/shriyashish-mishra/who-broke-it && cd who-broke-it && make install
 ```
 
-Every release ships six archives (Linux, macOS, Windows × amd64/arm64) with a `checksums.txt`; the installer refuses to install on a checksum mismatch.
+Requires only `git` at runtime. Every release ships six archives (Linux, macOS, Windows × amd64/arm64) with a `checksums.txt`; the installer refuses to install on a mismatch.
 
-## Quickstart
+## Your first five minutes
+
+In any git repo that has at least one commit:
 
 ```bash
-cd your-repo                 # any git repo with at least one commit
-wbi init
-wbi plan "Build a multi-tenant SaaS dashboard with authentication, billing, analytics and an AI assistant"
-wbi simulate --approve       # review waves / critical path / conflicts, then approve
-git add .wbi && git commit -m "chore: engineering graph"
+wbi init                                   # creates .wbi/ and a commit hook that stamps task + agent on commits
+wbi plan "Build a SaaS dashboard with auth, billing and analytics"
+wbi simulate --approve                     # waves, critical path, overlapping scopes; you approve the plan
+git add -A && git commit -m "chore: engineering graph"
 
-# a human or agent picks up work (identify with --agent/--as or WBI_AGENT/WBI_DEVELOPER)
-wbi status
-wbi start TASK-001 --agent claude --as maya --worktree
+wbi adapters install claude                # writes the protocol into CLAUDE.md (also: codex, gemini, cursor, ...)
+wbi status                                 # mission control
+wbi start TASK-001 --worktree --agent claude
 ```
 
-Try the whole story on a throwaway repo, offline, in about 15 seconds:
+That produced a graph of 13 tasks, 6 contracts and 3 requirements, an isolated worktree on branch `wbi/TASK-001`, and a **work packet**: the task's goal, allowed and restricted paths, every contract, acceptance criteria and the rules that apply to it. Real output:
+
+```text
+$ wbi status
+
+WHO BROKE IT?
+
+PROJECT: shop
+Build a SaaS dashboard with auth, billing and analytics
+
+Progress: ░░░░░░░░░░░░░░░░░░░░ 0%  (0/13 tasks)
+
+READY
+○ TASK-001 Architecture & contracts
+
+BLOCKED
+○ TASK-002 Database schema & migrations
+  waiting for TASK-001
+○ TASK-003 Web app shell
+  waiting for TASK-001
+  … and 8 more (wbi tasks --status BLOCKED)
+```
+
+**Next:** point an agent at the repo. Claude Code reads `CLAUDE.md` and follows the loop: *start a task → declare intent → code and commit in the worktree → hand off → the Judge verifies*. Over MCP instead: `wbi adapters mcp claude`. Other agents: [docs/INTEGRATING.md](docs/INTEGRATING.md).
+
+**No agent handy?** Watch the whole story on a throwaway repo in about 15 seconds. Every `wbi` action is real (git, worktrees, SQLite, verification); only the *coding* is a scripted commit per agent turn:
 
 ```bash
+git clone https://github.com/shriyashish-mishra/who-broke-it && cd who-broke-it
 make demo           # one machine, three agents
 make demo-team      # two machines sharing only a git remote
 ```
 
-> **Honesty note on the demo:** every `wbi` action in it is real (git repo, branches, worktrees, commits, SQLite state, verification). The *coding* is a scripted commit per agent turn, because the demo must run without anyone's AI subscription. Swap any step for a real agent session and the coordination is identical.
+## How it works
 
-Requires only git at runtime. `wbi` is one static binary (pure Go, no cgo: `make cross` builds Linux/macOS/Windows from any machine). Building needs Go ≥ 1.26. The only third-party dependency is a pure-Go SQLite driver (`modernc.org/sqlite`).
+1. **`wbi plan "<goal>"`** inspects your repo and produces a task graph: requirements, components, contracts (the interfaces tasks share), dependencies, allowed/restricted paths, acceptance criteria, risks.
+2. **Each task is a work packet.** `wbi start TASK-007 --worktree` gives an agent its own branch/worktree and everything it needs: scope, contracts, constitution rules, upstream handoffs. No rediscovering the project.
+3. **Agents declare intent before editing.** `wbi intent declare MODIFY src/api/billing/**` is checked against other agents, task ownership and contract ownership *before* code is written. Not after the merge conflict.
+4. **Handoffs are structured, and "done" is verified.** `wbi handoff` records what changed, tests and contract changes, notifies affected tasks, then the Judge checks scope, contracts, constitution, tests and acceptance criteria. Agents don't get to say DONE.
+5. **Everything is traceable.** `wbi blame`, `wbi why`, `wbi blast`, `wbi drift` answer: what changed, who/which agent, under which task and requirement, what it affects.
 
 ## Mission control
 
@@ -207,10 +235,11 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/PROTOCOL.md](docs/PROTOC
 
 ## Using it with your agents
 
-* **CLI works with every agent.** Any tool that can run shell commands can follow the protocol. `wbi adapters install all` writes a managed block into `CLAUDE.md`, `AGENTS.md` (Codex/OpenCode), `GEMINI.md` and `.cursor/rules/wbi.mdc`.
-* **MCP for tool-native use.** `wbi adapters mcp claude|codex|gemini|cursor` prints the config for your agent.
+* **CLI works with every agent.** Any tool that can run shell commands can follow the protocol (`export WBI_AGENT=<tool>`). `wbi adapters install claude|codex|gemini|cursor|opencode|aider` (or `all` for the first four) writes a managed block into the file that tool reads: `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `.cursor/rules/wbi.mdc`, `CONVENTIONS.md`.
+* **MCP for tool-native use.** `wbi adapters mcp <agent>` prints the config snippet; `wbi mcp` is the server (18 tools).
+* **Know what is proven.** `wbi adapters list` shows each adapter's status. Only **Claude Code** is verified; the rest are documented integration targets ([docs/ADAPTERS.md](docs/ADAPTERS.md)). If you run one, [tell us what happened](https://github.com/shriyashish-mishra/who-broke-it/issues/new?template=agent_report.yml).
 * **Commit attribution.** `wbi init` installs a `prepare-commit-msg` hook that stamps `WBI-Task` / `WBI-Agent` trailers from the branch name and `$WBI_AGENT`.
-* **Write your own adapter** in a few lines: see [docs/INTEGRATING.md](docs/INTEGRATING.md).
+* **Add an adapter**: one registry entry; see [docs/ADAPTERS.md](docs/ADAPTERS.md).
 
 ## Why not just use X?
 
@@ -220,34 +249,40 @@ Parallel agents, worktrees, task assignment, MCP, cloud agents, PR automation an
 
 **Real agents:** validated end to end with Claude Code over both MCP and the CLI protocol ([docs/REAL-AGENTS.md](docs/REAL-AGENTS.md): what it found and what changed). **Codex, Gemini CLI, Cursor, OpenCode and Aider are untested.** Their adapters follow each tool's documented conventions but have not been run.
 
-Works and is tested (`go test ./...`, 38 tests: unit, end-to-end on real git repos, and two-clone sync scenarios including a deterministic fetch→push race; plus both demos): everything in the table above.
+Works and is tested: 80+ test cases (`make test`: unit, end-to-end on real git repos, two-clone sync scenarios including deterministic races, docs-versus-code checks) run on Linux, macOS and Windows in CI, plus both demos. Evidence, including the real-GitHub sync run and what was *not* tested, is in [docs/VERIFICATION.md](docs/VERIFICATION.md).
 
 Known limits of this prototype:
 
 * **Sync is eventually consistent and trusts *team members* with each other.** Every published batch is ed25519-signed; a forged or tampered batch is always rejected, and with `wbi team join --enforce` only keys listed in `.wbi/team.json` (changed via PR) are applied. That protects against outsiders and forgery. It does **not** stop an authorized member from publishing events about someone else's task: there is no per-object permission.
 * **Claims are only atomic while you are online.** Offline claims are optimistic and can lose when you reconnect (you are told, and the claim is dropped).
 * **Log growth:** `wbi sync compact` replaces the history with one snapshot (guarded by a lease, so it cannot clobber a concurrent push). Run it occasionally; nothing runs it for you.
-* **Hosts:** verified against GitHub (two clones racing for the same task six times in a row: always exactly one winner, both clones converged; a claim round-trip takes about 4 s there) and against plain bare git remotes. GitLab, Bitbucket and self-hosted setups are untested; if one blocks `refs/wbi/*`, use the branch fallback above.
+* **Hosts:** sync was verified against **GitHub** (signing, forged-batch rejection, allow-list, `--force-with-lease` compaction, concurrent races) and plain bare git remotes. GitLab, Bitbucket and self-hosted git are untested; if one blocks `refs/wbi/*`, use the branch fallback above. Slack/Discord notifications were tested against local webhook mocks only.
 * **Intent is cooperative at edit time.** Agents must call it (the instruction files and MCP make that easy). The merge gate (`wbi check`) is what enforces the rules, after the fact, on the PR.
 * **The built-in planner is template-based** (auth, billing, analytics, assistant, notifications, mobile, multi-tenant, plus a generic fallback). It inspects your repo for stack, layout, test command and relevant files, but it is not an architect. For LLM-authored plans use `wbi plan --prompt` (prints a prompt + JSON schema for any agent), or `--agent-cmd "<cmd>"` (pipes the prompt to your agent CLI and ingests its JSON), or `--from plan.json`.
 * **Blast radius is declared relationships plus a best-effort static import scan** (JS/TS, Python, Go). It does not follow tsconfig/webpack aliases, computed dynamic imports, reflection, generated code, or other languages. It surfaces *undeclared coupling* (code in one task's area importing another's with no dependency edge) in `wbi blast`, `wbi drift` and `wbi check`.
 * **Acceptance criteria** are verified automatically only when they carry a `check` (command / file-exists / contains); otherwise the agent must attest and the human reviews.
-* Single repository per graph. The schema is multi-repo-ready; propagation across repos is not implemented.
+* Single repository per graph today; cross-repository links are on the roadmap.
 
 ## Roadmap
 
-1. **Sync hardening:** log compaction, signed events / per-user authorization, push-notification wake-ups instead of polling.
-2. **Enforcement:** a GitHub Action / pre-commit check that fails PRs which leave scope, change contracts without a handoff, or violate the constitution.
-3. **Smarter analysis:** import/call-graph based blast radius (tree-sitter), drift checks against OpenAPI specs and typed schemas.
-4. **Adapters:** Linear/Jira/Slack/Discord notifications, GitLab/Bitbucket, first-class PR state.
-5. **Multi-repo graph** with cross-repo contract propagation.
-6. **Hosted collaboration** (team dashboard, org permissions, audit logs, SSO), built on the same protocol.
+What exists is listed above. What is next, roughly in order:
+
+1. **More agents verified.** Run Codex, Gemini CLI, Cursor, OpenCode or Aider through wbi and report what breaks ([template](https://github.com/shriyashish-mishra/who-broke-it/issues/new?template=agent_report.yml)). This is the most valuable contribution.
+2. **Multi-repo links:** contracts that cross repositories (backend → SDK → web/mobile), with impact shown across the boundary. A small foundation only.
+3. **Other hosts for sync:** verify GitLab, Bitbucket and self-hosted git.
+4. **Sync:** per-object permissions (today any authorized member can write any event), push-style wake-ups instead of polling.
+5. **Bridges:** Linear and Jira via the generic webhook sink, if someone needs them.
+
+Deliberately **not** planned for the open-source core: a hosted service, a chat UI, or an agent of its own. wbi coordinates; it does not write the code.
 
 ## Development
 
 ```bash
 make test         # go vet + go test (unit + end-to-end on real temp git repos)
-make demo
+make demo         # one machine, three agents
+make demo-team    # two machines sharing a git remote
+make site-data    # regenerate the website's transcripts from real demo runs
+scripts/verify-github-sync.sh <scratch-repo-url> bin/wbi   # sync against a real host
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). MIT licensed.
