@@ -4,9 +4,9 @@ import (
 	"strings"
 	"testing"
 
-	"wbi/internal/glob"
-	"wbi/internal/graph"
-	"wbi/internal/model"
+	"github.com/shriyashish-mishra/who-broke-it/internal/glob"
+	"github.com/shriyashish-mishra/who-broke-it/internal/graph"
+	"github.com/shriyashish-mishra/who-broke-it/internal/model"
 )
 
 func TestHeuristicPlanIsValidDAGWithDisjointParallelScopes(t *testing.T) {

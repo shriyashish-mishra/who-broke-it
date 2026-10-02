@@ -10,11 +10,11 @@ import (
 	"strings"
 	"time"
 
-	"wbi/internal/gitx"
-	"wbi/internal/glob"
-	"wbi/internal/graph"
-	"wbi/internal/model"
-	"wbi/internal/rules"
+	"github.com/shriyashish-mishra/who-broke-it/internal/gitx"
+	"github.com/shriyashish-mishra/who-broke-it/internal/glob"
+	"github.com/shriyashish-mishra/who-broke-it/internal/graph"
+	"github.com/shriyashish-mishra/who-broke-it/internal/model"
+	"github.com/shriyashish-mishra/who-broke-it/internal/rules"
 )
 
 // ---------------------------------------------------------------- status

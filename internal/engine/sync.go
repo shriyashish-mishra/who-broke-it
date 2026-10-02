@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"wbi/internal/gitx"
-	"wbi/internal/model"
-	"wbi/internal/replicate"
+	"github.com/shriyashish-mishra/who-broke-it/internal/gitx"
+	"github.com/shriyashish-mishra/who-broke-it/internal/model"
+	"github.com/shriyashish-mishra/who-broke-it/internal/replicate"
 )
 
 // SyncConfig resolves the effective sync settings. ok=false means sync is off; why says so when it is

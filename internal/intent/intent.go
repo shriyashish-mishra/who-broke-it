@@ -5,8 +5,8 @@ package intent
 import (
 	"fmt"
 
-	"wbi/internal/glob"
-	"wbi/internal/model"
+	"github.com/shriyashish-mishra/who-broke-it/internal/glob"
+	"github.com/shriyashish-mishra/who-broke-it/internal/model"
 )
 
 type ActiveConsumer struct{ TaskID, AgentID string }

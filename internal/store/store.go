@@ -9,8 +9,8 @@ import (
 	"sort"
 	"strings"
 
-	"wbi/internal/gitx"
-	"wbi/internal/model"
+	"github.com/shriyashish-mishra/who-broke-it/internal/gitx"
+	"github.com/shriyashish-mishra/who-broke-it/internal/model"
 )
 
 type Store struct{ Root string }

@@ -3,7 +3,7 @@ package rules
 import (
 	"testing"
 
-	"wbi/internal/gitx"
+	"github.com/shriyashish-mishra/who-broke-it/internal/gitx"
 )
 
 func TestParseAndEnforce(t *testing.T) {

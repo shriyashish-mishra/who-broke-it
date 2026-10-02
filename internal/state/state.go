@@ -9,7 +9,7 @@ import (
 
 	_ "modernc.org/sqlite" // pure-Go driver: no cgo, single static binary
 
-	"wbi/internal/gitx"
+	"github.com/shriyashish-mishra/who-broke-it/internal/gitx"
 )
 
 const schema = `

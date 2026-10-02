@@ -7,11 +7,11 @@ import (
 	"strings"
 	"time"
 
-	"wbi/internal/gitx"
-	"wbi/internal/model"
-	"wbi/internal/planner"
-	"wbi/internal/rules"
-	"wbi/internal/store"
+	"github.com/shriyashish-mishra/who-broke-it/internal/gitx"
+	"github.com/shriyashish-mishra/who-broke-it/internal/model"
+	"github.com/shriyashish-mishra/who-broke-it/internal/planner"
+	"github.com/shriyashish-mishra/who-broke-it/internal/rules"
+	"github.com/shriyashish-mishra/who-broke-it/internal/store"
 )
 
 type InitOpts struct {

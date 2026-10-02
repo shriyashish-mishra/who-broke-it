@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"wbi/internal/engine"
+	"github.com/shriyashish-mishra/who-broke-it/internal/engine"
 )
 
 // Git runs git in dir and fails the test on error.

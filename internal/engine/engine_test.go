@@ -6,9 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	"wbi/internal/engine"
-	"wbi/internal/model"
-	"wbi/internal/testutil"
+	"github.com/shriyashish-mishra/who-broke-it/internal/engine"
+	"github.com/shriyashish-mishra/who-broke-it/internal/model"
+	"github.com/shriyashish-mishra/who-broke-it/internal/testutil"
 )
 
 var (
@@ -286,7 +286,7 @@ func TestContractChangePropagatesBlastSeesAgentsAckClearsDrift(t *testing.T) {
 	if len(e.StaleContracts(t8)) != 0 {
 		t.Fatal("ack must clear staleness")
 	}
-	out := testutil.Git(t, dir, "show", "wbi/TASK-007:.wbi/contracts/BillingStatus.json")
+	out := testutil.Git(t, dir, "show", "github.com/shriyashish-mishra/who-broke-it/TASK-007:.wbi/contracts/BillingStatus.json")
 	var c model.Contract
 	if err := json.Unmarshal([]byte(out), &c); err != nil || c.Version != 2 {
 		t.Fatalf("the version bump must travel with the PR branch: %v %+v", err, c)
@@ -307,7 +307,7 @@ func TestConstitutionForbidRulesFailVerificationAndShowAsBranchDrift(t *testing.
 	}
 	ok := false
 	for _, v := range e.Drift().Architecture {
-		ok = ok || (v.Rule.ID == "C6" && v.Branch == "wbi/TASK-010")
+		ok = ok || (v.Rule.ID == "C6" && v.Branch == "github.com/shriyashish-mishra/who-broke-it/TASK-010")
 	}
 	if !ok {
 		t.Fatal("drift must flag the violation on the unmerged branch")
@@ -322,7 +322,7 @@ func TestBlameAndWhySeeUnmergedAgentWork(t *testing.T) {
 		t.Fatal("no blame entries")
 	}
 	first := b.Entries[0]
-	if first.TaskID != "TASK-004" || first.Provider != "claude" || !first.IsAgent || first.Ref != "wbi/TASK-004" {
+	if first.TaskID != "TASK-004" || first.Provider != "claude" || !first.IsAgent || first.Ref != "github.com/shriyashish-mishra/who-broke-it/TASK-004" {
 		t.Fatalf("entry %+v", first)
 	}
 	w := e.Why("src/api/auth/index.ts")

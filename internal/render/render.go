@@ -9,9 +9,9 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"wbi/internal/blast"
-	"wbi/internal/engine"
-	"wbi/internal/model"
+	"github.com/shriyashish-mishra/who-broke-it/internal/blast"
+	"github.com/shriyashish-mishra/who-broke-it/internal/engine"
+	"github.com/shriyashish-mishra/who-broke-it/internal/model"
 )
 
 var on = func() bool {

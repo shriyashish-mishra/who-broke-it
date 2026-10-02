@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"wbi/internal/mcp"
-	"wbi/internal/testutil"
+	"github.com/shriyashish-mishra/who-broke-it/internal/mcp"
+	"github.com/shriyashish-mishra/who-broke-it/internal/testutil"
 )
 
 type rpc struct {

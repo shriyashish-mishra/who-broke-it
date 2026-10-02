@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"wbi/internal/engine"
-	"wbi/internal/model"
+	"github.com/shriyashish-mishra/who-broke-it/internal/engine"
+	"github.com/shriyashish-mishra/who-broke-it/internal/model"
 )
 
 type Args map[string]any

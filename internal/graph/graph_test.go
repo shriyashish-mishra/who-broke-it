@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"wbi/internal/model"
+	"github.com/shriyashish-mishra/who-broke-it/internal/model"
 )
 
 func task(id string, deps ...string) model.Task {

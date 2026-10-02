@@ -7,10 +7,10 @@ import (
 	"sync"
 	"testing"
 
-	"wbi/internal/engine"
-	"wbi/internal/model"
-	"wbi/internal/replicate"
-	"wbi/internal/testutil"
+	"github.com/shriyashish-mishra/who-broke-it/internal/engine"
+	"github.com/shriyashish-mishra/who-broke-it/internal/model"
+	"github.com/shriyashish-mishra/who-broke-it/internal/replicate"
+	"github.com/shriyashish-mishra/who-broke-it/internal/testutil"
 )
 
 var (

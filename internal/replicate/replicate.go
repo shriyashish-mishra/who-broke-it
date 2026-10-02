@@ -18,8 +18,8 @@ import (
 	"strings"
 	"time"
 
-	"wbi/internal/gitx"
-	"wbi/internal/state"
+	"github.com/shriyashish-mishra/who-broke-it/internal/gitx"
+	"github.com/shriyashish-mishra/who-broke-it/internal/state"
 )
 
 const (

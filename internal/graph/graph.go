@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"wbi/internal/model"
+	"github.com/shriyashish-mishra/who-broke-it/internal/model"
 )
 
 type Issue struct {

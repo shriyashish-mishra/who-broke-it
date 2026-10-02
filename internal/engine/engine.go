@@ -14,14 +14,14 @@ import (
 	"strings"
 	"time"
 
-	"wbi/internal/blast"
-	"wbi/internal/gitx"
-	"wbi/internal/graph"
-	"wbi/internal/intent"
-	"wbi/internal/model"
-	"wbi/internal/rules"
-	"wbi/internal/state"
-	"wbi/internal/store"
+	"github.com/shriyashish-mishra/who-broke-it/internal/blast"
+	"github.com/shriyashish-mishra/who-broke-it/internal/gitx"
+	"github.com/shriyashish-mishra/who-broke-it/internal/graph"
+	"github.com/shriyashish-mishra/who-broke-it/internal/intent"
+	"github.com/shriyashish-mishra/who-broke-it/internal/model"
+	"github.com/shriyashish-mishra/who-broke-it/internal/rules"
+	"github.com/shriyashish-mishra/who-broke-it/internal/state"
+	"github.com/shriyashish-mishra/who-broke-it/internal/store"
 )
 
 // StaleAgentAfter is how long without a heartbeat before an active agent is flagged.
@@ -301,7 +301,7 @@ func (e *Engine) Claim(taskID string, o AgentOpts, force bool) (*ClaimResult, er
 		}
 		s.Owner, s.AgentID = agent.Developer, agent.ID
 		if s.Branch == "" {
-			s.Branch = "wbi/" + t.ID
+			s.Branch = "github.com/shriyashish-mishra/who-broke-it/" + t.ID
 		}
 		if s.ClaimedAt == 0 {
 			s.ClaimedAt = nowMs()
@@ -744,7 +744,7 @@ func (e *Engine) Context(taskID string) (string, error) {
 	p("")
 	p("**Goal:** %s", t.Goal)
 	p("")
-	p("**Owner:** %s  |  **Executor:** %s  |  **Layer:** %s  |  **Branch:** %s", or(st.Owner, "(unclaimed)"), or(st.AgentID, "(unclaimed)"), t.Layer, or(st.Branch, "wbi/"+t.ID))
+	p("**Owner:** %s  |  **Executor:** %s  |  **Layer:** %s  |  **Branch:** %s", or(st.Owner, "(unclaimed)"), or(st.AgentID, "(unclaimed)"), t.Layer, or(st.Branch, "github.com/shriyashish-mishra/who-broke-it/"+t.ID))
 	p("")
 	if len(t.Requirements) > 0 {
 		reqs := e.Store.Requirements()

@@ -5,9 +5,9 @@ package blast
 import (
 	"fmt"
 
-	"wbi/internal/glob"
-	"wbi/internal/graph"
-	"wbi/internal/model"
+	"github.com/shriyashish-mishra/who-broke-it/internal/glob"
+	"github.com/shriyashish-mishra/who-broke-it/internal/graph"
+	"github.com/shriyashish-mishra/who-broke-it/internal/model"
 )
 
 type Input struct {

@@ -1,4 +1,4 @@
-module wbi
+module github.com/shriyashish-mishra/who-broke-it
 
 go 1.26.0
 

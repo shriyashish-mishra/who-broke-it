@@ -17,9 +17,9 @@ import (
 	"strings"
 	"time"
 
-	"wbi/internal/gitx"
-	"wbi/internal/graph"
-	"wbi/internal/model"
+	"github.com/shriyashish-mishra/who-broke-it/internal/gitx"
+	"github.com/shriyashish-mishra/who-broke-it/internal/graph"
+	"github.com/shriyashish-mishra/who-broke-it/internal/model"
 )
 
 type Roots struct{ API, Web, DB, Migrations, Tests string }

@@ -11,16 +11,17 @@ import (
 	"strings"
 	"time"
 
-	"wbi/internal/engine"
-	"wbi/internal/graph"
-	"wbi/internal/mcp"
-	"wbi/internal/model"
-	"wbi/internal/render"
-	"wbi/internal/replicate"
-	"wbi/internal/store"
+	"github.com/shriyashish-mishra/who-broke-it/internal/engine"
+	"github.com/shriyashish-mishra/who-broke-it/internal/graph"
+	"github.com/shriyashish-mishra/who-broke-it/internal/mcp"
+	"github.com/shriyashish-mishra/who-broke-it/internal/model"
+	"github.com/shriyashish-mishra/who-broke-it/internal/render"
+	"github.com/shriyashish-mishra/who-broke-it/internal/replicate"
+	"github.com/shriyashish-mishra/who-broke-it/internal/store"
 )
 
-const version = "0.1.0"
+// version is set at release time: -ldflags "-X main.version=v0.1.0".
+var version = "dev"
 
 var boolFlags = map[string]bool{"force": true, "json": true, "worktree": true, "mermaid": true, "dot": true, "approve": true, "prompt": true, "no-hook": true, "mark-read": true, "help": true, "version": true, "all": true}
 var multiFlags = map[string]bool{"contract": true, "limitation": true}
