@@ -129,6 +129,6 @@ wbi why src/api/billing/status.ts
 echo
 wbi drift
 echo
-wbi graph | head -22
+wbi graph | sed -n 1,22p
 
 echo; printf '\033[1;32m✓ demo complete.\033[0m Repo left at %s (worktrees alongside). Try: cd %s && %s/bin/wbi status\n' "$DEMO" "$DEMO" "$HERE"
