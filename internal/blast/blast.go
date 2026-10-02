@@ -4,7 +4,9 @@ package blast
 
 import (
 	"fmt"
+	"sort"
 
+	"github.com/shriyashish-mishra/who-broke-it/internal/codegraph"
 	"github.com/shriyashish-mishra/who-broke-it/internal/glob"
 	"github.com/shriyashish-mishra/who-broke-it/internal/graph"
 	"github.com/shriyashish-mishra/who-broke-it/internal/model"
@@ -15,6 +17,9 @@ type Input struct {
 	Contracts  []model.Contract
 	Components []model.Component
 	State      func(taskID string) (model.TaskState, bool)
+	// Optional static import graph and the repo's files; adds code-level dependents (undeclared coupling).
+	Code  *codegraph.Graph
+	Files []string
 }
 
 type ActiveAgent struct{ AgentID, TaskID string }
@@ -30,6 +35,8 @@ type Result struct {
 	ActiveAgents  []ActiveAgent     `json:"activeAgents"`
 	Risk          string            `json:"risk"` // LOW | MEDIUM | HIGH
 	Reasons       []string          `json:"reasons"`
+	// CodeDependents are repo files that import the changed code (transitively), found by static scan.
+	CodeDependents []string `json:"codeDependents,omitempty"`
 }
 
 func has(s []string, v string) bool {
@@ -123,6 +130,61 @@ func Radius(in Input, target string) Result {
 		}
 	}
 
+	var codeDeps []string
+	if in.Code != nil {
+		var changed []string
+		switch kind {
+		case "path":
+			for _, f := range in.Files {
+				if glob.Matches(target, f) {
+					changed = append(changed, f)
+				}
+			}
+		default:
+			for _, f := range in.Files {
+				for _, o := range origin {
+					if t := tm[o]; t != nil && glob.MatchesAny(t.AllowedPaths, f) && !isWbi(f) {
+						changed = append(changed, f)
+						break
+					}
+				}
+			}
+		}
+		if len(changed) > 0 {
+			directFiles := in.Code.ImportedBy(changed, false)
+			allFiles := in.Code.ImportedBy(changed, true)
+			isDirect := map[string]bool{}
+			for _, f := range directFiles {
+				isDirect[f] = true
+			}
+			ownerOf := func(f string) []string {
+				var ids []string
+				for _, t := range in.Tasks {
+					if glob.MatchesAny(t.AllowedPaths, f) && !has(origin, t.ID) {
+						ids = append(ids, t.ID)
+					}
+				}
+				return ids
+			}
+			for _, f := range allFiles {
+				for _, id := range ownerOf(f) {
+					switch {
+					case isDirect[f] && !has(direct, id):
+						direct = add(direct, id)
+						why[id] = "its code imports " + firstChanged(in.Code, f, changed)
+					case !isDirect[f] && !has(direct, id) && !has(indirect, id):
+						indirect = append(indirect, id)
+						why[id] = "its code transitively imports changed code (" + f + ")"
+					}
+				}
+			}
+			codeDeps = allFiles
+			if len(codeDeps) > 50 {
+				codeDeps = codeDeps[:50]
+			}
+		}
+	}
+
 	compOf := func(ids []string) []string {
 		var out []string
 		for _, id := range ids {
@@ -200,7 +262,8 @@ func Radius(in Input, target string) Result {
 	if len(reasons) == 0 && len(affected) > 0 {
 		reasons = append(reasons, "limited downstream impact")
 	}
-	return Result{Target: target, Kind: kind, DirectTasks: nz(direct), DirectComps: nz(directComps), IndirectTasks: nz(indirect), IndirectComps: nz(indirectComps),
+	sort.Strings(codeDeps)
+	return Result{CodeDependents: codeDeps, Target: target, Kind: kind, DirectTasks: nz(direct), DirectComps: nz(directComps), IndirectTasks: nz(indirect), IndirectComps: nz(indirectComps),
 		Why: why, ActiveAgents: active, Risk: risk, Reasons: nz(reasons)}
 }
 
@@ -220,4 +283,18 @@ func join(s []string) string {
 		out += x
 	}
 	return out
+}
+
+func isWbi(f string) bool { return len(f) >= 5 && f[:5] == ".wbi/" }
+
+// firstChanged names a changed file that f imports, for a readable "why".
+func firstChanged(g *codegraph.Graph, f string, changed []string) string {
+	for _, d := range g.Imports[f] {
+		for _, c := range changed {
+			if d == c {
+				return c
+			}
+		}
+	}
+	return "changed code"
 }

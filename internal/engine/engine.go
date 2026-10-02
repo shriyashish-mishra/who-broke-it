@@ -460,9 +460,11 @@ func (e *Engine) Ack(taskID string) error {
 
 func (e *Engine) Blast(target string) blast.Result {
 	states := e.States()
+	code, files := e.CodeGraph()
 	return blast.Radius(blast.Input{
 		Tasks: e.Tasks(), Contracts: e.Contracts(), Components: e.Store.Components(),
 		State: func(id string) (model.TaskState, bool) { s, ok := states[id]; return s, ok },
+		Code:  code, Files: files,
 	}, target)
 }
 

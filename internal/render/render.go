@@ -213,6 +213,13 @@ func Blast(b blast.Result) string {
 	list("Direct:", direct)
 	list("Indirect:", indirect)
 	list("Active agents:", agents)
+	if len(b.CodeDependents) > 0 {
+		shown := b.CodeDependents
+		if len(shown) > 8 {
+			shown = append(append([]string{}, shown[:8]...), fmt.Sprintf("… and %d more", len(b.CodeDependents)-8))
+		}
+		list("Code that imports it (static scan):", shown)
+	}
 	col := Green
 	switch b.Risk {
 	case "HIGH":
@@ -384,6 +391,13 @@ func Drift(d engine.DriftReport) string {
 			where += " on " + v.Branch + ", unmerged"
 		}
 		L = append(L, Red(fmt.Sprintf("  ✗ %s %s", v.Rule.ID, v.Rule.Text)), Dim(fmt.Sprintf("     %s: %s", where, v.Excerpt)))
+	}
+	L = append(L, "", Bold("Undeclared coupling"))
+	if len(d.Coupling) == 0 {
+		L = append(L, Green("  ✓ no code crosses task boundaries without a declared dependency"))
+	}
+	for _, x := range d.Coupling {
+		L = append(L, Yellow(fmt.Sprintf("  ! %s imports %s code (%d import(s), e.g. %s → %s) but does not depend on it", x.From, x.To, x.Count, x.FromFile, x.ToFile)))
 	}
 	L = append(L, "", Bold("Context drift"))
 	if len(d.Context) == 0 {

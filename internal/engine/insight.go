@@ -313,6 +313,7 @@ type DriftReport struct {
 	Product      []ProductDrift    `json:"product"`
 	Architecture []rules.Violation `json:"architecture"`
 	Context      []ContextDrift    `json:"context"`
+	Coupling     []Coupling        `json:"coupling"`
 }
 
 // Drift reports product (requirement × layer), architecture (constitution) and context (stale contract) drift.
@@ -373,6 +374,7 @@ func (e *Engine) Drift() DriftReport {
 			r.Context = append(r.Context, ContextDrift{t.ID, s.Contract, s.By, s.From, s.To})
 		}
 	}
+	r.Coupling = e.UndeclaredCoupling(nil)
 	return r
 }
 

@@ -172,3 +172,49 @@ func editContract(t *testing.T, workdir, name string, fn func(map[string]any)) {
 	t.Helper()
 	testutil.EditJSON(t, workdir+"/.wbi/contracts/"+name+".json", fn)
 }
+
+// A real import crosses task areas with no declared dependency: blast radius, drift and the merge gate all see it.
+func TestUndeclaredCouplingIsSeenEverywhere(t *testing.T) {
+	dir, e := testutil.PlannedRepo(t)
+	testutil.Put(t, dir, "src/api/billing/status.ts", "export type BillingStatus = 'active'\n")
+	testutil.Put(t, dir, "src/web/auth/login.tsx", "import { BillingStatus } from '../../api/billing/status'\nexport const L = (s: BillingStatus) => s\n")
+	testutil.CommitAll(t, dir, "code")
+
+	// 1. blast radius of the billing file includes the auth UI, found by import scan only (TASK-005 never declared it)
+	b := e.Blast("src/api/billing/status.ts")
+	found := false
+	for _, id := range b.DirectTasks {
+		if id == "TASK-005" && strings.Contains(b.Why[id], "imports") {
+			found = true
+		}
+	}
+	if !found || len(b.CodeDependents) != 1 || b.CodeDependents[0] != "src/web/auth/login.tsx" {
+		t.Fatalf("code-level dependents missing: direct=%v why=%v files=%v", b.DirectTasks, b.Why, b.CodeDependents)
+	}
+
+	// 2. drift lists the pair
+	d := e.Drift()
+	if len(d.Coupling) != 1 || d.Coupling[0].From != "TASK-005" || d.Coupling[0].To != "TASK-007" {
+		t.Fatalf("coupling: %+v", d.Coupling)
+	}
+
+	// 3. a PR for TASK-005 that touches the importing file is warned
+	wd := worktreeFor(t, e, "TASK-005", claude)
+	testutil.Put(t, wd, "src/web/auth/login.tsx", "import { BillingStatus } from '../../api/billing/status'\nexport const L = (s: BillingStatus) => s + '!'\n")
+	testutil.Put(t, wd, "src/api/billing/status.ts", "export type BillingStatus = 'active'\n")
+	testutil.CommitAll(t, wd, "ui\n\nWBI-Task: TASK-005")
+	rep := check(t, e, engine.CheckOpts{Head: "wbi/TASK-005"})
+	if !hasCode(rep, "UNDECLARED_COUPLING") {
+		t.Fatalf("merge gate must warn: %+v", rep.Findings)
+	}
+
+	// 4. declaring the dependency removes the warning and the drift entry
+	t5, _ := e.Task("TASK-005")
+	t5.DependsOn = append(t5.DependsOn, "TASK-007")
+	if err := e.Store.SaveTask(t5); err != nil {
+		t.Fatal(err)
+	}
+	if got := e.UndeclaredCoupling(nil); len(got) != 0 {
+		t.Fatalf("declared dependency must silence it: %+v", got)
+	}
+}

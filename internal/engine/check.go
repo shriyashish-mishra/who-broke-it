@@ -202,6 +202,17 @@ func (e *Engine) Check(o CheckOpts) (*CheckReport, error) {
 			rep.add("warn", "PLAN_CHANGE", fmt.Sprintf("%s edits the plan itself (%s); plan changes belong in an architecture task", task.ID, strings.Join(first(planChanged, 3), ", ")), planChanged[0])
 		}
 
+		// ---- undeclared coupling: this task's changed files importing another task's code
+		changed := map[string]bool{}
+		for _, f := range rep.Files {
+			changed[f] = true
+		}
+		for _, c := range e.UndeclaredCoupling(changed) {
+			if c.From == task.ID {
+				rep.add("warn", "UNDECLARED_COUPLING", fmt.Sprintf("%s imports %s (owned by %s) but %s does not depend on %s; declare the dependency or the contract", c.FromFile, c.ToFile, c.To, task.ID, c.To), c.FromFile)
+			}
+		}
+
 		// ---- dependencies: upstream work should be merged (its handoff record is on the base)
 		for _, d := range task.DependsOn {
 			if _, ok := gitx.Show(root, o.Base, ".wbi/handoffs/"+d+".json"); !ok {

@@ -70,7 +70,8 @@ Stored: `TODO · IN_PROGRESS · REVIEW · DONE`. Derived for display: `TODO` bec
 | `internal/rules` | Constitution parsing, scoping to tasks, forbid-rule checks on diffs and the working tree |
 | `internal/planner` | Repo inspection, template planner, plan parsing/validation, agent prompt, doc rendering |
 | `internal/intent` | Conflict detection (pure function) |
-| `internal/blast` | Blast radius (pure function) |
+| `internal/blast` | Blast radius (pure function; optionally given the code graph) |
+| `internal/codegraph` | Static import graph for JS/TS, Python, Go |
 | `internal/engine` | `engine.go`: agents, claims, work packets, worktrees, contract versions/staleness, intents, inbox, approvals. `judge.go`: handoff + verification. `insight.go`: status, simulation, drift, blame, why. `sync.go`: sync config and auto-sync wrappers. `ops.go`: init/plan. `adapters.go`: agent instruction files, MCP config, commit-trailer hook |
 | `internal/mcp` | MCP adapter (JSON-RPC over stdio), thin wrapper over `engine.Engine` |
 | `internal/render` | Terminal rendering |
@@ -86,6 +87,8 @@ The core (`Engine`, pure analyzers) knows nothing about MCP or any vendor. MCP a
 **Glob overlap** (`internal/glob`). Literal vs glob: precise match, or directory prefix. Glob vs glob: static-prefix containment (conservative: may report overlap that cannot occur, never misses one). A planner test asserts that no two concurrent tasks in generated plans have overlapping allowed paths.
 
 **Blast radius** (`internal/blast`). Origin = provider of a contract / the task / path owners. Direct = consumers of the provided contracts (+ direct dependents for a task, + relevant-file listers for a path). Indirect = transitive task dependents and components that depend on affected components. Active agents = affected tasks currently `IN_PROGRESS`/`REVIEW`. Risk: `HIGH` if already-DONE tasks are affected, or (active agent and (public contract or ≥3 affected)), or (public and ≥3 affected); `MEDIUM` if anything is affected; else `LOW`. Reasons are returned with the score.
+
+**Code graph** (`internal/codegraph`). Regex scan of import statements (JS/TS incl. `export … from`, `require`, dynamic `import()`; Python absolute/relative `import`/`from`; Go `import` of module-local packages, which depend on every non-test file of the package), resolved to repo files; unresolved imports are ignored. `blast` uses it to add the owners of importing files (direct importers → direct, transitive → indirect); `UndeclaredCoupling` reports importer-task → imported-task pairs with no dependency path, surfaced by `wbi drift` and as the `UNDECLARED_COUPLING` warning of `wbi check`.
 
 **Contract propagation** (`engine/judge.go`). On handoff with `--contract "Name=note"`: bump version (file + `contract_state`), compute blast, notify the owner of each affected task with the reason ("consumes X" / "depends on TASK-n"), emit a `contract_changed` event. Tasks whose acknowledged version is behind show as context drift and get a banner in their work packet until `wbi ack`.
 
