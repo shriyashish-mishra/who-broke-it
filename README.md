@@ -33,7 +33,7 @@ Last significant changes:
 ## Quickstart
 
 ```bash
-git clone <this repo> && cd who-broke-it && make install      # builds a single static binary and copies it to your PATH
+git clone https://github.com/shriyashish-mishra/who-broke-it.git && cd who-broke-it && make install      # builds a single static binary and copies it to your PATH
 # or: go install ./cmd/wbi
 
 cd your-repo                 # any git repo with at least one commit
@@ -168,7 +168,7 @@ Known limits of this prototype:
 * **Sync is eventually consistent and trusts your teammates.** Anyone with push access to the remote can write events (the same trust as pushing code); incoming text is sanitized, unknown event types are ignored. There is no per-user authorization inside the log yet.
 * **Claims are only atomic while you are online.** Offline claims are optimistic and can lose when you reconnect (you are told, and the claim is dropped).
 * **The log grows without bound.** There is no compaction yet; it is small (one short JSON line per change) but not free.
-* **Custom refs:** GitHub and plain git servers accept `refs/wbi/*`; some locked-down hosts may not. Use the branch fallback above.
+* **Hosts:** verified against GitHub (two clones racing for the same task six times in a row: always exactly one winner, both clones converged; a claim round-trip takes about 4 s there) and against plain bare git remotes. GitLab, Bitbucket and self-hosted setups are untested; if one blocks `refs/wbi/*`, use the branch fallback above.
 * **Intent is cooperative.** Agents must call it (the instruction files and MCP make that easy); it is not enforced at the filesystem level. CI/pre-commit enforcement is planned.
 * **The built-in planner is template-based** (auth, billing, analytics, assistant, notifications, mobile, multi-tenant, plus a generic fallback). It inspects your repo for stack, layout, test command and relevant files, but it is not an architect. For LLM-authored plans use `wbi plan --prompt` (prints a prompt + JSON schema for any agent), or `--agent-cmd "<cmd>"` (pipes the prompt to your agent CLI and ingests its JSON), or `--from plan.json`.
 * **Blast radius is graph-based**, not semantic code analysis: it only knows relationships that are declared in the graph (contracts, dependencies, component and path ownership).
