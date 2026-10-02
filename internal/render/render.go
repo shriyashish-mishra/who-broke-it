@@ -428,3 +428,50 @@ func Blame(path string, r engine.BlameResult) string {
 	}
 	return strings.Join(L, "\n")
 }
+
+// Check renders the merge-gate report for a terminal.
+func Check(r engine.CheckReport) string {
+	title := "WBI CHECK"
+	if r.Task != "" {
+		title += "  " + r.Task
+	}
+	L := []string{Bold(title) + Dim(fmt.Sprintf("  %s...%s, %d file(s)", r.Base, r.Head, len(r.Files))), ""}
+	for _, f := range r.Findings {
+		icon := map[string]string{"error": Red("✗"), "warn": Yellow("!"), "notice": Cyan("ℹ")}[f.Level]
+		where := ""
+		if f.File != "" {
+			where = Dim("  " + f.File)
+		}
+		L = append(L, fmt.Sprintf("%s %s %s%s", icon, pad(Dim(f.Code), 22), f.Message, where))
+	}
+	if len(r.Findings) == 0 {
+		L = append(L, Green("✓ nothing to report"))
+	}
+	L = append(L, "")
+	if r.OK {
+		L = append(L, Green(Bold("PASS")))
+	} else {
+		L = append(L, Red(Bold("FAIL"))+Dim("  the Engineering Graph says this change should not merge as-is"))
+	}
+	return strings.Join(L, "\n") + "\n"
+}
+
+// CheckGitHub renders GitHub Actions workflow commands, which show up as inline PR annotations.
+func CheckGitHub(r engine.CheckReport) string {
+	var b strings.Builder
+	esc := strings.NewReplacer("%", "%25", "\r", "%0D", "\n", "%0A")
+	for _, f := range r.Findings {
+		lvl := map[string]string{"error": "error", "warn": "warning", "notice": "notice"}[f.Level]
+		file := ""
+		if f.File != "" {
+			file = ",file=" + f.File
+		}
+		fmt.Fprintf(&b, "::%s title=%s%s::%s\n", lvl, f.Code, file, esc.Replace(f.Message))
+	}
+	status := "PASS"
+	if !r.OK {
+		status = "FAIL"
+	}
+	fmt.Fprintf(&b, "wbi check %s: %s (%d finding(s), %d file(s))\n", r.Task, status, len(r.Findings), len(r.Files))
+	return b.String()
+}

@@ -204,3 +204,18 @@ func LogFor(cwd, path string, limit int, extra []string, branches bool) []Commit
 	}
 	return out
 }
+
+// Show returns the content of path at rev ("" , false if it does not exist there).
+func Show(cwd, rev, path string) (string, bool) { return Try(cwd, "show", rev+":"+path) }
+
+// Messages returns the full commit messages in base..head, newest first.
+func Messages(cwd, base, head string) []string {
+	s, _ := Try(cwd, "log", base+".."+head, "--format=%B%x1e")
+	var out []string
+	for _, m := range strings.Split(s, "\x1e") {
+		if m = strings.TrimSpace(m); m != "" {
+			out = append(out, m)
+		}
+	}
+	return out
+}

@@ -1,0 +1,61 @@
+name: "Who Broke It? check"
+description: "Merge gate for AI-agent teams: fails a PR that leaves its task's scope, changes a contract without a handoff, or breaks the constitution."
+author: "Who Broke It? contributors"
+branding:
+  icon: shield
+  color: purple
+
+inputs:
+  version:
+    description: "wbi release to run (e.g. v0.1.1). Default: latest."
+    default: ""
+  base:
+    description: "Base ref to diff against. Default: origin/<PR base branch>."
+    default: ""
+  require-task:
+    description: "Fail PRs that are not linked to a wbi task."
+    default: "false"
+  require-handoff:
+    description: "Fail task PRs that carry no handoff record."
+    default: "false"
+  require-approval:
+    description: "Fail high-impact tasks (migrations, security, public API, infra) until a human reviewer approves the PR."
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - name: Install wbi
+      shell: bash
+      env:
+        WBI_VERSION: ${{ inputs.version }}
+        WBI_INSTALL_DIR: ${{ runner.temp }}/wbi-bin
+      run: |
+        set -euo pipefail
+        curl -fsSL --retry 3 "https://raw.githubusercontent.com/shriyashish-mishra/who-broke-it/main/install.sh" | sh
+        echo "$WBI_INSTALL_DIR" >> "$GITHUB_PATH"
+
+    - name: Run wbi check
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+        INPUT_BASE: ${{ inputs.base }}
+        REQUIRE_TASK: ${{ inputs.require-task }}
+        REQUIRE_HANDOFF: ${{ inputs.require-handoff }}
+        REQUIRE_APPROVAL: ${{ inputs.require-approval }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+        BASE_REF: ${{ github.base_ref }}
+        HEAD_REF: ${{ github.head_ref }}
+      run: |
+        set -euo pipefail
+        base="$INPUT_BASE"; [ -n "$base" ] || base="origin/${BASE_REF:-main}"
+        git rev-parse --verify --quiet "$base" >/dev/null || { echo "::error::cannot resolve $base. Use actions/checkout with fetch-depth: 0"; exit 1; }
+        args=(check --base "$base" --head HEAD --format github)
+        [ -z "${HEAD_REF:-}" ] || args+=(--branch "$HEAD_REF")
+        [ "$REQUIRE_TASK" = true ] && args+=(--require-task)
+        [ "$REQUIRE_HANDOFF" = true ] && args+=(--require-handoff)
+        if [ "$REQUIRE_APPROVAL" = true ]; then
+          args+=(--require-approval)
+          if [ -n "${PR_NUMBER:-}" ] && [ "$(gh pr view "$PR_NUMBER" --json reviewDecision -q .reviewDecision 2>/dev/null || true)" = APPROVED ]; then args+=(--approved); fi
+        fi
+        wbi "${args[@]}"

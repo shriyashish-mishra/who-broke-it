@@ -286,7 +286,7 @@ func TestContractChangePropagatesBlastSeesAgentsAckClearsDrift(t *testing.T) {
 	if len(e.StaleContracts(t8)) != 0 {
 		t.Fatal("ack must clear staleness")
 	}
-	out := testutil.Git(t, dir, "show", "github.com/shriyashish-mishra/who-broke-it/TASK-007:.wbi/contracts/BillingStatus.json")
+	out := testutil.Git(t, dir, "show", "wbi/TASK-007:.wbi/contracts/BillingStatus.json")
 	var c model.Contract
 	if err := json.Unmarshal([]byte(out), &c); err != nil || c.Version != 2 {
 		t.Fatalf("the version bump must travel with the PR branch: %v %+v", err, c)
@@ -307,7 +307,7 @@ func TestConstitutionForbidRulesFailVerificationAndShowAsBranchDrift(t *testing.
 	}
 	ok := false
 	for _, v := range e.Drift().Architecture {
-		ok = ok || (v.Rule.ID == "C6" && v.Branch == "github.com/shriyashish-mishra/who-broke-it/TASK-010")
+		ok = ok || (v.Rule.ID == "C6" && v.Branch == "wbi/TASK-010")
 	}
 	if !ok {
 		t.Fatal("drift must flag the violation on the unmerged branch")
@@ -322,7 +322,7 @@ func TestBlameAndWhySeeUnmergedAgentWork(t *testing.T) {
 		t.Fatal("no blame entries")
 	}
 	first := b.Entries[0]
-	if first.TaskID != "TASK-004" || first.Provider != "claude" || !first.IsAgent || first.Ref != "github.com/shriyashish-mishra/who-broke-it/TASK-004" {
+	if first.TaskID != "TASK-004" || first.Provider != "claude" || !first.IsAgent || first.Ref != "wbi/TASK-004" {
 		t.Fatalf("entry %+v", first)
 	}
 	w := e.Why("src/api/auth/index.ts")
@@ -408,5 +408,29 @@ func TestAdaptersAreIdempotentAndPreserveUserContent(t *testing.T) {
 	}
 	if _, err := engine.InstallGuidance(dir, "nope"); err == nil {
 		t.Fatal("unknown adapter must error")
+	}
+}
+
+// Task branches have a fixed, documented name. Asserted as a literal on purpose: a test that merely reads
+// back whatever the code produced cannot catch a corrupted prefix (this once shipped in v0.1.0).
+func TestTaskBranchNameIsWbiSlashTaskID(t *testing.T) {
+	_, e := testutil.PlannedRepo(t)
+	r, err := e.Claim("TASK-001", claude, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if r.State.Branch != "wbi/TASK-001" {
+		t.Fatalf("branch must be wbi/TASK-001, got %q", r.State.Branch)
+	}
+	ctx, _ := e.Context("TASK-001")
+	if !strings.Contains(ctx, "**Branch:** wbi/TASK-001") {
+		t.Fatal("work packet must show the real branch")
+	}
+	s, err := e.Start("TASK-001", claude, true, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := testutil.Git(t, s.Workdir, "rev-parse", "--abbrev-ref", "HEAD"); strings.TrimSpace(got) != "wbi/TASK-001" {
+		t.Fatalf("worktree is on %q", got)
 	}
 }

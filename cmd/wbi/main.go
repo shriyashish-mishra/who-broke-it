@@ -34,7 +34,7 @@ func init() {
 	}
 }
 
-var boolFlags = map[string]bool{"force": true, "json": true, "worktree": true, "mermaid": true, "dot": true, "approve": true, "prompt": true, "no-hook": true, "mark-read": true, "help": true, "version": true, "all": true}
+var boolFlags = map[string]bool{"force": true, "json": true, "worktree": true, "mermaid": true, "dot": true, "approve": true, "prompt": true, "no-hook": true, "mark-read": true, "help": true, "version": true, "all": true, "require-task": true, "require-handoff": true, "require-approval": true, "approved": true}
 var multiFlags = map[string]bool{"contract": true, "limitation": true}
 
 type args struct {
@@ -111,6 +111,7 @@ func help() string {
   wbi blast <contract|TASK-id|path>     blast radius
   wbi verify <id>   wbi approve <id>    judge a handoff / human sign-off
   wbi drift                             product, architecture and context drift
+  wbi check [--base main] [--format github]   merge gate: scope, contracts, constitution, handoff (for CI)
   wbi decide "<title>" --why "..."      record an architecture decision
 
 %s
@@ -509,6 +510,23 @@ func execute(e *engine.Engine, cmd string, a args, ident engine.AgentOpts, rest 
 			return err
 		}
 		p(fmt.Sprintf("%s %s recorded: %s", render.Green("✓"), d.ID, d.Title))
+	case "check":
+		rep, err := e.Check(engine.CheckOpts{Base: a.get("base"), Head: a.get("head"), Branch: a.get("branch"), Task: a.get("task"),
+			RequireTask: a.has("require-task"), RequireHandoff: a.has("require-handoff"), RequireApproval: a.has("require-approval"), Approved: a.has("approved")})
+		if err != nil {
+			return err
+		}
+		switch a.get("format") {
+		case "json":
+			printJSON(rep)
+		case "github":
+			fmt.Print(render.CheckGitHub(*rep))
+		default:
+			fmt.Print(render.Check(*rep))
+		}
+		if !rep.OK {
+			exitCode = 1
+		}
 	case "mcp":
 		return mcp.Serve(e, os.Stdin, os.Stdout)
 	default:

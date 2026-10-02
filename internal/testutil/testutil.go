@@ -2,6 +2,7 @@
 package testutil
 
 import (
+	"encoding/json"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -135,4 +136,22 @@ func Team(t testing.TB) *TeamEnv {
 	a.Warn, b.Warn = quiet, quiet
 	t.Cleanup(func() { a.Close(); b.Close() })
 	return &TeamEnv{Remote: remote, DirA: dirA, DirB: dirB, A: a, B: b}
+}
+
+// EditJSON rewrites a JSON object file in place via fn.
+func EditJSON(t testing.TB, path string, fn func(map[string]any)) {
+	t.Helper()
+	b, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var m map[string]any
+	if err := json.Unmarshal(b, &m); err != nil {
+		t.Fatal(err)
+	}
+	fn(m)
+	out, _ := json.MarshalIndent(m, "", "  ")
+	if err := os.WriteFile(path, append(out, '\n'), 0o644); err != nil {
+		t.Fatal(err)
+	}
 }

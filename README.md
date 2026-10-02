@@ -119,6 +119,34 @@ git add -A && git commit -m "chore: enable wbi sync" && git push
 examples/demo-two-machines.sh       # two clones + a bare remote: handoff, race, intents, contract change
 ```
 
+## Enforce it in CI
+
+Agents are *asked* to follow the rules; CI makes them *required*. `wbi check` needs only the repo (no runtime state), so it runs on a fresh checkout and fails a PR that:
+
+* touches files **outside its task's allowed paths** (or inside restricted ones),
+* **changes a contract it does not own**, changes a contract's shape **without a version bump**, or bumps a version **without a handoff record**,
+* adds code that violates a **constitution `forbid` rule**,
+* breaks the plan itself (cycles, unknown dependencies),
+* is **high-impact** (migration, security, public API, infra) and has no human approval (opt-in).
+
+```yaml
+# .github/workflows/wbi.yml
+name: wbi
+on: [pull_request]
+jobs:
+  check:
+    runs-on: ubuntu-latest        # Linux or macOS runners
+    steps:
+      - uses: actions/checkout@v7
+        with: { fetch-depth: 0 }  # wbi diffs against the base branch
+      - uses: shriyashish-mishra/who-broke-it@v0.1.1
+        with:
+          require-handoff: true
+          require-approval: true  # high-impact tasks need an approving review
+```
+
+The PR's task comes from the branch name (`wbi/TASK-7`), a `WBI-Task:` commit trailer, or `--task`. Findings appear as inline annotations. Locally: `wbi check --base main`.
+
 ## What it does
 
 | Capability | Command | How it works (deterministic, no LLM required) |
@@ -132,6 +160,7 @@ examples/demo-two-machines.sh       # two clones + a bare remote: handoff, race,
 | Blame / why | `wbi blame`, `wbi why` | Commit trailers (`WBI-Task`, `WBI-Agent`) → task → requirement → ADR; includes **unmerged** branches |
 | Drift | `wbi drift` | Product (requirement × layer matrix), architecture (constitution forbid-rules, incl. unmerged branches), context (stale contract versions) |
 | Simulation | `wbi simulate` | Waves, critical path, parallelizable tasks, overlapping scopes, missing deps, approval gate |
+| Merge gate | `wbi check`, GitHub Action | Diff vs. the task's scope, contract ownership/versioning, constitution, plan integrity; optional handoff + human-approval gates |
 | Cross-machine sync | `wbi sync` (automatic once enabled) | Git-native: an append-only event log on `refs/wbi/sync`; atomic claims via push compare-and-swap |
 | MCP | `wbi mcp` | 18 `wbi_*` tools over stdio; same engine as the CLI |
 
@@ -182,7 +211,7 @@ Known limits of this prototype:
 * **Claims are only atomic while you are online.** Offline claims are optimistic and can lose when you reconnect (you are told, and the claim is dropped).
 * **The log grows without bound.** There is no compaction yet; it is small (one short JSON line per change) but not free.
 * **Hosts:** verified against GitHub (two clones racing for the same task six times in a row: always exactly one winner, both clones converged; a claim round-trip takes about 4 s there) and against plain bare git remotes. GitLab, Bitbucket and self-hosted setups are untested; if one blocks `refs/wbi/*`, use the branch fallback above.
-* **Intent is cooperative.** Agents must call it (the instruction files and MCP make that easy); it is not enforced at the filesystem level. CI/pre-commit enforcement is planned.
+* **Intent is cooperative at edit time.** Agents must call it (the instruction files and MCP make that easy). The merge gate (`wbi check`) is what enforces the rules, after the fact, on the PR.
 * **The built-in planner is template-based** (auth, billing, analytics, assistant, notifications, mobile, multi-tenant, plus a generic fallback). It inspects your repo for stack, layout, test command and relevant files, but it is not an architect. For LLM-authored plans use `wbi plan --prompt` (prints a prompt + JSON schema for any agent), or `--agent-cmd "<cmd>"` (pipes the prompt to your agent CLI and ingests its JSON), or `--from plan.json`.
 * **Blast radius is graph-based**, not semantic code analysis: it only knows relationships that are declared in the graph (contracts, dependencies, component and path ownership).
 * **Acceptance criteria** are verified automatically only when they carry a `check` (command / file-exists / contains); otherwise the agent must attest and the human reviews.

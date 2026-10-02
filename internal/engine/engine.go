@@ -301,7 +301,7 @@ func (e *Engine) Claim(taskID string, o AgentOpts, force bool) (*ClaimResult, er
 		}
 		s.Owner, s.AgentID = agent.Developer, agent.ID
 		if s.Branch == "" {
-			s.Branch = "github.com/shriyashish-mishra/who-broke-it/" + t.ID
+			s.Branch = "wbi/" + t.ID
 		}
 		if s.ClaimedAt == 0 {
 			s.ClaimedAt = nowMs()
@@ -744,7 +744,7 @@ func (e *Engine) Context(taskID string) (string, error) {
 	p("")
 	p("**Goal:** %s", t.Goal)
 	p("")
-	p("**Owner:** %s  |  **Executor:** %s  |  **Layer:** %s  |  **Branch:** %s", or(st.Owner, "(unclaimed)"), or(st.AgentID, "(unclaimed)"), t.Layer, or(st.Branch, "github.com/shriyashish-mishra/who-broke-it/"+t.ID))
+	p("**Owner:** %s  |  **Executor:** %s  |  **Layer:** %s  |  **Branch:** %s", or(st.Owner, "(unclaimed)"), or(st.AgentID, "(unclaimed)"), t.Layer, or(st.Branch, "wbi/"+t.ID))
 	p("")
 	if len(t.Requirements) > 0 {
 		reqs := e.Store.Requirements()
