@@ -1,0 +1,18 @@
+{
+  "components": [
+    { "id": "api", "name": "Public API", "description": "HTTP layer", "paths": ["src/api/**"], "dependsOn": [] },
+    { "id": "cli", "name": "CLI", "description": "Command line client", "paths": ["src/cli/**"], "dependsOn": ["api"] }
+  ],
+  "requirements": [{ "id": "REQ-001", "text": "Users can list items from the CLI", "layers": ["backend", "frontend"] }],
+  "contracts": [
+    { "name": "ItemList", "kind": "type", "providedBy": "TASK-001", "shape": "{ items: { id: string; name: string }[] }", "description": "List response", "public": true }
+  ],
+  "tasks": [
+    { "id": "TASK-001", "title": "Items API", "goal": "GET /items", "layer": "backend", "component": "api", "requirements": ["REQ-001"],
+      "allowedPaths": ["src/api/**"], "provides": ["ItemList"], "effort": 2,
+      "acceptance": [{ "text": "Endpoint returns ItemList" }, { "text": "README documents the endpoint", "check": { "type": "file-exists", "path": "README.md" } }] },
+    { "id": "TASK-002", "title": "CLI list command", "goal": "items list", "layer": "frontend", "component": "cli", "requirements": ["REQ-001"],
+      "dependsOn": ["TASK-001"], "allowedPaths": ["src/cli/**"], "consumes": ["ItemList"], "effort": 1, "acceptance": ["Prints one item per line"] }
+  ],
+  "decisions": [{ "id": "ADR-001", "title": "JSON over HTTP", "why": "Simple, debuggable", "status": "accepted", "tasks": ["TASK-001"] }]
+}
