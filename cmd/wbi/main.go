@@ -218,6 +218,17 @@ func run(argv []string) error {
 		p(fmt.Sprintf("  Next: %s to review, %s for mission control.", render.Cyan("wbi simulate"), render.Cyan("wbi status")))
 		return nil
 	case "adapters":
+		if restArg(0) == "list" || restArg(0) == "" {
+			fmt.Println(render.Bold("Agent adapters") + render.Dim("   (verified = run end to end with the real tool)"))
+			for _, ad := range engine.Adapters() {
+				st := render.Yellow("documented, untested")
+				if ad.Status == engine.Verified {
+					st = render.Green("verified")
+				}
+				fmt.Printf("  %-9s %-18s %-24s %s\n", ad.Name, ad.Display, ad.InstructionFile, st)
+			}
+			return nil
+		}
 		if restArg(0) == "mcp" {
 			a2 := restArg(1)
 			if a2 == "" {
@@ -231,7 +242,7 @@ func run(argv []string) error {
 			return err
 		}
 		if restArg(0) == "install" {
-			targets := []string{"claude", "codex", "gemini", "cursor"}
+			targets := []string{"claude", "codex", "gemini", "cursor"} // aider and opencode are opt-in: wbi adapters install aider
 			if t := restArg(1); t != "" && t != "all" {
 				targets = []string{t}
 			}
@@ -244,7 +255,7 @@ func run(argv []string) error {
 			}
 			return nil
 		}
-		p(fmt.Sprintf("usage: wbi adapters install <%s|all>  |  wbi adapters mcp <agent>", strings.Join(engine.TargetNames(), "|")))
+		p(fmt.Sprintf("usage: wbi adapters [list]  |  wbi adapters install <%s|all>  |  wbi adapters mcp <agent>", strings.Join(engine.TargetNames(), "|")))
 		return nil
 	case "hook":
 		s, err := store.Find(cwd)

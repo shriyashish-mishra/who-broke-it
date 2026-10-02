@@ -177,7 +177,7 @@ func (e *Engine) Agents() []model.Agent {
 
 // ResolveAgent identifies (and registers / heartbeats) the calling agent from flags or WBI_* env vars.
 func (e *Engine) ResolveAgent(o AgentOpts) (model.Agent, error) {
-	provider := strings.ToLower(firstNonEmpty(o.Agent, os.Getenv("WBI_AGENT"), detectProvider()))
+	provider := strings.ToLower(firstNonEmpty(o.Agent, os.Getenv("WBI_AGENT"), DetectProvider()))
 	if provider == "" {
 		return model.Agent{}, model.Errf("Which agent are you? Pass --agent <claude|codex|gemini|cursor|aider|human|...> or set WBI_AGENT.")
 	}
@@ -209,15 +209,6 @@ func (e *Engine) ResolveAgent(o AgentOpts) (model.Agent, error) {
 		}
 	}
 	return model.Agent{}, model.Errf("failed to register agent %s", id)
-}
-
-// detectProvider recognizes agents that announce themselves in the environment, so they do not have to be
-// configured. Only Claude Code is detected today (CLAUDECODE=1); others are set with WBI_AGENT / --agent.
-func detectProvider() string {
-	if os.Getenv("CLAUDECODE") == "1" {
-		return "claude"
-	}
-	return ""
 }
 
 func firstNonEmpty(ss ...string) string {
