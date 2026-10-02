@@ -100,7 +100,7 @@ func help() string {
   wbi tasks [--status READY]            all tasks      wbi task <id>   work packet
   wbi agents                            registered agents
   wbi sync [init|status|watch|compact]  share claims/intents/handoffs with teammates over git (auto when enabled)
-  wbi dashboard [--out file.html | --serve]   one-file visual dashboard (graph, agents, blast radius, drift)
+  wbi dashboard [--out file.html | --serve | --json]   one-file visual dashboard (graph, agents, blast radius, drift)
   wbi notify [add slack|discord|webhook --env VAR | test | list]   post key events to Slack/Discord/any webhook
   wbi team [join|add|remove|list|enforce]   who may publish to the shared log (.wbi/team.json, signed events)
   wbi graph [--mermaid|--dot|--json]    the engineering graph
@@ -1009,6 +1009,14 @@ func dashboardCmd(e *engine.Engine, a args) error {
 		})
 		fmt.Printf("%s dashboard at http://%s/?live=1  (refreshes every 5s; Ctrl-C to stop)\n", render.Cyan("●"), addr)
 		return http.ListenAndServe(addr, mux)
+	}
+	if a.has("json") { // the same data the page embeds, for scripts and the project website
+		b, err := json.MarshalIndent(dashboard.Collect(e, time.Now().Format("2006-01-02 15:04:05")), "", "  ")
+		if err != nil {
+			return err
+		}
+		fmt.Println(string(b))
+		return nil
 	}
 	out := a.get("out")
 	if out == "" {

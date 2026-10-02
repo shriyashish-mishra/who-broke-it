@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Who Broke It? One repo. Humans. AI agents. Zero excuses.</title>
+<meta name="description" content="Who Broke It? is the open-source coordination layer for AI-native engineering teams: one repo, many humans and coding agents, shared task graph, intent and conflict detection, blast radius, verified handoffs and a merge gate.">
+<meta property="og:title" content="Who Broke It?">
+<meta property="og:description" content="One repo. Humans. AI agents. Zero excuses. The open-source coordination layer for AI-native engineering teams.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://shriyashish-mishra.github.io/who-broke-it/">
+<meta property="og:image" content="https://shriyashish-mishra.github.io/who-broke-it/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="site.css">
+<noscript><style>.term pre .ln,.m{opacity:1!important;transform:none!important}</style></noscript>
+</head>
+<body>
+
+<div class="tape" aria-hidden="true"></div>
+
+<header class="top">
+  <a class="logo" href="#top" aria-label="Who Broke It? home"><span class="q">?</span> WHO BROKE IT?</a>
+  <nav aria-label="Sections">
+    <a href="#problem">Problem</a><a href="#how">How it works</a><a href="#graph">Graph</a><a href="#agents">Agents</a><a href="#trust">Honesty</a><a href="#install">Install</a>
+    <a class="gh" href="https://github.com/shriyashish-mishra/who-broke-it" rel="noopener">GitHub ↗</a>
+  </nav>
+</header>
+
+<main id="top">
+
+<!-- ============================ HERO -->
+<section class="hero">
+  <p class="case mono">CASE FILE · REPO: <b>everything</b> · STATUS: <b class="hot">UNDER INVESTIGATION</b></p>
+  <h1>Who Broke It<span class="cursor">?</span></h1>
+  <p class="tag">One repo. Humans. AI agents. <em>Zero excuses.</em></p>
+  <p class="sub">The open-source coordination layer for AI-native engineering teams. Your agents write the code. <b>Who Broke It?</b> keeps the engineering from falling apart.</p>
+  <div class="cta">
+    <div class="install" data-copy="curl -fsSL https://raw.githubusercontent.com/shriyashish-mishra/who-broke-it/main/install.sh | sh">
+      <code>curl -fsSL …/install.sh | sh</code><button type="button" aria-label="Copy install command">copy</button>
+    </div>
+    <a class="btn" href="demo-dashboard.html">See the live dashboard →</a>
+    <a class="btn ghost" href="https://github.com/shriyashish-mishra/who-broke-it">Star on GitHub</a>
+  </div>
+  <p class="fine mono">single static binary · no server · no account · MIT · Linux · macOS · Windows</p>
+
+  <div class="lineup" aria-label="Suspects who touched the repo">
+    <figure><div class="face" style="--h:36">🤖</div><figcaption><b>Claude</b><span>touched the API</span></figcaption></figure>
+    <figure><div class="face" style="--h:205">🤖</div><figcaption><b>Codex</b><span>touched the schema</span></figcaption></figure>
+    <figure><div class="face" style="--h:275">🤖</div><figcaption><b>Gemini</b><span>touched the UI</span></figcaption></figure>
+    <figure><div class="face" style="--h:130">🧑</div><figcaption><b>Alice</b><span>touched "just one thing"</span></figcaption></figure>
+    <figure><div class="face" style="--h:350">🧑</div><figcaption><b>Bob</b><span>was on holiday (suspicious)</span></figcaption></figure>
+  </div>
+  <p class="verdict">Everyone touched the repo.<br><b>Now you can actually find out why.</b></p>
+</section>
+
+<!-- ============================ BEFORE / AFTER -->
+<section id="problem" class="block">
+  <div class="split">
+    <div>
+      <h2><span class="tagpill">BEFORE</span> The standup nobody wanted</h2>
+      <div class="chat" id="chat" aria-label="A chat about who changed payments">
+        <p class="m a"><i>Maya</i>Hey, did you change payments?</p>
+        <p class="m b"><i>Dev</i>Not me.</p>
+        <p class="m b"><i>Sam</i>I only changed the API.</p>
+        <p class="m a"><i>Maya</i>Claude changed the API.</p>
+        <p class="m b"><i>Sam</i>Which Claude?</p>
+        <p class="m dots"><i>everyone</i>…</p>
+      </div>
+      <p class="aside">Three humans, four agent sessions, one repo, zero shared memory.</p>
+    </div>
+    <div>
+      <h2><span class="tagpill ok">AFTER</span> One command</h2>
+      <div class="term" data-key="blame" data-cmd="wbi blame src/api/billing/"></div>
+      <div class="term" data-key="why" data-cmd="wbi why src/api/billing/status.ts" style="margin-top:14px"></div>
+      <p class="aside">The task, the requirement, the agent, the commit and the contract it changed, including work that has <em>not merged yet</em>.</p>
+    </div>
+  </div>
+</section>
+
+<section class="block alt">
+  <h2 class="center">Agents can already write the code. Nobody coordinates it.</h2>
+  <div class="cards four">
+    <article><b>01</b><h3>They collide</h3><p>Two agents edit the same area. A merge conflict is the <em>good</em> outcome: the bad one is both being "right".</p></article>
+    <article><b>02</b><h3>Changes break strangers</h3><p>One agent bumps a type. Three other tasks, built against the old one, find out in CI. Or production.</p></article>
+    <article><b>03</b><h3>"Done" means "I said so"</h3><p>The agent reports success. Nothing checks scope, contracts, rules, or whether anyone asked for this.</p></article>
+    <article><b>04</b><h3>Nobody remembers why</h3><p>Six weeks later: why does this code exist, who wrote it, and which requirement was it for?</p></article>
+  </div>
+</section>
+
+<!-- ============================ HOW IT WORKS -->
+<section id="how" class="block">
+  <h2 class="center">How it works</h2>
+  <p class="lead center">The repo carries its own engineering context. Any agent that can run a shell command can play, and Claude Code is proven end to end.</p>
+  <div class="how">
+    <ol class="steps" id="steps" role="tablist" aria-label="Workflow steps"></ol>
+    <div class="stage">
+      <div class="stagehead mono" id="stagehead"></div>
+      <div class="term big" id="stageterm"></div>
+      <p class="stagenote" id="stagenote"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ GRAPH -->
+<section id="graph" class="block alt">
+  <h2 class="center">The Engineering Graph</h2>
+  <p class="lead center">Goal → requirements → tasks → contracts → agents → commits → PRs, as plain files in your repo. This is a real plan, generated by <code>wbi plan</code> for a SaaS app. <b>Click a task. Or break a contract.</b></p>
+  <div class="graphbox">
+    <div class="contracts" id="contractbtns"><span class="mono dim">Break a contract:</span></div>
+    <div class="gscroll"><svg id="g" role="img" aria-label="Interactive task dependency graph"></svg></div>
+    <div class="ginfo" id="ginfo"><p class="dim">Click a task to trace what it depends on (blue) and what depends on it (red). Break a contract to see its blast radius. We'll tell you who to apologise to.</p></div>
+  </div>
+  <div class="term" data-key="blast" data-cmd="wbi blast BillingStatus" style="margin-top:18px"></div>
+</section>
+
+<!-- ============================ AGENTS -->
+<section id="agents" class="block">
+  <h2 class="center">Many agents, one repository</h2>
+  <p class="lead center">Each agent works in its own isolated worktree on its own task branch. They <em>declare intent</em> before touching code, and wbi checks the declaration against everyone else.</p>
+  <div class="lanes" id="lanes">
+    <div class="lane" data-who="claude"><span class="who">🤖 claude@maya</span><span class="task">TASK-007 · Billing API</span><code>wbi/TASK-007</code></div>
+    <div class="lane" data-who="codex"><span class="who">🤖 codex@devb</span><span class="task">TASK-010 · Analytics API</span><code>wbi/TASK-010</code></div>
+    <div class="lane" data-who="gemini"><span class="who">🤖 gemini@devc</span><span class="task">TASK-003 · Web app shell</span><code>wbi/TASK-003</code></div>
+    <div class="lane" data-who="alice"><span class="who">🧑 alice</span><span class="task">TASK-001 · Architecture</span><code>wbi/TASK-001</code></div>
+    <div class="lane" data-who="bob"><span class="who">🧑 bob</span><span class="task">TASK-002 · Database</span><code>wbi/TASK-002</code></div>
+  </div>
+  <div class="incident">
+    <button class="btn" id="replay" type="button">▶ Replay the incident</button>
+    <div class="alertbox" id="alertbox" aria-live="polite"></div>
+  </div>
+  <div class="two">
+    <div class="stack">
+      <div class="term" data-key="intents1" data-cmd="wbi intent declare MODIFY src/api/billing/plans.ts --task TASK-003   # gemini"></div>
+      <div class="term" data-key="intents2" data-cmd="wbi intent declare CHANGE_CONTRACT BillingStatus --task TASK-010   # codex"></div>
+    </div>
+    <div class="term" data-key="blocked" data-cmd="wbi claim TASK-007   # gemini, too early"></div>
+  </div>
+</section>
+
+<!-- ============================ SYNC -->
+<section class="block alt" id="sync">
+  <h2 class="center">Two laptops. One task. Git decides.</h2>
+  <p class="lead center">No server, no account. Teammates on separate machines share state through the git remote you already have. A push to a ref is an atomic compare-and-swap, so exactly one claim wins.</p>
+  <div class="race" aria-label="Animated diagram of a claim race">
+    <div class="box"><div class="lap">💻 Alice<br><small>claude</small></div><div class="state" id="sa">TASK-003: free</div></div>
+    <div class="wire"><div class="pkt a" id="pa"></div><div class="pkt b" id="pb"></div><div class="remote">☁ git remote<br><small>refs/wbi/sync</small><div class="state" id="sr">log: empty</div></div></div>
+    <div class="box"><div class="lap">💻 Bob<br><small>codex</small></div><div class="state" id="sb">TASK-003: free</div></div>
+  </div>
+  <p class="center"><button class="btn" id="racebtn" type="button">▶ Both claim TASK-003 at once</button></p>
+  <div class="term" data-key="race" data-cmd="wbi sync   # what Bob actually saw" style="max-width:760px;margin:16px auto 0"></div>
+  <p class="fine center mono" style="margin-top:14px">Signed batches · team allow-list · offline-tolerant · compaction</p>
+</section>
+
+<!-- ============================ JUDGE -->
+<section class="block" id="judge">
+  <div class="split">
+    <div>
+      <h2>The agent says it's done.</h2>
+      <p class="lead">"Done" is a claim. The <b>Agent Judge</b> checks it against scope, contracts, your constitution, tests and acceptance criteria. Risky changes (migrations, security, public API) wait for a human. Criteria only a person can sign are never attested by an agent.</p>
+      <div class="gavel" id="gavel"><span>⚖</span><b id="gavelmsg">Objection: the agent says it's done.</b></div>
+      <button class="btn" id="judgebtn" type="button">Run the checks</button>
+    </div>
+    <div>
+      <div class="term" data-key="judge" data-cmd="wbi handoff TASK-010 --summary 'Analytics summary' --tests 'npm test'"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ PR / GATE -->
+<section class="block alt" id="gate">
+  <h2 class="center">Handoff → pull request → merge gate</h2>
+  <p class="lead center"><code>wbi pr</code> opens a PR whose body is built from the handoff. The GitHub Action then enforces the graph on the diff. These are the real findings from the <a href="https://github.com/shriyashish-mishra/wbi-action-demo/pulls?q=is%3Apr">public demo repo</a>.</p>
+  <div class="prs">
+    <article class="pr ok"><header><span class="dot"></span><b>TASK-001: architecture notes</b><em>clean</em></header><ul><li class="g">✓ in scope</li><li class="g">✓ handoff record present</li><li class="g">✓ constitution</li></ul><footer>wbi check · PASS</footer></article>
+    <article class="pr bad"><header><span class="dot"></span><b>TASK-003: web shell</b><em>scope + constitution</em></header><ul><li class="r">✗ SCOPE_RESTRICTED <code>src/api/billing/steal.ts</code></li><li class="r">✗ CONSTITUTION C6: all billing mutations go through BillingService <code>src/web/shell/pay.ts</code></li><li class="y">! NO_HANDOFF</li></ul><footer>wbi check · FAIL</footer></article>
+    <article class="pr bad"><header><span class="dot"></span><b>TASK-010: analytics</b><em>contract tampering</em></header><ul><li class="r">✗ CONTRACT_NOT_OWNED BillingStatus is owned by TASK-007 but changed by TASK-010</li><li class="y">! UNMERGED_DEPENDENCY</li></ul><footer>wbi check · FAIL</footer></article>
+    <article class="pr bad"><header><span class="dot"></span><b>TASK-002: database</b><em>high-impact</em></header><ul><li class="r">✗ NEEDS_APPROVAL a migration needs a human reviewer</li><li class="y">! UNMERGED_DEPENDENCY</li></ul><footer>wbi check · FAIL until approved</footer></article>
+  </div>
+</section>
+
+<!-- ============================ DASHBOARD -->
+<section class="block" id="dash">
+  <h2 class="center">A dashboard that is just a file</h2>
+  <p class="lead center"><code>wbi dashboard</code> writes one self-contained HTML file: no server, no network calls. Open it, commit it, host it anywhere static.</p>
+  <a class="shot" href="demo-dashboard.html"><img src="assets/dashboard.png" alt="The Who Broke It dashboard showing a task graph with the BillingStatus contract's blast radius highlighted" loading="lazy" width="1440" height="640"><span>Open the live demo dashboard →</span></a>
+</section>
+
+<!-- ============================ HONESTY -->
+<section id="trust" class="block alt">
+  <h2 class="center">What's proven, and what isn't</h2>
+  <p class="lead center">Open-source tools lie by omission. Here is the whole truth.</p>
+  <div class="truth">
+    <div><h3 class="g">✓ Verified</h3><ul>
+      <li><b>Claude Code</b> run end to end over MCP <em>and</em> the CLI protocol. It found five real problems we then fixed.</li>
+      <li>Linux, macOS and Windows CI, including a 24-process database stress test.</li>
+      <li>Sync raced on a <b>real GitHub</b> repo: exactly one claim wins, every time we tried.</li>
+      <li>The merge gate on real pull requests, installable via <code>curl</code>, Homebrew and <code>go install</code>.</li>
+      <li>Every transcript on this page is captured from a real run.</li></ul></div>
+    <div><h3 class="y">◌ Integration targets (not run)</h3><ul>
+      <li><b>Codex CLI, Gemini CLI, Cursor, OpenCode, Aider.</b> The adapter architecture supports them, and the files follow their docs, but nobody has run those agents through wbi yet. <a href="https://github.com/shriyashish-mishra/who-broke-it/blob/main/docs/ADAPTERS.md">Help verify one →</a></li>
+      <li>GitLab, Bitbucket and self-hosted git for sync: untested.</li>
+      <li>Linear and Jira sync: not built (generic webhooks are).</li>
+      <li>Authorized teammates are trusted with each other: signatures stop outsiders and forgery, not insiders.</li></ul></div>
+  </div>
+</section>
+
+<!-- ============================ INSTALL -->
+<section id="install" class="block">
+  <h2 class="center">Install it in 30 seconds</h2>
+  <div class="tabs" role="tablist" id="itabs">
+    <button role="tab" aria-selected="true" data-i="curl">curl</button><button role="tab" aria-selected="false" data-i="brew">Homebrew</button><button role="tab" aria-selected="false" data-i="go">go install</button><button role="tab" aria-selected="false" data-i="win">Windows</button>
+  </div>
+  <div class="itab" id="i-curl"><div class="install wide" data-copy="curl -fsSL https://raw.githubusercontent.com/shriyashish-mishra/who-broke-it/main/install.sh | sh"><code>curl -fsSL https://raw.githubusercontent.com/shriyashish-mishra/who-broke-it/main/install.sh | sh</code><button type="button">copy</button></div><p class="fine">Verifies the SHA-256 checksum and refuses to install on a mismatch.</p></div>
+  <div class="itab" id="i-brew" hidden><div class="install wide" data-copy="brew install shriyashish-mishra/tap/wbi"><code>brew install shriyashish-mishra/tap/wbi</code><button type="button">copy</button></div></div>
+  <div class="itab" id="i-go" hidden><div class="install wide" data-copy="go install github.com/shriyashish-mishra/who-broke-it/cmd/wbi@latest"><code>go install github.com/shriyashish-mishra/who-broke-it/cmd/wbi@latest</code><button type="button">copy</button></div><p class="fine">Needs Go 1.26+.</p></div>
+  <div class="itab" id="i-win" hidden><p>Download <code>wbi_&lt;version&gt;_windows_amd64.zip</code> from the <a href="https://github.com/shriyashish-mishra/who-broke-it/releases/latest">latest release</a>, unzip, and put <code>wbi.exe</code> on your PATH. Windows is covered by CI tests; the demo scripts are bash.</p></div>
+
+  <h3 class="center" style="margin-top:34px">Your first five minutes</h3>
+  <pre class="qs"><code><span class="c"># in any git repo with one commit</span>
+wbi init
+wbi plan "Build a SaaS dashboard with auth, billing and analytics"
+wbi simulate --approve            <span class="c"># waves, critical path, conflicts</span>
+git add .wbi &amp;&amp; git commit -m "chore: engineering graph"
+
+wbi adapters install claude       <span class="c"># teach your agent the protocol</span>
+wbi status                        <span class="c"># mission control</span>
+wbi start TASK-001 --worktree     <span class="c"># an isolated branch + the full work packet</span></code></pre>
+  <p class="center"><a class="btn" href="https://github.com/shriyashish-mishra/who-broke-it#readme">Read the README</a> <a class="btn ghost" href="https://github.com/shriyashish-mishra/wbi-action-demo">Browse the demo repo</a></p>
+</section>
+
+</main>
+
+<footer>
+  <div class="tape" aria-hidden="true"></div>
+  <p><b>WHO BROKE IT?</b> · MIT licensed · <a href="https://github.com/shriyashish-mishra/who-broke-it">source</a> · <a href="https://github.com/shriyashish-mishra/who-broke-it/blob/main/docs/PROTOCOL.md">protocol</a> · <a href="https://github.com/shriyashish-mishra/who-broke-it/blob/main/CHANGELOG.md">changelog</a> · <a href="https://github.com/shriyashish-mishra/homebrew-tap">tap</a></p>
+  <p class="fine">Built so nobody has to ask <i>"which Claude?"</i> ever again.</p>
+</footer>
+
+<script src="data.js"></script>
+<script src="site.js"></script>
+</body>
+</html>

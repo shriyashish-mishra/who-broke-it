@@ -1,4 +1,4 @@
-.PHONY: build test demo demo-team install cross fmt clean
+.PHONY: build test demo demo-team site-data install cross fmt clean
 BIN := bin/wbi
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 LDFLAGS := -s -w -X main.version=$(VERSION)
@@ -12,6 +12,9 @@ test:
 
 demo: build
 	bash examples/demo.sh
+
+site-data: build
+	python3 scripts/site-data.py
 
 demo-team: build
 	bash examples/demo-two-machines.sh
