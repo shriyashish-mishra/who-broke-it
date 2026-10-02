@@ -151,6 +151,18 @@ jobs:
 
 The PR's task comes from the branch name (`wbi/TASK-7`), a `WBI-Task:` commit trailer, or `--task`. Findings appear as inline annotations. Locally: `wbi check --base main`.
 
+## Notifications (Slack, Discord, any webhook)
+
+```bash
+export WBI_SLACK_WEBHOOK=https://hooks.slack.com/services/…     # the URL is a secret: it lives in your environment
+wbi notify add slack --env WBI_SLACK_WEBHOOK                    # stores only the variable NAME in .wbi/project.json
+wbi notify test
+```
+
+Sinks: `slack`, `discord`, or `webhook` (structured JSON `{event, task, agent, message, data, ts}` for Teams, Zapier, n8n or your own service). By default you hear about contract changes (with blast risk), failed verifications, tasks waiting for human review, handoffs and approvals; pick others with `--events claimed,released,intent_blocked,…`. Only the machine that performed an action posts, so nothing is announced twice. A dead webhook warns (URL redacted) and never breaks a command.
+
+**Not built:** native Linear and Jira issue sync. It needs accounts and API tokens I could not verify against; use a `webhook` sink with a small bridge, or open an issue if you want it.
+
 ## What it does
 
 | Capability | Command | How it works (deterministic, no LLM required) |

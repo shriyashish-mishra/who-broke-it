@@ -21,14 +21,23 @@ type SyncConfig struct {
 	Ref    string `json:"ref,omitempty"`    // ref holding the log (default refs/wbi/sync)
 }
 
+// NotifyConfig sends selected events to Slack, Discord or any JSON webhook. The URL is a secret and is read
+// from the environment variable named by URLEnv; it is never stored in the repository.
+type NotifyConfig struct {
+	Type   string   `json:"type"`             // slack | discord | webhook
+	URLEnv string   `json:"urlEnv"`           // name of the env var holding the webhook URL
+	Events []string `json:"events,omitempty"` // default: contract_changed, verify_failed, verify_review, handoff, approved
+}
+
 type Project struct {
-	Version    int         `json:"version"`
-	Name       string      `json:"name"`
-	Goal       string      `json:"goal"`
-	CreatedAt  string      `json:"createdAt"`
-	BaseBranch string      `json:"baseBranch"`
-	TestCmd    string      `json:"testCmd,omitempty"`
-	Sync       *SyncConfig `json:"sync,omitempty"`
+	Version    int            `json:"version"`
+	Name       string         `json:"name"`
+	Goal       string         `json:"goal"`
+	CreatedAt  string         `json:"createdAt"`
+	BaseBranch string         `json:"baseBranch"`
+	TestCmd    string         `json:"testCmd,omitempty"`
+	Sync       *SyncConfig    `json:"sync,omitempty"`
+	Notify     []NotifyConfig `json:"notify,omitempty"`
 }
 
 // Check is a deterministic acceptance check: command | file-exists | contains.

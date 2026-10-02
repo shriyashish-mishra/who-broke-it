@@ -134,6 +134,7 @@ func (e *Engine) Display(t model.Task, states map[string]model.TaskState) string
 func (e *Engine) Event(typ, taskID, agentID string, payload any) {
 	b, _ := json.Marshal(payload)
 	_, _ = e.DB.Exec(`INSERT INTO events (ts,type,task_id,agent_id,payload) VALUES (?,?,?,?,?)`, nowMs(), typ, nullS(taskID), nullS(agentID), string(b))
+	e.dispatch(typ, taskID, agentID, payload) // only the machine that performed the action notifies, so each event posts once
 }
 
 func (e *Engine) Notify(taskID, agentID, message, ref string) {

@@ -98,6 +98,7 @@ func help() string {
   wbi tasks [--status READY]            all tasks      wbi task <id>   work packet
   wbi agents                            registered agents
   wbi sync [init|status|watch|compact]  share claims/intents/handoffs with teammates over git (auto when enabled)
+  wbi notify [add slack|discord|webhook --env VAR | test | list]   post key events to Slack/Discord/any webhook
   wbi team [join|add|remove|list|enforce]   who may publish to the shared log (.wbi/team.json, signed events)
   wbi graph [--mermaid|--dot|--json]    the engineering graph
 
@@ -519,6 +520,8 @@ func execute(e *engine.Engine, cmd string, a args, ident engine.AgentOpts, rest 
 		return prCmd(e, a, restArg(0))
 	case "team":
 		return teamCmd(e, a, rest)
+	case "notify":
+		return notifyCmd(e, a, rest)
 	case "check":
 		rep, err := e.Check(engine.CheckOpts{Base: a.get("base"), Head: a.get("head"), Branch: a.get("branch"), Task: a.get("task"),
 			RequireTask: a.has("require-task"), RequireHandoff: a.has("require-handoff"), RequireApproval: a.has("require-approval"), Approved: a.has("approved")})
@@ -920,6 +923,55 @@ func teamCmd(e *engine.Engine, a args, rest []string) error {
 		fmt.Printf("this clone's key: %s\n", replicate.Fingerprint(id.PubB64()))
 	default:
 		return model.Errf("usage: wbi team [key | join --name N [--enforce] | add <key> --name N | remove N | enforce [on|off] | list]")
+	}
+	return nil
+}
+
+func notifyCmd(e *engine.Engine, a args, rest []string) error {
+	sub := ""
+	if len(rest) > 0 {
+		sub = rest[0]
+	}
+	switch sub {
+	case "add":
+		if len(rest) < 2 {
+			return model.Errf("usage: wbi notify add <slack|discord|webhook> --env <VAR_HOLDING_THE_URL> [--events contract_changed,handoff,...]")
+		}
+		var events []string
+		for _, ev := range strings.Split(a.get("events"), ",") {
+			if ev = strings.TrimSpace(ev); ev != "" {
+				events = append(events, ev)
+			}
+		}
+		if err := e.AddNotify(rest[1], a.get("env"), events); err != nil {
+			return err
+		}
+		fmt.Printf("%s %s notifications enabled; the URL is read from $%s (never stored in the repo)\n", render.Green("✓"), rest[1], a.get("env"))
+		fmt.Println("  Commit .wbi/project.json so the team shares the setting; each person exports the variable. Try: wbi notify test")
+	case "test":
+		res := e.TestNotify()
+		if len(res) == 0 {
+			fmt.Println("no notification sinks configured: wbi notify add slack --env WBI_SLACK_WEBHOOK")
+		}
+		for _, r := range res {
+			fmt.Println("  " + r)
+		}
+	default:
+		sinks := e.Project().Notify
+		if len(sinks) == 0 {
+			fmt.Println("no notification sinks configured")
+		}
+		for _, s := range sinks {
+			ev := strings.Join(s.Events, ",")
+			if ev == "" {
+				ev = strings.Join(engine.DefaultNotifyEvents, ",") + render.Dim(" (default)")
+			}
+			set := render.Green("set")
+			if os.Getenv(s.URLEnv) == "" {
+				set = render.Yellow("NOT SET")
+			}
+			fmt.Printf("  %-8s $%s [%s]  events: %s\n", s.Type, s.URLEnv, set, ev)
+		}
 	}
 	return nil
 }
