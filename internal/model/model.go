@@ -29,6 +29,14 @@ type NotifyConfig struct {
 	Events []string `json:"events,omitempty"` // default: contract_changed, verify_failed, verify_review, handoff, approved
 }
 
+// RepoLink points at another repository that is part of the same product. Contracts from a linked repo are
+// consumed as "<link name>:<contract name>" (e.g. "backend:PaymentStatus").
+type RepoLink struct {
+	Name string `json:"name"`           // short name used as the contract namespace
+	Path string `json:"path"`           // local checkout, relative to this repo's root or absolute
+	Role string `json:"role,omitempty"` // free text: frontend, backend, mobile, sdk, infra...
+}
+
 type Project struct {
 	Version    int            `json:"version"`
 	Name       string         `json:"name"`
@@ -38,6 +46,7 @@ type Project struct {
 	TestCmd    string         `json:"testCmd,omitempty"`
 	Sync       *SyncConfig    `json:"sync,omitempty"`
 	Notify     []NotifyConfig `json:"notify,omitempty"`
+	Links      []RepoLink     `json:"links,omitempty"`
 }
 
 // Check is a deterministic acceptance check: command | file-exists | contains.

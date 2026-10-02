@@ -101,6 +101,7 @@ func help() string {
   wbi agents                            registered agents
   wbi sync [init|status|watch|compact]  share claims/intents/handoffs with teammates over git (auto when enabled)
   wbi dashboard [--out file.html | --serve | --json]   one-file visual dashboard (graph, agents, blast radius, drift)
+  wbi link [add <name> <path> | remove | list | impact <Contract>]   connect repos: consume <name>:<Contract>, see cross-repo impact
   wbi notify [add slack|discord|webhook --env VAR | test | list]   post key events to Slack/Discord/any webhook
   wbi team [join|add|remove|list|enforce]   who may publish to the shared log (.wbi/team.json, signed events)
   wbi graph [--mermaid|--dot|--json]    the engineering graph
@@ -536,6 +537,8 @@ func execute(e *engine.Engine, cmd string, a args, ident engine.AgentOpts, rest 
 		return teamCmd(e, a, rest)
 	case "notify":
 		return notifyCmd(e, a, rest)
+	case "link":
+		return linkCmd(e, a, rest)
 	case "dashboard":
 		return dashboardCmd(e, a)
 	case "check":
@@ -1026,5 +1029,74 @@ func dashboardCmd(e *engine.Engine, a args) error {
 		return err
 	}
 	fmt.Printf("%s wrote %s (one self-contained file: open it, commit it, or host it anywhere static)\n", render.Green("✓"), out)
+	return nil
+}
+
+func linkCmd(e *engine.Engine, a args, rest []string) error {
+	sub := ""
+	if len(rest) > 0 {
+		sub = rest[0]
+	}
+	switch sub {
+	case "add":
+		if len(rest) < 3 {
+			return model.Errf("usage: wbi link add <name> <path-to-the-other-repo> [--role backend|frontend|mobile|sdk|...]")
+		}
+		if err := e.LinkAdd(rest[1], rest[2], a.get("role")); err != nil {
+			return err
+		}
+		fmt.Printf("%s linked %s -> %s. Tasks here can now consume %s:<Contract>.\n", render.Green("✓"), rest[1], rest[2], rest[1])
+		fmt.Println("  Commit .wbi/project.json. The path is relative to this repo, so teammates need the other repo checked out at the same relative location.")
+	case "remove":
+		if len(rest) < 2 {
+			return model.Errf("usage: wbi link remove <name>")
+		}
+		return e.LinkRemove(rest[1])
+	case "impact":
+		if len(rest) < 2 {
+			return model.Errf("usage: wbi link impact <Contract>   (which tasks in linked repos consume this repo's contract?)")
+		}
+		res, err := e.ImpactOnLinks(rest[1])
+		if err != nil {
+			return err
+		}
+		if a.has("json") {
+			printJSON(res)
+			return nil
+		}
+		fmt.Println(render.Bold("CROSS-REPO IMPACT") + render.Dim("  "+rest[1]))
+		for _, r := range res {
+			switch {
+			case r.Error != "":
+				fmt.Printf("  %s %s\n", render.Yellow("!"), r.Error)
+			case len(r.Tasks) == 0:
+				fmt.Printf("  %-12s %s\n", r.Repo, render.Dim("no consumers"))
+			default:
+				fmt.Printf("  %-12s %s", r.Repo, strings.Join(r.Tasks, ", "))
+				if len(r.Stale) > 0 {
+					fmt.Print(render.Yellow("   not yet updated: " + strings.Join(r.Stale, ", ")))
+				}
+				fmt.Println()
+			}
+		}
+	default: // list
+		links := e.Links()
+		if len(links) == 0 {
+			fmt.Println("no linked repos: wbi link add backend ../backend --role backend")
+		}
+		for _, l := range links {
+			fmt.Printf("  %-12s %-24s %s\n", l.Name, l.Path, render.Dim(l.Role))
+		}
+		for _, u := range e.ExternalUses() {
+			state := render.Green("current")
+			switch {
+			case u.Problem != "":
+				state = render.Red(u.Problem)
+			case u.Stale:
+				state = render.Yellow(fmt.Sprintf("STALE: built against v%d, now v%d (wbi ack %s)", u.Acked, u.Current, u.Task))
+			}
+			fmt.Printf("  %s consumes %s  %s\n", u.Task, u.Ref, state)
+		}
+	}
 	return nil
 }

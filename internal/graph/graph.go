@@ -95,6 +95,9 @@ func Validate(tasks []model.Task, contracts []model.Contract) []Issue {
 			}
 		}
 		for _, c := range t.Consumes {
+			if strings.Contains(c, ":") {
+				continue // "<repo>:<contract>" lives in a linked repository; the engine checks the link
+			}
 			k, ok := cm[c]
 			if !ok {
 				issues = append(issues, Issue{"error", fmt.Sprintf("%s consumes unknown contract %s", t.ID, c)})

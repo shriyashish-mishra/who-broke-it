@@ -4,6 +4,9 @@ All notable changes. Format follows [Keep a Changelog](https://keepachangelog.co
 
 ## [Unreleased]
 
+### Added
+- **Multi-repo links** (foundation): `wbi link add|remove|list|impact`. A task consumes `<repo>:<Contract>`; cross-repo drift reuses the banner / status / `wbi ack` flow, `wbi blast <repo>:<Contract>` shows impact in the consumer, and `wbi link impact <Contract>` shows consumers in linked repos. One hop per repo; local checkouts; committed graphs only.
+
 ## [0.2.0] - 2026-10-02
 
 ### Added

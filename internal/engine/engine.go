@@ -434,7 +434,7 @@ func (e *Engine) StaleContracts(t model.Task) []Stale {
 			}
 		}
 	}
-	return out
+	return append(out, e.externalStale(t)...)
 }
 
 func (e *Engine) Ack(taskID string) error {
@@ -451,6 +451,11 @@ func (e *Engine) Ack(taskID string) error {
 }
 
 func (e *Engine) Blast(target string) blast.Result {
+	if strings.Contains(target, ":") {
+		if r, ok := e.blastExternal(target); ok {
+			return r
+		}
+	}
 	states := e.States()
 	code, files := e.CodeGraph()
 	return blast.Radius(blast.Input{

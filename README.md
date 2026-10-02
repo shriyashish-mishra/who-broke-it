@@ -191,6 +191,24 @@ Sinks: `slack`, `discord`, or `webhook` (structured JSON `{event, task, agent, m
 
 **Not built:** native Linear and Jira issue sync. It needs accounts and API tokens I could not verify against; use a `webhook` sink with a small bridge, or open an issue if you want it.
 
+## Several repositories (foundation)
+
+A product is often several repos: backend, shared SDK, web, mobile. `wbi link` connects them so a contract change in one is visible in the others:
+
+```bash
+# in the sdk repo (the backend is checked out next to it)
+wbi link add backend ../backend --role backend
+# a task in the sdk repo then declares:  "consumes": ["backend:PaymentStatus"]
+
+wbi blast backend:PaymentStatus     # what in THIS repo is affected if it changes
+wbi link list                       # linked repos, and any external contract that moved under you
+wbi link impact PaymentStatus       # (in the backend) which tasks in linked repos consume it, and who has not caught up
+```
+
+When the backend hands off a change to `PaymentStatus` and it lands, the SDK's tasks get the same banner, status attention and `wbi ack` flow as a same-repo change. A chain (backend → sdk → web) works because each repo links to its upstream; impact moves **one hop per repo** until the middle repo republishes its own contract.
+
+**Limits (this is a foundation, not a platform):** links are local paths to checkouts, read from each repo's *committed* graph (so a change shows up once it is merged and checked out); there is no cross-repo sync of claims or a combined dashboard; and it has been tested with repos on disk, not across hosts.
+
 ## What it does
 
 | Capability | Command | How it works (deterministic, no LLM required) |
@@ -268,7 +286,7 @@ Known limits of this prototype:
 What exists is listed above. What is next, roughly in order:
 
 1. **More agents verified.** Run Codex, Gemini CLI, Cursor, OpenCode or Aider through wbi and report what breaks ([template](https://github.com/shriyashish-mishra/who-broke-it/issues/new?template=agent_report.yml)). This is the most valuable contribution.
-2. **Multi-repo links:** contracts that cross repositories (backend → SDK → web/mobile), with impact shown across the boundary. A small foundation only.
+2. **Multi-repo:** build on the `wbi link` foundation (shared dashboard, cross-repo notifications), if people need it.
 3. **Other hosts for sync:** verify GitLab, Bitbucket and self-hosted git.
 4. **Sync:** per-object permissions (today any authorized member can write any event), push-style wake-ups instead of polling.
 5. **Bridges:** Linear and Jira via the generic webhook sink, if someone needs them.

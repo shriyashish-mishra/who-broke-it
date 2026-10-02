@@ -155,3 +155,17 @@ func EditJSON(t testing.TB, path string, fn func(map[string]any)) {
 		t.Fatal(err)
 	}
 }
+
+// MakeRepoAt is MakeRepo at an exact path (for tests that need sibling repos).
+func MakeRepoAt(t testing.TB, dir string) string {
+	t.Helper()
+	t.Setenv("WBI_NO_GH", "1")
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	Git(t, dir, "init", "-q", "-b", "main")
+	Put(t, dir, "README.md", "# "+filepath.Base(dir)+"\n")
+	Git(t, dir, "add", "-A")
+	Git(t, dir, "commit", "-qm", "initial")
+	return dir
+}
