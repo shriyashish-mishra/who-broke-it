@@ -113,6 +113,8 @@ git add -A && git commit -m "chore: enable wbi sync" && git push
 * **Races:** if two people claim the same task at the same moment, exactly one push wins. The other machine learns it lost (`⚠ TASK-003: codex@bob lost the claim to claude@alice`), drops the claim and shows the owner. The order is the remote's, not anyone's clock.
 * **Offline:** everything keeps working locally and queues; changes publish when you are back online. A claim made offline can still lose a race later, and you are told.
 * **Automatic:** mutating commands pull first and publish after; `status`/`tasks`/etc. refresh at most every 3 s; `inbox` and `intent` always refresh. `WBI_NO_SYNC=1` turns it off.
+* **Live mode:** `wbi sync watch` polls every few seconds in a spare terminal and prints what teammates did.
+* **Trust:** batches are signed per clone; `wbi team join --name you --enforce` + a reviewed PR to `.wbi/team.json` limits who is applied. `wbi sync compact` keeps the log small.
 * **Hosts that block custom refs:** `wbi sync init --ref refs/heads/wbi-sync` uses an ordinary branch instead (verified; it just shows up as a branch).
 
 ```bash
@@ -157,14 +159,14 @@ The PR's task comes from the branch name (`wbi/TASK-7`), a `WBI-Task:` commit tr
 | Work packets | `wbi start`, `wbi task` | Scope + contracts + constitution rules + upstream handoffs + pending change notices |
 | Intent registry | `wbi intent declare` | Glob-overlap analysis vs active intents, task ownership (soft), restricted paths, contract ownership |
 | Contract propagation | `wbi handoff --contract "X=note"` | Bumps version, finds consumers via the graph, notifies owners, marks their context stale |
-| Blast radius | `wbi blast <contract\|task\|path>` | Explicit relationships: contracts, task/component deps, path ownership, active agents |
+| Blast radius | `wbi blast <contract\|task\|path>` | Declared relationships (contracts, task/component deps, path ownership, active agents) **plus a static import scan** (JS/TS, Python, Go) that finds code depending on the change |
 | Agent Judge | `wbi verify` (auto on handoff) | Scope, contracts, forbid-rules on the diff, test evidence, acceptance criteria; human approval for migrations/security/public API |
 | Blame / why | `wbi blame`, `wbi why` | Commit trailers (`WBI-Task`, `WBI-Agent`) → task → requirement → ADR; includes **unmerged** branches |
 | Drift | `wbi drift` | Product (requirement × layer matrix), architecture (constitution forbid-rules, incl. unmerged branches), context (stale contract versions) |
 | Simulation | `wbi simulate` | Waves, critical path, parallelizable tasks, overlapping scopes, missing deps, approval gate |
 | Pull requests | `wbi pr <task>` | Opens a PR (via `gh`) whose body is built from the handoff: requirement, files changed (from git), contract changes, verification, acceptance, affected tasks, labels (`high-impact`, `contract-change`) |
 | Merge gate | `wbi check`, GitHub Action | Diff vs. the task's scope, contract ownership/versioning, constitution, plan integrity; optional handoff + human-approval gates |
-| Cross-machine sync | `wbi sync` (automatic once enabled) | Git-native: an append-only event log on `refs/wbi/sync`; atomic claims via push compare-and-swap |
+| Cross-machine sync | `wbi sync` (automatic once enabled), `watch`, `compact`, `wbi team` | Git-native: signed, append-only event log on `refs/wbi/sync`; atomic claims via push compare-and-swap; team allow-list; snapshot compaction |
 | MCP | `wbi mcp` | 18 `wbi_*` tools over stdio; same engine as the CLI |
 
 ## Architecture
@@ -210,9 +212,9 @@ Works and is tested (`go test ./...`, 38 tests: unit, end-to-end on real git rep
 
 Known limits of this prototype:
 
-* **Sync is eventually consistent and trusts your teammates.** Anyone with push access to the remote can write events (the same trust as pushing code); incoming text is sanitized, unknown event types are ignored. There is no per-user authorization inside the log yet.
+* **Sync is eventually consistent and trusts *team members* with each other.** Every published batch is ed25519-signed; a forged or tampered batch is always rejected, and with `wbi team join --enforce` only keys listed in `.wbi/team.json` (changed via PR) are applied. That protects against outsiders and forgery. It does **not** stop an authorized member from publishing events about someone else's task: there is no per-object permission.
 * **Claims are only atomic while you are online.** Offline claims are optimistic and can lose when you reconnect (you are told, and the claim is dropped).
-* **The log grows without bound.** There is no compaction yet; it is small (one short JSON line per change) but not free.
+* **Log growth:** `wbi sync compact` replaces the history with one snapshot (guarded by a lease, so it cannot clobber a concurrent push). Run it occasionally; nothing runs it for you.
 * **Hosts:** verified against GitHub (two clones racing for the same task six times in a row: always exactly one winner, both clones converged; a claim round-trip takes about 4 s there) and against plain bare git remotes. GitLab, Bitbucket and self-hosted setups are untested; if one blocks `refs/wbi/*`, use the branch fallback above.
 * **Intent is cooperative at edit time.** Agents must call it (the instruction files and MCP make that easy). The merge gate (`wbi check`) is what enforces the rules, after the fact, on the PR.
 * **The built-in planner is template-based** (auth, billing, analytics, assistant, notifications, mobile, multi-tenant, plus a generic fallback). It inspects your repo for stack, layout, test command and relevant files, but it is not an architect. For LLM-authored plans use `wbi plan --prompt` (prints a prompt + JSON schema for any agent), or `--agent-cmd "<cmd>"` (pipes the prompt to your agent CLI and ingests its JSON), or `--from plan.json`.

@@ -2,12 +2,14 @@
 package main
 
 import (
+	"context"
 	"crypto/sha1"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
 	"os/exec"
+	"os/signal"
 	"runtime/debug"
 	"strconv"
 	"strings"
@@ -35,7 +37,7 @@ func init() {
 	}
 }
 
-var boolFlags = map[string]bool{"force": true, "json": true, "worktree": true, "mermaid": true, "dot": true, "approve": true, "prompt": true, "no-hook": true, "mark-read": true, "help": true, "version": true, "all": true, "require-task": true, "require-handoff": true, "require-approval": true, "approved": true, "draft": true, "dry-run": true, "no-push": true}
+var boolFlags = map[string]bool{"force": true, "json": true, "worktree": true, "mermaid": true, "dot": true, "approve": true, "prompt": true, "no-hook": true, "mark-read": true, "help": true, "version": true, "all": true, "require-task": true, "require-handoff": true, "require-approval": true, "approved": true, "enforce": true, "draft": true, "dry-run": true, "no-push": true}
 var multiFlags = map[string]bool{"contract": true, "limitation": true}
 
 type args struct {
@@ -95,7 +97,8 @@ func help() string {
   wbi status [--json]                   progress, who is doing what, what needs attention
   wbi tasks [--status READY]            all tasks      wbi task <id>   work packet
   wbi agents                            registered agents
-  wbi sync [init|status]                share claims/intents/handoffs with teammates over git (auto when enabled)
+  wbi sync [init|status|watch|compact]  share claims/intents/handoffs with teammates over git (auto when enabled)
+  wbi team [join|add|remove|list|enforce]   who may publish to the shared log (.wbi/team.json, signed events)
   wbi graph [--mermaid|--dot|--json]    the engineering graph
 
 %s  %s
@@ -514,6 +517,8 @@ func execute(e *engine.Engine, cmd string, a args, ident engine.AgentOpts, rest 
 		p(fmt.Sprintf("%s %s recorded: %s", render.Green("✓"), d.ID, d.Title))
 	case "pr":
 		return prCmd(e, a, restArg(0))
+	case "team":
+		return teamCmd(e, a, rest)
 	case "check":
 		rep, err := e.Check(engine.CheckOpts{Base: a.get("base"), Head: a.get("head"), Branch: a.get("branch"), Task: a.get("task"),
 			RequireTask: a.has("require-task"), RequireHandoff: a.has("require-handoff"), RequireApproval: a.has("require-approval"), Approved: a.has("approved")})
@@ -739,6 +744,34 @@ func syncCmd(e *engine.Engine, a args, rest []string) error {
 		fmt.Printf("sync: %s  remote=%s ref=%s\n", render.Green("on"), i.Remote, i.Ref)
 		fmt.Printf("  this clone: actor %s\n  unpublished local events: %d\n  claims that lost a race: %d\n  last sync: %s\n", i.Actor, i.Pending, i.Rejected, last)
 		return nil
+	case "compact":
+		keep, _ := strconv.Atoi(a.get("keep-events"))
+		if keep <= 0 {
+			keep = 500
+		}
+		rep, err := e.Compact(keep)
+		if err != nil {
+			return err
+		}
+		fmt.Printf("%s compacted: the log is now one snapshot of %d row(s)\n", render.Green("✓"), rep.Pushed)
+		return nil
+	case "watch":
+		iv, err := time.ParseDuration(firstNonEmptyStr(a.get("interval"), "5s"))
+		if err != nil {
+			return model.Errf("bad --interval: %v", err)
+		}
+		fmt.Printf("%s watching the team every %s (Ctrl-C to stop)\n", render.Cyan("●"), iv)
+		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+		defer stop()
+		return e.Watch(ctx, iv, func(r replicate.Report) {
+			fmt.Printf("%s %s: %d event(s) from teammates\n", render.Dim(time.Now().Format("15:04:05")), render.Bold("sync"), r.Applied)
+			for _, x := range r.Rejected {
+				fmt.Println(render.Yellow("  ⚠ " + x))
+			}
+			for _, x := range r.Quarantined {
+				fmt.Println(render.Red("  ✖ " + x))
+			}
+		})
 	case "", "now":
 		rep, err := e.Sync()
 		if err != nil {
@@ -752,9 +785,12 @@ func syncCmd(e *engine.Engine, a args, rest []string) error {
 		for _, r := range rep.Rejected {
 			fmt.Println(render.Yellow("  ⚠ " + r))
 		}
+		for _, q := range rep.Quarantined {
+			fmt.Println(render.Red("  ✖ " + q))
+		}
 		return nil
 	}
-	return model.Errf("usage: wbi sync [init [--remote origin] [--ref refs/wbi/sync] | status | now]")
+	return model.Errf("usage: wbi sync [init [--remote origin] [--ref refs/wbi/sync] | status | now | watch [--interval 5s] | compact [--keep-events 500]]")
 }
 
 func prCmd(e *engine.Engine, a args, taskID string) error {
@@ -811,4 +847,79 @@ func labelColor(l string) string {
 		return "fbca04"
 	}
 	return "6f42c1"
+}
+
+func firstNonEmptyStr(ss ...string) string {
+	for _, s := range ss {
+		if s != "" {
+			return s
+		}
+	}
+	return ""
+}
+
+func teamCmd(e *engine.Engine, a args, rest []string) error {
+	sub := ""
+	if len(rest) > 0 {
+		sub = rest[0]
+	}
+	switch sub {
+	case "key":
+		id, err := e.Identity()
+		if err != nil {
+			return err
+		}
+		fmt.Printf("%s\nfingerprint: %s\n", id.PubB64(), replicate.Fingerprint(id.PubB64()))
+	case "join":
+		t, err := e.TeamJoin(a.get("name"), a.has("enforce"))
+		if err != nil {
+			return err
+		}
+		fmt.Printf("%s your key is in .wbi/team.json (%d member(s), signatures %s).\n", render.Green("✓"), len(t.Members), map[bool]string{true: "ENFORCED", false: "advisory"}[t.Enforce])
+		fmt.Println("  Commit it through a pull request: merging it is what authorizes you, and every teammate's clone applies your events once it lands.")
+	case "add":
+		if len(rest) < 2 || a.get("name") == "" {
+			return model.Errf("usage: wbi team add <base64-key> --name <person>   (they get it from: wbi team key)")
+		}
+		if err := e.TeamAdd(a.get("name"), rest[1]); err != nil {
+			return err
+		}
+		fmt.Printf("%s added %s (%s)\n", render.Green("✓"), a.get("name"), replicate.Fingerprint(rest[1]))
+	case "remove":
+		if err := e.TeamRemove(strings.Join(rest[1:], " ")); err != nil {
+			return err
+		}
+		fmt.Println(render.Green("✓") + " removed; their published events stop being applied once this change is merged")
+	case "enforce":
+		on := len(rest) < 2 || rest[1] != "off"
+		if err := e.TeamSetEnforce(on); err != nil {
+			return err
+		}
+		fmt.Printf("%s signatures %s\n", render.Green("✓"), map[bool]string{true: "ENFORCED: only listed keys are applied", false: "advisory: unlisted keys are applied, forged signatures are still rejected"}[on])
+	case "", "list":
+		t, _ := replicate.LoadTeam(e.Root())
+		id, err := e.Identity()
+		if err != nil {
+			return err
+		}
+		mode := "advisory (forged signatures are rejected; unlisted keys are applied)"
+		if t.Enforce {
+			mode = "ENFORCED (only listed keys are applied)"
+		}
+		fmt.Printf("signatures: %s\n", mode)
+		for _, m := range t.Members {
+			me := ""
+			if m.Key == id.PubB64() {
+				me = render.Cyan("  ← this clone")
+			}
+			fmt.Printf("  %-16s %s%s\n", m.Name, replicate.Fingerprint(m.Key), me)
+		}
+		if len(t.Members) == 0 {
+			fmt.Println(render.Dim("  no members yet: wbi team join --name <you> --enforce"))
+		}
+		fmt.Printf("this clone's key: %s\n", replicate.Fingerprint(id.PubB64()))
+	default:
+		return model.Errf("usage: wbi team [key | join --name N [--enforce] | add <key> --name N | remove N | enforce [on|off] | list]")
+	}
+	return nil
 }

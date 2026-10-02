@@ -3,6 +3,7 @@ package engine
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -10,6 +11,7 @@ import (
 	"github.com/shriyashish-mishra/who-broke-it/internal/gitx"
 	"github.com/shriyashish-mishra/who-broke-it/internal/model"
 	"github.com/shriyashish-mishra/who-broke-it/internal/replicate"
+	"github.com/shriyashish-mishra/who-broke-it/internal/state"
 )
 
 // SyncConfig resolves the effective sync settings. ok=false means sync is off; why says so when it is
@@ -36,6 +38,8 @@ func (e *Engine) Sync() (replicate.Report, error) {
 	if !ok {
 		return replicate.Report{}, model.Errf("sync is off: %s", why)
 	}
+	cfg.Policy = replicate.LoadPolicy(e.Root())
+	cfg.StateDir = filepath.Dir(state.PathFor(e.Root()))
 	rep, err := replicate.Sync(e.DB, e.Root(), cfg)
 	if err == nil {
 		e.DB.SetKV("sync.last_ms", strconv.FormatInt(nowMs(), 10))
@@ -66,6 +70,9 @@ func (e *Engine) autoSync(warnRejected bool) replicate.Report {
 		for _, r := range rep.Rejected {
 			e.Warn("wbi: ⚠ " + r)
 		}
+	}
+	for _, q := range rep.Quarantined {
+		e.warnOnce("q:"+q, "wbi: ⚠ "+q)
 	}
 	return rep
 }

@@ -372,3 +372,62 @@ func (d *DB) Merge(remote []Event, lastSeen string) (applied int, rejected []str
 	}
 	return applied, rejected, tx.Commit()
 }
+
+// ---------------------------------------------------------------- snapshots (compaction)
+
+// Snapshot returns the current replicated state as events, suitable as the first commit of a compacted log.
+// Active intents only; the most recent keepEvents audit events and keepNotices notifications.
+func (d *DB) Snapshot(keepEvents, keepNotices int) ([]Event, error) {
+	type q struct {
+		tbl, sql string
+		cols     []string
+	}
+	qs := []q{
+		{"task_state", `SELECT task_id,status,owner,agent_id,branch,claimed_at,updated_at FROM task_state`, []string{"task_id", "status", "owner", "agent_id", "branch", "claimed_at", "updated_at"}},
+		{"agents", `SELECT id,provider,type,developer,repository,branch,status,current_task,capabilities,heartbeat FROM agents`, []string{"id", "provider", "type", "developer", "repository", "branch", "status", "current_task", "capabilities", "heartbeat"}},
+		{"intents", `SELECT uid,agent_id,task_id,kind,target,note,status,created_at FROM intents WHERE status='active'`, []string{"uid", "agent_id", "task_id", "kind", "target", "note", "status", "created_at"}},
+		{"handoffs", `SELECT task_id,json,ts FROM handoffs`, []string{"task_id", "json", "ts"}},
+		{"contract_state", `SELECT name,version,task_id,ts,note FROM contract_state`, []string{"name", "version", "task_id", "ts", "note"}},
+		{"task_ack", `SELECT task_id,contract,version FROM task_ack`, []string{"task_id", "contract", "version"}},
+		{"kv", `SELECT key,value FROM kv WHERE key='plan_approved'`, []string{"key", "value"}},
+		{"events", fmt.Sprintf(`SELECT uid,ts,type,task_id,agent_id,payload FROM (SELECT * FROM events ORDER BY id DESC LIMIT %d) ORDER BY id`, keepEvents), []string{"uid", "ts", "type", "task_id", "agent_id", "payload"}},
+		{"notifications", fmt.Sprintf(`SELECT uid,ts,task_id,agent_id,message,ref FROM (SELECT * FROM notifications ORDER BY id DESC LIMIT %d) ORDER BY id`, keepNotices), []string{"uid", "ts", "task_id", "agent_id", "message", "ref"}},
+	}
+	actor := d.Actor()
+	var out []Event
+	for _, t := range qs {
+		rows, err := d.Query(t.sql)
+		if err != nil {
+			return nil, err
+		}
+		for rows.Next() {
+			vals := make([]any, len(t.cols))
+			ptrs := make([]any, len(t.cols))
+			for i := range vals {
+				ptrs[i] = &vals[i]
+			}
+			if err := rows.Scan(ptrs...); err != nil {
+				rows.Close()
+				return nil, err
+			}
+			row := map[string]any{}
+			for i, c := range t.cols {
+				switch v := vals[i].(type) {
+				case []byte:
+					row[c] = string(v)
+				case int64:
+					row[c] = float64(v)
+				default:
+					row[c] = v
+				}
+			}
+			uid := fmt.Sprint(row["uid"])
+			if row["uid"] == nil {
+				uid = fmt.Sprintf("snap-%s-%d", t.tbl, len(out))
+			}
+			out = append(out, Event{UID: uid, Actor: actor, TS: 0, Tbl: t.tbl, Row: row})
+		}
+		rows.Close()
+	}
+	return out, nil
+}

@@ -28,7 +28,11 @@ const (
 	maxTries   = 6
 )
 
-type Config struct{ Remote, Ref string }
+type Config struct {
+	Remote, Ref string
+	Policy      Policy // who may publish events (from .wbi/team.json)
+	StateDir    string // where this clone's signing key lives
+}
 
 // BeforePush, when set, runs after the commit is built and right before it is pushed. Tests use it to let
 // another machine publish inside the fetch→push window, which is the only place compare-and-swap matters.
@@ -44,7 +48,9 @@ type Report struct {
 	Pushed   int      // local events published
 	Attempts int      // fetch/push rounds (>1 means we raced someone)
 	Rejected []string // local claims that lost a race
-	Tip      string
+	// Quarantined lists published batches that were NOT applied: forged signatures, or authors the team policy does not allow.
+	Quarantined []string
+	Tip         string
 }
 
 func trackingRef(ref string) string {
@@ -110,16 +116,25 @@ func newCommits(root, lastSeen, tip string) []string {
 	return cs
 }
 
-func readEvents(root string, commits []string) []state.Event {
-	var evs []state.Event
+func readEvents(root string, commits []string, pol Policy) (evs []state.Event, quarantined []string) {
 	for _, c := range commits {
 		names, _ := gitx.Try(root, "diff-tree", "--no-commit-id", "--name-only", "-r", "--root", c)
 		for _, f := range strings.Split(names, "\n") {
 			if !strings.HasPrefix(f, "log/") || !strings.HasSuffix(f, ".jsonl") {
 				continue
 			}
-			body, err := gitx.Git(root, "show", c+":"+f)
+			raw, err := gitx.Run(root, gitx.Opts{}, "show", c+":"+f)
 			if err != nil {
+				continue
+			}
+			body, key, verdict := openBatch(raw+"\n", pol)
+			if verdict != Accept {
+				who := "an unsigned author"
+				if key != "" {
+					who = "key " + Fingerprint(key)
+				}
+				why := map[Verdict]string{RejectForged: "its signature does not verify (tampered or forged)", RejectUnauthorized: "it is not in .wbi/team.json", RejectUnsigned: "it is unsigned and this team enforces signatures"}[verdict]
+				quarantined = append(quarantined, fmt.Sprintf("ignored a batch from %s in %s: %s", who, c[:7], why))
 				continue
 			}
 			sc := bufio.NewScanner(strings.NewReader(body))
@@ -132,12 +147,12 @@ func readEvents(root string, commits []string) []state.Event {
 			}
 		}
 	}
-	return evs
+	return evs, quarantined
 }
 
 // commitEvents writes the events as one new file on top of tip, using plumbing only: no checkout, no
 // index, and no effect on the user's branches or working tree.
-func commitEvents(root, actor, tip string, evs []state.Event) (string, error) {
+func commitEvents(root, actor, tip string, evs []state.Event, id Identity, msg string) (string, error) {
 	var b strings.Builder
 	for _, ev := range evs {
 		ev.Actor = actor
@@ -148,7 +163,7 @@ func commitEvents(root, actor, tip string, evs []state.Event) (string, error) {
 		b.Write(line)
 		b.WriteByte('\n')
 	}
-	blob, err := gitx.Run(root, gitx.Opts{Stdin: b.String()}, "hash-object", "-w", "--stdin")
+	blob, err := gitx.Run(root, gitx.Opts{Stdin: string(sealBatch(id, actor, []byte(b.String())))}, "hash-object", "-w", "--stdin")
 	if err != nil {
 		return "", err
 	}
@@ -171,7 +186,10 @@ func commitEvents(root, actor, tip string, evs []state.Event) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	args := []string{"commit-tree", tree, "-m", fmt.Sprintf("wbi sync: %s +%d events", actor, len(evs))}
+	if msg == "" {
+		msg = fmt.Sprintf("wbi sync: %s +%d events", actor, len(evs))
+	}
+	args := []string{"commit-tree", tree, "-m", msg}
 	if tip != "" {
 		args = append(args, "-p", tip)
 	}
@@ -204,19 +222,29 @@ func Sync(db *state.DB, root string, cfg Config) (Report, error) {
 		return rep, fmt.Errorf("git remote %q does not exist (configure it, or set WBI_SYNC_REMOTE)", cfg.Remote)
 	}
 	actor := db.Actor()
+	id, err := LoadIdentity(cfg.StateDir)
+	if err != nil {
+		return rep, fmt.Errorf("signing key: %w", err)
+	}
 	for rep.Attempts < maxTries {
 		rep.Attempts++
 		tip, err := fetch(root, cfg)
 		if err != nil {
 			return rep, err
 		}
-		commits := newCommits(root, db.KV("sync.last_seen"), tip)
-		remote := readEvents(root, commits)
+		lastSeen := db.KV("sync.last_seen")
+		if db.KV("sync.policy_hash") != cfg.Policy.Hash {
+			lastSeen = "" // the team file changed: re-verify the whole log against the new policy
+		}
+		commits := newCommits(root, lastSeen, tip)
+		remote, quarantined := readEvents(root, commits, cfg.Policy)
+		rep.Quarantined = append(rep.Quarantined, quarantined...)
 		// our own events come back to us only after a history rewrite; applying them is harmless (log order)
 		applied, rejected, err := db.Merge(remote, tip)
 		if err != nil {
 			return rep, err
 		}
+		db.SetKV("sync.policy_hash", cfg.Policy.Hash)
 		rep.Applied += applied
 		rep.Rejected = append(rep.Rejected, rejected...)
 		rep.Tip = tip
@@ -225,7 +253,7 @@ func Sync(db *state.DB, root string, cfg Config) (Report, error) {
 		if len(pending) == 0 {
 			return rep, nil
 		}
-		commit, err := commitEvents(root, actor, tip, pending)
+		commit, err := commitEvents(root, actor, tip, pending, id, "")
 		if err != nil {
 			return rep, err
 		}
@@ -248,4 +276,59 @@ func Sync(db *state.DB, root string, cfg Config) (Report, error) {
 		return rep, nil
 	}
 	return rep, fmt.Errorf("sync gave up after %d attempts: the remote kept changing", maxTries)
+}
+
+// Compact replaces the log's history with a single snapshot commit of the current state, so the log (and every
+// new clone) stops growing without bound. It first syncs, then publishes with --force-with-lease pinned to the
+// tip it read: if anyone published in the meantime the lease fails and nothing is lost. Other machines notice the
+// rewritten history, replay the snapshot, and re-apply their own unpublished changes on top.
+func Compact(db *state.DB, root string, cfg Config, keepEvents int) (Report, error) {
+	if cfg.Ref == "" {
+		cfg.Ref = DefaultRef
+	}
+	var rep Report
+	for rep.Attempts < maxTries {
+		rep.Attempts++
+		r, err := Sync(db, root, cfg)
+		if err != nil {
+			return rep, err
+		}
+		rep.Applied += r.Applied
+		rep.Quarantined = append(rep.Quarantined, r.Quarantined...)
+		tip := r.Tip
+		if tip == "" {
+			return rep, fmt.Errorf("nothing to compact: the log is empty")
+		}
+		id, err := LoadIdentity(cfg.StateDir)
+		if err != nil {
+			return rep, err
+		}
+		evs, err := db.Snapshot(keepEvents, 300)
+		if err != nil {
+			return rep, err
+		}
+		commit, err := commitEvents(root, db.Actor(), "", evs, id, fmt.Sprintf("wbi sync: compacted snapshot (%d rows)", len(evs)))
+		if err != nil {
+			return rep, err
+		}
+		if BeforePush != nil {
+			BeforePush()
+		}
+		_, err = gitx.Run(root, gitx.Opts{Timeout: netTimeout}, "push", "--quiet", "--force-with-lease="+cfg.Ref+":"+tip, cfg.Remote, commit+":"+cfg.Ref)
+		if err != nil {
+			var ge *gitx.Error
+			if errors.As(err, &ge) {
+				low := strings.ToLower(ge.Stderr)
+				if strings.Contains(low, "stale info") || strings.Contains(low, "rejected") || strings.Contains(low, "fetch first") {
+					continue // someone published after we read the tip: start over with their changes
+				}
+			}
+			return rep, netErr(err)
+		}
+		_, _ = gitx.Try(root, "update-ref", trackingRef(cfg.Ref), commit)
+		db.SetKV("sync.last_seen", commit)
+		rep.Pushed, rep.Tip = len(evs), commit
+		return rep, nil
+	}
+	return rep, fmt.Errorf("compaction gave up after %d attempts: the remote kept changing", maxTries)
 }
