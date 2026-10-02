@@ -95,7 +95,7 @@ The core (`Engine`, pure analyzers) knows nothing about MCP or any vendor. MCP a
 
 ## Worktrees and identity
 
-`wbi start --worktree` creates `../<repo>-TASK-n` on branch `wbi/TASK-n` from the base branch. The graph is found from any worktree (walk up for `.wbi/`, falling back to the main worktree). Agent identity is `provider@developer[#session]`, from flags or `WBI_AGENT` / `WBI_DEVELOPER` / `WBI_SESSION`; every call heartbeats the agent. Handoff records and contract bumps are written into the task's own checkout and committed on the task branch, so they ride with the PR.
+`wbi start --worktree` creates `.wbi/worktrees/TASK-n` inside the repo (git-ignored, so sandboxed agents that may only touch the repo directory can reach it) on branch `wbi/TASK-n` from the base branch. The graph is found from any worktree (walk up for `.wbi/`, falling back to the main worktree). Agent identity is `provider@developer[#session]`, from flags or `WBI_AGENT` / `WBI_DEVELOPER` / `WBI_SESSION`; every call heartbeats the agent. Handoff records and contract bumps are written into the task's own checkout and committed on the task branch, so they ride with the PR.
 
 ## Security notes
 

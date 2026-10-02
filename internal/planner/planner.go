@@ -315,7 +315,7 @@ func HeuristicPlan(goal string, facts RepoFacts) model.Plan {
 	arch := mk(model.Task{
 		Title: "Architecture & contracts", Goal: "Review the generated plan, finalize contracts and the constitution so parallel work can start.", Layer: "architecture", Component: "platform",
 		Requirements: allReqs, AllowedPaths: []string{".wbi/**", "docs/**"}, Effort: 1, Decisions: adrIDs,
-		Acceptance: []model.Criterion{{Text: "Every contract in .wbi/contracts reviewed by its provider and consumers"}, {Text: "Constitution rules agreed by the team"}},
+		Acceptance: []model.Criterion{{Text: "Every contract in .wbi/contracts reviewed by its provider and consumers", Human: true}, {Text: "Constitution rules agreed by the team", Human: true}},
 		Risks:      []string{"Skipping this review is how parallel agents diverge"},
 	})
 	components = append(components, model.Component{ID: "database", Name: "Database", Description: "Schema and migrations.", Paths: []string{R.DB + "/**", R.Migrations + "/**"}, DependsOn: []string{"platform"}})

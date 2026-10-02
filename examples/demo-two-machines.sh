@@ -37,9 +37,11 @@ bob sync status
 
 step "3. Alice finishes TASK-001. Bob has not been told anything."
 alice start TASK-001 --worktree >/dev/null
-mkdir -p "$ALICE-TASK-001/docs" && echo "contracts reviewed" > "$ALICE-TASK-001/docs/architecture-notes.md"
-( cd "$ALICE-TASK-001" && git add -A && git -c user.name=Alice -c user.email=a@x commit -qm "docs: architecture notes" )
-( cd "$ALICE-TASK-001" && WBI_AGENT=claude WBI_DEVELOPER=Alice "$WBI_BIN" handoff TASK-001 --summary "Contracts reviewed" --attest 1,2 | tail -3 )
+mkdir -p "$ALICE/.wbi/worktrees/TASK-001/docs" && echo "contracts reviewed" > "$ALICE/.wbi/worktrees/TASK-001/docs/architecture-notes.md"
+( cd "$ALICE/.wbi/worktrees/TASK-001" && git add -A && git -c user.name=Alice -c user.email=a@x commit -qm "docs: architecture notes" )
+( cd "$ALICE/.wbi/worktrees/TASK-001" && WBI_AGENT=claude WBI_DEVELOPER=Alice "$WBI_BIN" handoff TASK-001 --summary "Contracts reviewed" --attest 1,2 | tail -3 )
+say "architecture criteria are human sign-offs, so Alice (the person) approves:"
+alice approve TASK-001 --as Alice
 
 step "4. Bob opens mission control. His clone pulls the team's state first."
 bob status
@@ -60,9 +62,9 @@ bob intent
 step "7. Contract-first: Bob builds Billing UI early; Alice changes BillingStatus"
 bob claim TASK-008 --force
 alice start TASK-007 --worktree --force >/dev/null
-mkdir -p "$ALICE-TASK-007/src/api/billing" && echo "export type S = 'paused'" > "$ALICE-TASK-007/src/api/billing/status.ts"
-( cd "$ALICE-TASK-007" && git add -A && git -c user.name=Alice -c user.email=a@x commit -qm "feat(billing): paused" )
-( cd "$ALICE-TASK-007" && WBI_AGENT=claude WBI_DEVELOPER=Alice "$WBI_BIN" handoff TASK-007 --summary "Billing API v2" --tests "echo 24 passed" --contract "BillingStatus=now supports paused" --attest 1,2,3 | grep -E "Contract|BillingStatus|Status:" )
+mkdir -p "$ALICE/.wbi/worktrees/TASK-007/src/api/billing" && echo "export type S = 'paused'" > "$ALICE/.wbi/worktrees/TASK-007/src/api/billing/status.ts"
+( cd "$ALICE/.wbi/worktrees/TASK-007" && git add -A && git -c user.name=Alice -c user.email=a@x commit -qm "feat(billing): paused" )
+( cd "$ALICE/.wbi/worktrees/TASK-007" && WBI_AGENT=claude WBI_DEVELOPER=Alice "$WBI_BIN" handoff TASK-007 --summary "Billing API v2" --tests "echo 24 passed" --contract "BillingStatus=now supports paused" --attest 1,2,3 | grep -E "Contract|BillingStatus|Status:" )
 
 step "8. Bob, on another machine, is told. His next command surfaces it."
 bob inbox

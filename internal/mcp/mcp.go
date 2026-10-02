@@ -129,6 +129,34 @@ var Tools = []Tool{
 			}
 			return M{"intent": r.Intent, "conflicts": conflicts, "blocked": r.Blocked}, nil
 		}},
+	{"wbi_release_intents", "Withdraw your active intents for a task (e.g. you declared one by mistake or changed plan).", obj(M{"task_id": str}, "task_id"),
+		func(e *engine.Engine, a Args) (any, error) {
+			if _, err := e.Task(a.str("task_id")); err != nil {
+				return nil, err
+			}
+			e.ReleaseIntents(strings.ToUpper(a.str("task_id")))
+			return M{"released": strings.ToUpper(a.str("task_id"))}, nil
+		}},
+	{"wbi_release_task", "Give a task back (unclaim it) so someone else can take it.", obj(M{"task_id": str}, "task_id"),
+		func(e *engine.Engine, a Args) (any, error) {
+			if err := e.Release(a.str("task_id")); err != nil {
+				return nil, err
+			}
+			return M{"released": strings.ToUpper(a.str("task_id"))}, nil
+		}},
+	{"wbi_start_task", "Claim a task if needed and prepare its isolated git worktree (default true). Returns the branch, workdir and work packet. Do your edits and commits inside workdir.",
+		obj(with(who, M{"task_id": str, "worktree": M{"type": "boolean"}, "force": M{"type": "boolean"}}), "task_id"),
+		func(e *engine.Engine, a Args) (any, error) {
+			wt := true
+			if v, ok := a["worktree"].(bool); ok {
+				wt = v
+			}
+			r, err := e.Start(a.str("task_id"), a.agent(), wt, a.boolean("force"))
+			if err != nil {
+				return nil, err
+			}
+			return M{"task": r.Task.ID, "agent": r.Agent.ID, "branch": r.Branch, "workdir": r.Workdir, "packet_file": r.ContextFile, "packet": r.Context}, nil
+		}},
 	{"wbi_list_intents", "List active intents of all agents.", obj(M{}),
 		func(e *engine.Engine, a Args) (any, error) {
 			if i := e.Intents(false); i != nil {
@@ -187,7 +215,7 @@ var Tools = []Tool{
 }
 
 // mutating tools publish their effect to teammates; the rest just refresh from them first.
-var mutating = map[string]bool{"wbi_register_agent": true, "wbi_claim_task": true, "wbi_declare_intent": true, "wbi_submit_handoff": true, "wbi_verify": true, "wbi_ack_changes": true}
+var mutating = map[string]bool{"wbi_release_intents": true, "wbi_release_task": true, "wbi_start_task": true, "wbi_register_agent": true, "wbi_claim_task": true, "wbi_declare_intent": true, "wbi_submit_handoff": true, "wbi_verify": true, "wbi_ack_changes": true}
 
 // CallTool runs a tool and returns its text output; errors become isError results, never protocol errors.
 // When cross-machine sync is enabled the call is wrapped: pull first, publish after writes.

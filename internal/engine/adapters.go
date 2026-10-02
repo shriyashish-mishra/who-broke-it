@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"sort"
@@ -97,6 +98,11 @@ func InstallGuidance(root, name string) (string, error) {
 func MCPConfig(agent, wbiPath string) string {
 	if wbiPath == "" {
 		wbiPath = "wbi"
+		if _, err := exec.LookPath("wbi"); err != nil { // not installed on PATH: point at this binary
+			if exe, err := os.Executable(); err == nil {
+				wbiPath = exe
+			}
+		}
 	}
 	switch agent {
 	case "codex":

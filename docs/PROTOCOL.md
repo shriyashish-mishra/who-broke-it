@@ -80,9 +80,13 @@ WBI-Agent: claude@maya
 
 These make `wbi blame` / `wbi why` exact. Without them, attribution falls back to `Co-Authored-By`, `TASK-nnn` in the message, and `(#PR)`.
 
+## Human-only criteria
+
+A task criterion may carry `"human": true`. An agent cannot attest it (attesting is ignored). The verifier reports `awaiting human sign-off`, the task moves to `REVIEW` (`READY_FOR_REVIEW`), and `wbi approve` is the sign-off. Agents should still hand off normally when their part is done.
+
 ## Environment
 
-`WBI_AGENT` (provider), `WBI_DEVELOPER`, `WBI_SESSION` (to run two sessions of one provider as one developer), `NO_COLOR`, `WBI_NO_GH=1` (skip PR lookups via `gh`).
+`WBI_AGENT` (provider; Claude Code is auto-detected from `CLAUDECODE=1` when unset), `WBI_DEVELOPER`, `WBI_SESSION` (to run two sessions of one provider as one developer), `NO_COLOR`, `WBI_NO_GH=1` (skip PR lookups via `gh`).
 
 ## Replication (cross-machine)
 

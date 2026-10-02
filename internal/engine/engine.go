@@ -176,7 +176,7 @@ func (e *Engine) Agents() []model.Agent {
 
 // ResolveAgent identifies (and registers / heartbeats) the calling agent from flags or WBI_* env vars.
 func (e *Engine) ResolveAgent(o AgentOpts) (model.Agent, error) {
-	provider := strings.ToLower(firstNonEmpty(o.Agent, os.Getenv("WBI_AGENT")))
+	provider := strings.ToLower(firstNonEmpty(o.Agent, os.Getenv("WBI_AGENT"), detectProvider()))
 	if provider == "" {
 		return model.Agent{}, model.Errf("Which agent are you? Pass --agent <claude|codex|gemini|cursor|aider|human|...> or set WBI_AGENT.")
 	}
@@ -208,6 +208,15 @@ func (e *Engine) ResolveAgent(o AgentOpts) (model.Agent, error) {
 		}
 	}
 	return model.Agent{}, model.Errf("failed to register agent %s", id)
+}
+
+// detectProvider recognizes agents that announce themselves in the environment, so they do not have to be
+// configured. Only Claude Code is detected today (CLAUDECODE=1); others are set with WBI_AGENT / --agent.
+func detectProvider() string {
+	if os.Getenv("CLAUDECODE") == "1" {
+		return "claude"
+	}
+	return ""
 }
 
 func firstNonEmpty(ss ...string) string {
@@ -281,7 +290,7 @@ func (e *Engine) Claim(taskID string, o AgentOpts, force bool) (*ClaimResult, er
 		return nil, model.Errf("%s is already DONE.", t.ID)
 	}
 	if st.AgentID != "" && st.AgentID != agent.ID && st.Status != model.Todo {
-		return nil, model.Errf("%s is already claimed by %s.", t.ID, st.AgentID)
+		return nil, model.Errf("%s is already claimed by %s (you are %s; pass --agent/--as or set WBI_AGENT/WBI_DEVELOPER to act as someone else).", t.ID, st.AgentID, agent.ID)
 	}
 	if e.Display(t, e.States()) == model.Blocked && !force {
 		return nil, model.Errf("%s\n\n(use --force to start against unfinished dependencies)", e.ExplainBlocked(t.ID))
@@ -346,7 +355,8 @@ func (e *Engine) Start(taskID string, o AgentOpts, worktree, force bool) (*Start
 	branch := e.State(t.ID).Branch
 	workdir := e.Root()
 	if worktree {
-		path := filepath.Join(filepath.Dir(e.Root()), filepath.Base(e.Root())+"-"+t.ID)
+		path := filepath.Join(e.Root(), ".wbi", "worktrees", t.ID)
+		EnsureIgnored(e.Root(), ".wbi/worktrees/")
 		if _, err := os.Stat(path); err != nil {
 			var gerr error
 			if gitx.RefExists(e.Root(), branch) {
@@ -751,6 +761,20 @@ func (e *Engine) Context(taskID string) (string, error) {
 		p("**Requirements:** %s", strings.Join(rr, "; "))
 		p("")
 	}
+	if t.Layer == "architecture" {
+		p("## All project contracts (reviewing these is this task)")
+		if len(contracts) == 0 {
+			p("- none yet")
+		}
+		for _, c := range contracts {
+			pub := ""
+			if c.Public {
+				pub = ", public"
+			}
+			p("- **%s** v%d (%s%s), owned by %s: `%s`", c.Name, e.EffectiveVersion(c), c.Kind, pub, c.ProvidedBy, c.Shape)
+		}
+		p("")
+	}
 	p("## Depends on")
 	if len(t.DependsOn) == 0 {
 		p("- nothing")
@@ -809,6 +833,9 @@ func (e *Engine) Context(taskID string) (string, error) {
 		how := "_(attest in handoff)_"
 		if a.Check != nil {
 			how = "_(auto-checked)_"
+		}
+		if a.Human {
+			how = "_(human sign-off: do not attest; your handoff goes to REVIEW)_"
 		}
 		p("%d. %s %s", i+1, a.Text, how)
 	}

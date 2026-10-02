@@ -254,7 +254,11 @@ func Verification(v engine.Verification) string {
 	case "DONE":
 		st = Green("DONE (verified)")
 	case "READY_FOR_REVIEW":
-		st = Magenta("READY FOR REVIEW") + Dim("  high-impact: wbi approve "+v.TaskID)
+		why := "high-impact"
+		if len(v.PendingHuman) > 0 {
+			why = "needs a person to sign off criteria " + strings.Trim(strings.Join(strings.Fields(fmt.Sprint(v.PendingHuman)), ","), "[]")
+		}
+		st = Magenta("READY FOR REVIEW") + Dim("  "+why+": wbi approve "+v.TaskID)
 	default:
 		st = Red("FAILED") + Dim("  sent back to IN_PROGRESS")
 	}

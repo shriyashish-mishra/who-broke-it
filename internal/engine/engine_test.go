@@ -112,10 +112,14 @@ func TestJudgeSendsScopeViolationsBack(t *testing.T) {
 
 func TestUnattestedCriterionCannotBeDone(t *testing.T) {
 	_, e := testutil.PlannedRepo(t)
-	r, _ := e.Start("TASK-001", claude, true, false)
-	testutil.Put(t, r.Workdir, "docs/a.md", "x")
-	testutil.CommitAll(t, r.Workdir, "docs")
-	res, err := e.SubmitHandoff("TASK-001", engine.HandoffOpts{AgentOpts: claude, Summary: "s", Attest: []int{1}})
+	// TASK-002's criteria are agent-attestable. Attesting only one of two must fail verification.
+	r, err := e.Start("TASK-002", codex, true, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	testutil.Put(t, r.Workdir, "migrations/001.sql", "create table t();")
+	testutil.CommitAll(t, r.Workdir, "sql")
+	res, err := e.SubmitHandoff("TASK-002", engine.HandoffOpts{AgentOpts: codex, Summary: "s", TestsPassed: ptr(true), Attest: []int{1}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -126,6 +130,30 @@ func TestUnattestedCriterionCannotBeDone(t *testing.T) {
 		if c.Name == "Acceptance criteria" && (!strings.Contains(c.Detail, "1/2") || !strings.Contains(c.Detail, "not attested")) {
 			t.Fatalf("detail %q", c.Detail)
 		}
+	}
+}
+
+func TestHumanOnlyCriteriaCannotBeAttestedByAnAgent(t *testing.T) {
+	_, e := testutil.PlannedRepo(t)
+	r, _ := e.Start("TASK-001", claude, true, false)
+	testutil.Put(t, r.Workdir, "docs/a.md", "x")
+	testutil.CommitAll(t, r.Workdir, "docs")
+	// Even if the agent claims to attest everything, human criteria are not its to sign.
+	res, err := e.SubmitHandoff("TASK-001", engine.HandoffOpts{AgentOpts: claude, Summary: "s", Attest: []int{1, 2}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	v := res.Verification
+	if v.Verdict != "READY_FOR_REVIEW" || len(v.PendingHuman) != 2 || e.State("TASK-001").Status != model.Review {
+		t.Fatalf("want READY_FOR_REVIEW awaiting 2 human sign-offs, got %s %+v / %s", v.Verdict, v.PendingHuman, e.State("TASK-001").Status)
+	}
+	for _, c := range v.Checks {
+		if c.Name == "Acceptance criteria" && !strings.Contains(c.Detail, "awaiting human sign-off") {
+			t.Fatalf("detail %q", c.Detail)
+		}
+	}
+	if err := e.Approve("TASK-001", "maya"); err != nil || e.State("TASK-001").Status != model.Done {
+		t.Fatalf("a human approval must finish it: %v", err)
 	}
 }
 

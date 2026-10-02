@@ -43,6 +43,9 @@ type Check struct {
 type Criterion struct {
 	Text  string `json:"text"`
 	Check *Check `json:"check,omitempty"`
+	// Human marks criteria only a person can sign off ("the team agreed…"). An agent cannot attest them;
+	// the task goes to REVIEW and `wbi approve` is the sign-off.
+	Human bool `json:"human,omitempty"`
 }
 
 // UnmarshalJSON accepts either a bare string or an object, so hand/agent-written plans can be terse.

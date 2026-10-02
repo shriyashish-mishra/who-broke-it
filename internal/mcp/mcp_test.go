@@ -36,8 +36,8 @@ func TestProtocolRoundTrip(t *testing.T) {
 
 	var list rpc
 	_ = json.Unmarshal(mustJSON(t, mcp.Handle(e, []byte(`{"jsonrpc":"2.0","id":1,"method":"tools/list"}`))), &list)
-	if len(list.Result.Tools) != 15 {
-		t.Fatalf("want 15 tools, got %d", len(list.Result.Tools))
+	if len(list.Result.Tools) != 18 {
+		t.Fatalf("want 18 tools, got %d", len(list.Result.Tools))
 	}
 	for _, tl := range list.Result.Tools {
 		if tl.InputSchema["type"] != "object" {

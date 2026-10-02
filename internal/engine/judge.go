@@ -40,6 +40,7 @@ type Verification struct {
 	TaskID        string
 	Checks        []CheckResult
 	Met, Total    int
+	PendingHuman  []int // 1-based criteria only a person can sign off
 	NeedsApproval bool
 	Verdict       string // DONE | READY_FOR_REVIEW | FAILED
 }
@@ -364,7 +365,12 @@ func (e *Engine) VerifyTask(taskID string) (*Verification, error) {
 
 	met := 0
 	var unmetCrit []string
+	var pendingHuman []int
 	for i, c := range t.Acceptance {
+		if c.Human {
+			pendingHuman = append(pendingHuman, i+1) // an agent cannot attest these; a person signs off via `wbi approve`
+			continue
+		}
 		ok := false
 		switch {
 		case c.Check == nil:
@@ -387,17 +393,28 @@ func (e *Engine) VerifyTask(taskID string) (*Verification, error) {
 			unmetCrit = append(unmetCrit, fmt.Sprint(i+1))
 		}
 	}
-	detail := fmt.Sprintf("%d/%d", met, len(t.Acceptance))
+	auto := len(t.Acceptance) - len(pendingHuman)
+	detail := fmt.Sprintf("%d/%d", met, auto)
 	if len(unmetCrit) > 0 {
 		detail += "; unmet: " + strings.Join(unmetCrit, ", ")
 	}
 	status := "pass"
-	if met != len(t.Acceptance) {
+	switch {
+	case met != auto:
 		status = "fail"
+	case len(pendingHuman) > 0:
+		status = "warn"
+	}
+	if len(pendingHuman) > 0 {
+		var nums []string
+		for _, n := range pendingHuman {
+			nums = append(nums, fmt.Sprint(n))
+		}
+		detail += "; awaiting human sign-off: " + strings.Join(nums, ", ")
 	}
 	add("Acceptance criteria", status, detail)
 
-	needsApproval := len(t.Impact) > 0
+	needsApproval := len(t.Impact) > 0 || len(pendingHuman) > 0
 	failed := false
 	var failures []string
 	for _, c := range checks {
@@ -423,7 +440,7 @@ func (e *Engine) VerifyTask(taskID string) (*Verification, error) {
 		e.NotifyUnblocked(t.ID)
 	}
 	e.Event("verify", t.ID, st.AgentID, map[string]string{"verdict": verdict})
-	return &Verification{TaskID: t.ID, Checks: checks, Met: met, Total: len(t.Acceptance), NeedsApproval: needsApproval, Verdict: verdict}, nil
+	return &Verification{TaskID: t.ID, Checks: checks, Met: met, Total: auto, PendingHuman: pendingHuman, NeedsApproval: needsApproval, Verdict: verdict}, nil
 }
 
 func first(s []string, n int) []string {

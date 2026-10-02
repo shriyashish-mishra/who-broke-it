@@ -122,7 +122,7 @@ examples/demo-two-machines.sh       # two clones + a bare remote: handoff, race,
 | Drift | `wbi drift` | Product (requirement × layer matrix), architecture (constitution forbid-rules, incl. unmerged branches), context (stale contract versions) |
 | Simulation | `wbi simulate` | Waves, critical path, parallelizable tasks, overlapping scopes, missing deps, approval gate |
 | Cross-machine sync | `wbi sync` (automatic once enabled) | Git-native: an append-only event log on `refs/wbi/sync`; atomic claims via push compare-and-swap |
-| MCP | `wbi mcp` | 15 `wbi_*` tools over stdio; same engine as the CLI |
+| MCP | `wbi mcp` | 18 `wbi_*` tools over stdio; same engine as the CLI |
 
 ## Architecture
 
@@ -160,6 +160,8 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/PROTOCOL.md](docs/PROTOC
 Parallel agents, worktrees, task assignment, MCP, cloud agents, PR automation and file-claim servers all exist already (GitHub Agent HQ, Cursor, Codex, Devin, agent-claim-mcp, ai-team-sync, ai-crew-sync, COORD-Harness…). Who Broke It? does **not** compete on those. The gap it targets is the *shared engineering understanding* above them: intent + dependency graph + contract propagation + blast radius + verification + product-to-code traceability, vendor-neutral and living in your repo. Details and sources: [docs/COMPETITIVE.md](docs/COMPETITIVE.md).
 
 ## What works today, and what does not (read this)
+
+**Real agents:** validated end to end with Claude Code over both MCP and the CLI protocol ([docs/REAL-AGENTS.md](docs/REAL-AGENTS.md): what it found and what changed). **Codex, Gemini CLI, Cursor, OpenCode and Aider are untested.** Their adapters follow each tool's documented conventions but have not been run.
 
 Works and is tested (`go test ./...`, 38 tests: unit, end-to-end on real git repos, and two-clone sync scenarios including a deterministic fetch→push race; plus both demos): everything in the table above.
 

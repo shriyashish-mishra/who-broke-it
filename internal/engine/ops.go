@@ -56,19 +56,8 @@ func Init(cwd string, o InitOpts) (*InitResult, error) {
 	for _, d := range []string{"requirements", "tasks", "contracts", "decisions", "handoffs"} {
 		_ = os.MkdirAll(filepath.Join(s.Dir(), d), 0o755)
 	}
-	gi := filepath.Join(root, ".gitignore")
-	cur, _ := os.ReadFile(gi)
-	if !strings.Contains(string(cur), ".wbi/state/") {
-		add := ".wbi/state/\n"
-		if len(cur) > 0 && !strings.HasSuffix(string(cur), "\n") {
-			add = "\n" + add
-		}
-		f, err := os.OpenFile(gi, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
-		if err == nil {
-			_, _ = f.WriteString(add)
-			f.Close()
-		}
-	}
+	EnsureIgnored(root, ".wbi/state/")
+	EnsureIgnored(root, ".wbi/worktrees/")
 	hook := "skipped"
 	if !o.NoHook {
 		hook = InstallHook(root)
@@ -185,4 +174,23 @@ func PlanProject(cwd, goal string, o PlanOpts) (*PlanResult, error) {
 		e.Close()
 	}
 	return &PlanResult{Plan: &plan, Source: source}, nil
+}
+
+// EnsureIgnored appends pattern to the repo's .gitignore if it is not already there.
+func EnsureIgnored(root, pattern string) {
+	gi := filepath.Join(root, ".gitignore")
+	cur, _ := os.ReadFile(gi)
+	for _, l := range strings.Split(string(cur), "\n") {
+		if strings.TrimSpace(l) == pattern {
+			return
+		}
+	}
+	add := pattern + "\n"
+	if len(cur) > 0 && !strings.HasSuffix(string(cur), "\n") {
+		add = "\n" + add
+	}
+	if f, err := os.OpenFile(gi, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644); err == nil {
+		_, _ = f.WriteString(add)
+		f.Close()
+	}
 }

@@ -21,7 +21,7 @@ Set identity per terminal: `export WBI_AGENT=codex WBI_DEVELOPER="Dev B"`.
 
 ## Level 1: MCP (tool-native)
 
-`wbi mcp` is a stdio MCP server exposing 15 `wbi_*` tools. Print config for your agent:
+`wbi mcp` is a stdio MCP server exposing 18 `wbi_*` tools. Print config for your agent:
 
 ```bash
 wbi adapters mcp claude    # claude mcp add wbi --env WBI_AGENT=claude -- wbi mcp   (+ .mcp.json)
@@ -30,11 +30,11 @@ wbi adapters mcp gemini    # JSON mcpServers block
 wbi adapters mcp cursor
 ```
 
-Run it from (or point `cwd` at) a directory inside the repo. Tools: `wbi_register_agent`, `wbi_list_tasks`, `wbi_claim_task`, `wbi_get_context`, `wbi_declare_intent`, `wbi_list_intents`, `wbi_blast_radius`, `wbi_submit_handoff`, `wbi_verify`, `wbi_inbox`, `wbi_ack_changes`, `wbi_status`, `wbi_simulate`, `wbi_drift`, `wbi_blame`. Schemas are served by `tools/list`.
+Run it from (or point `cwd` at) a directory inside the repo. Tools: `wbi_register_agent`, `wbi_list_tasks`, `wbi_claim_task`, `wbi_start_task`, `wbi_release_task`, `wbi_release_intents`, `wbi_get_context`, `wbi_declare_intent`, `wbi_list_intents`, `wbi_blast_radius`, `wbi_submit_handoff`, `wbi_verify`, `wbi_inbox`, `wbi_ack_changes`, `wbi_status`, `wbi_simulate`, `wbi_drift`, `wbi_blame`. Schemas are served by `tools/list`.
 
 Minimal agent loop over MCP:
 
-1. `wbi_list_tasks {status: "ready"}` → pick one → `wbi_claim_task {task_id}`
+1. `wbi_list_tasks {status: "ready"}` → pick one → `wbi_start_task {task_id}` (claims it and creates an isolated worktree under `.wbi/worktrees/`; edit and commit there)
 2. `wbi_get_context {task_id}` → follow the packet
 3. `wbi_declare_intent {task_id, kind, target}` before touching files; stop if `blocked`
 4. work, commit on the task branch
