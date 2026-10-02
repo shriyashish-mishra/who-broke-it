@@ -29,7 +29,7 @@ func TestDashboardIsSelfContainedValidAndSafe(t *testing.T) {
 		t.Fatal("the data block must escape </script>")
 	}
 	// the inlined JSON must be valid and complete
-	m := regexp.MustCompile(`(?s)const D = (\{.*?\});\nconst \$`).FindStringSubmatch(page)
+	m := regexp.MustCompile(`(?s)const D = (\{.*?\});\r?\nconst \$`).FindStringSubmatch(page)
 	if m == nil {
 		t.Fatal("data block not found")
 	}

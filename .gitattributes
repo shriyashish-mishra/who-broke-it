@@ -1,0 +1,10 @@
+# Keep LF everywhere: shell scripts and embedded templates break (or silently differ) with CRLF checkouts on Windows.
+* text=auto
+*.go text eol=lf
+*.sh text eol=lf
+*.html text eol=lf
+*.yml text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+install.sh text eol=lf
+*.png binary
