@@ -2,6 +2,7 @@
 package main
 
 import (
+	"runtime/debug"
 	"crypto/sha1"
 	"encoding/json"
 	"errors"
@@ -20,8 +21,18 @@ import (
 	"github.com/shriyashish-mishra/who-broke-it/internal/store"
 )
 
-// version is set at release time: -ldflags "-X main.version=v0.1.0".
+// version is set at release time: -ldflags "-X main.version=v0.1.0". Binaries built with `go install` carry
+// the module version instead, which Go embeds in the build info.
 var version = "dev"
+
+func init() {
+	if version != "dev" {
+		return
+	}
+	if bi, ok := debug.ReadBuildInfo(); ok && bi.Main.Version != "" && bi.Main.Version != "(devel)" {
+		version = bi.Main.Version
+	}
+}
 
 var boolFlags = map[string]bool{"force": true, "json": true, "worktree": true, "mermaid": true, "dot": true, "approve": true, "prompt": true, "no-hook": true, "mark-read": true, "help": true, "version": true, "all": true}
 var multiFlags = map[string]bool{"contract": true, "limitation": true}
@@ -105,7 +116,7 @@ func help() string {
 %s
   wbi adapters install <claude|codex|gemini|cursor|opencode|all>   write agent instruction files
   wbi adapters mcp <agent>              print MCP config      wbi mcp   run the MCP server
-`, render.Header(), d("v"+version), d("The agents write the code. Who Broke It? coordinates the engineering."),
+`, render.Header(), d(version), d("The agents write the code. Who Broke It? coordinates the engineering."),
 		b("Setup"), b("Mission control"), b("Doing work"), d("(identify with --agent <tool> --as <human>, or $WBI_AGENT / $WBI_DEVELOPER)"), b(`Answering "who broke it?"`), b("Integrations"))
 }
 

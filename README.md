@@ -30,12 +30,23 @@ Last significant changes:
 4. **Handoffs are structured, and "done" is verified.** `wbi handoff` records what changed, tests and contract changes, notifies affected tasks, then the Judge checks scope, contracts, constitution, tests and acceptance criteria. Agents don't get to say DONE.
 5. **Everything is traceable.** `wbi blame`, `wbi why`, `wbi blast`, `wbi drift` answer: what changed, who/which agent, under which task and requirement, what it affects.
 
+## Install
+
+```bash
+# macOS / Linux: verified download of the latest release
+curl -fsSL https://raw.githubusercontent.com/shriyashish-mishra/who-broke-it/main/install.sh | sh
+
+brew install shriyashish-mishra/tap/wbi                                        # Homebrew
+go install github.com/shriyashish-mishra/who-broke-it/cmd/wbi@latest           # Go 1.26+
+# Windows: download wbi_<version>_windows_amd64.zip from the Releases page
+# From source: git clone https://github.com/shriyashish-mishra/who-broke-it && cd who-broke-it && make install
+```
+
+Every release ships six archives (Linux, macOS, Windows × amd64/arm64) with a `checksums.txt`; the installer refuses to install on a checksum mismatch.
+
 ## Quickstart
 
 ```bash
-git clone https://github.com/shriyashish-mishra/who-broke-it.git && cd who-broke-it && make install      # builds a single static binary and copies it to your PATH
-# or: go install ./cmd/wbi
-
 cd your-repo                 # any git repo with at least one commit
 wbi init
 wbi plan "Build a multi-tenant SaaS dashboard with authentication, billing, analytics and an AI assistant"
