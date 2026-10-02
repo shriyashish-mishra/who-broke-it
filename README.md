@@ -169,7 +169,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with: { fetch-depth: 0 }  # wbi diffs against the base branch
-      - uses: shriyashish-mishra/who-broke-it@v0.1.1
+      - uses: shriyashish-mishra/who-broke-it@v0.2.0
         with:
           require-handoff: true
           require-approval: true  # high-impact tasks need an approving review
@@ -177,7 +177,7 @@ jobs:
 
 **See it live:** [wbi-action-demo](https://github.com/shriyashish-mishra/wbi-action-demo) has real open PRs: one clean (passes), one that edits restricted billing code and bypasses `BillingService` (fails), one that bumps a contract it doesn't own (fails), and one high-impact migration waiting for human approval (fails until approved). Each shows inline annotations and a job summary.
 
-The PR's task comes from the branch name (`wbi/TASK-7`), a `WBI-Task:` commit trailer, or `--task`. Findings appear as inline annotations. Locally: `wbi check --base main`.
+Pinning the Action (`@v0.2.0`) pins the `wbi` version it runs. The PR's task comes from the branch name (`wbi/TASK-7`), a `WBI-Task:` commit trailer, or `--task`. Findings appear as inline annotations. Locally: `wbi check --base main`.
 
 ## Notifications (Slack, Discord, any webhook)
 

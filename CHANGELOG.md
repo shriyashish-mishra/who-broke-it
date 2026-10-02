@@ -18,7 +18,7 @@ All notable changes. Format follows [Keep a Changelog](https://keepachangelog.co
 - MCP tools `wbi_start_task`, `wbi_release_task`, `wbi_release_intents` (18 tools total).
 - Human-only acceptance criteria (`"human": true`): an agent cannot attest them; the task goes to review and `wbi approve` is the sign-off.
 - Claude Code is auto-detected (`CLAUDECODE=1`); claim errors now say who *you* are.
-- The GitHub Action writes a Markdown job summary.
+- The GitHub Action writes a Markdown job summary, and pinning it (`@v0.2.0`) now pins the `wbi` version it installs (previously it always installed the latest release).
 - GitHub Pages site and the `scripts/site-data.py` generator that builds it from real demo runs.
 - Issue and PR templates (including an "I ran another agent" report), Dependabot, CODEOWNERS, release docs.
 

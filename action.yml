@@ -7,7 +7,7 @@ branding:
 
 inputs:
   version:
-    description: "wbi release to run (e.g. v0.1.1). Default: latest."
+    description: "wbi release to run (e.g. v0.2.0). Default: the version the action itself is pinned to (uses: ...@v0.2.0 runs wbi v0.2.0), or the latest release when the action is referenced by branch."
     default: ""
   base:
     description: "Base ref to diff against. Default: origin/<PR base branch>."
@@ -28,7 +28,7 @@ runs:
     - name: Install wbi
       shell: bash
       env:
-        WBI_VERSION: ${{ inputs.version }}
+        WBI_VERSION: ${{ inputs.version || (startsWith(github.action_ref, 'v') && github.action_ref) || '' }}
         WBI_INSTALL_DIR: ${{ runner.temp }}/wbi-bin
       run: |
         set -euo pipefail
