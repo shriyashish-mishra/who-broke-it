@@ -7,6 +7,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/shriyashish-mishra/who-broke-it/internal/dashboard"
+	"net/http"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -37,7 +39,7 @@ func init() {
 	}
 }
 
-var boolFlags = map[string]bool{"force": true, "json": true, "worktree": true, "mermaid": true, "dot": true, "approve": true, "prompt": true, "no-hook": true, "mark-read": true, "help": true, "version": true, "all": true, "require-task": true, "require-handoff": true, "require-approval": true, "approved": true, "enforce": true, "draft": true, "dry-run": true, "no-push": true}
+var boolFlags = map[string]bool{"force": true, "json": true, "worktree": true, "mermaid": true, "dot": true, "approve": true, "prompt": true, "no-hook": true, "mark-read": true, "help": true, "version": true, "all": true, "require-task": true, "require-handoff": true, "require-approval": true, "approved": true, "serve": true, "enforce": true, "draft": true, "dry-run": true, "no-push": true}
 var multiFlags = map[string]bool{"contract": true, "limitation": true}
 
 type args struct {
@@ -98,6 +100,7 @@ func help() string {
   wbi tasks [--status READY]            all tasks      wbi task <id>   work packet
   wbi agents                            registered agents
   wbi sync [init|status|watch|compact]  share claims/intents/handoffs with teammates over git (auto when enabled)
+  wbi dashboard [--out file.html | --serve]   one-file visual dashboard (graph, agents, blast radius, drift)
   wbi notify [add slack|discord|webhook --env VAR | test | list]   post key events to Slack/Discord/any webhook
   wbi team [join|add|remove|list|enforce]   who may publish to the shared log (.wbi/team.json, signed events)
   wbi graph [--mermaid|--dot|--json]    the engineering graph
@@ -522,6 +525,8 @@ func execute(e *engine.Engine, cmd string, a args, ident engine.AgentOpts, rest 
 		return teamCmd(e, a, rest)
 	case "notify":
 		return notifyCmd(e, a, rest)
+	case "dashboard":
+		return dashboardCmd(e, a)
 	case "check":
 		rep, err := e.Check(engine.CheckOpts{Base: a.get("base"), Head: a.get("head"), Branch: a.get("branch"), Task: a.get("task"),
 			RequireTask: a.has("require-task"), RequireHandoff: a.has("require-handoff"), RequireApproval: a.has("require-approval"), Approved: a.has("approved")})
@@ -973,5 +978,34 @@ func notifyCmd(e *engine.Engine, a args, rest []string) error {
 			fmt.Printf("  %-8s $%s [%s]  events: %s\n", s.Type, s.URLEnv, set, ev)
 		}
 	}
+	return nil
+}
+
+func dashboardCmd(e *engine.Engine, a args) error {
+	gen := func() string { return dashboard.HTML(dashboard.Collect(e, time.Now().Format("2006-01-02 15:04:05"))) }
+	if a.has("serve") {
+		addr := firstNonEmptyStr(a.get("addr"), "127.0.0.1:7777") // loopback only: the page shows your whole plan
+		mux := http.NewServeMux()
+		mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path != "/" {
+				http.NotFound(w, r)
+				return
+			}
+			e.PullIfStale(5 * time.Second)
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			w.Header().Set("Cache-Control", "no-store")
+			_, _ = w.Write([]byte(gen()))
+		})
+		fmt.Printf("%s dashboard at http://%s/?live=1  (refreshes every 5s; Ctrl-C to stop)\n", render.Cyan("●"), addr)
+		return http.ListenAndServe(addr, mux)
+	}
+	out := a.get("out")
+	if out == "" {
+		out = "wbi-dashboard.html"
+	}
+	if err := os.WriteFile(out, []byte(gen()), 0o644); err != nil {
+		return err
+	}
+	fmt.Printf("%s wrote %s (one self-contained file: open it, commit it, or host it anywhere static)\n", render.Green("✓"), out)
 	return nil
 }

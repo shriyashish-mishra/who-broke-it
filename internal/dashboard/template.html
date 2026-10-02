@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__WBI_TITLE__ · Who Broke It?</title>
+<style>
+:root{
+  --bg:#0f1115; --panel:#171a21; --panel2:#1d212a; --line:#2a2f3a; --ink:#e8eaf0; --dim:#8b93a5;
+  --amber:#ffc531; --READY:#3fc1d6; --BLOCKED:#6b7385; --IN_PROGRESS:#5b9dff; --REVIEW:#c58bff; --DONE:#43c97a;
+  --bad:#ff6b6b; --warn:#ffb454; --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:light){:root{--bg:#f6f4ee;--panel:#fffdf8;--panel2:#f1eee5;--line:#ddd7c8;--ink:#1b1d22;--dim:#6a6f7c;--amber:#c98a00;--READY:#0f8fa6;--BLOCKED:#8a91a1;--IN_PROGRESS:#2b6fe0;--REVIEW:#8a45d6;--DONE:#1f9d57;--bad:#d63b3b;--warn:#c7771a}}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+a{color:inherit} code,.mono{font-family:var(--mono)}
+header{padding:18px 20px 12px;border-bottom:1px solid var(--line);display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+.brand{font:800 15px var(--mono);letter-spacing:.14em;color:var(--amber)} .brand small{display:block;color:var(--dim);font-weight:400;letter-spacing:0;font-size:11px}
+.proj{flex:1;min-width:220px} .proj h1{margin:0;font-size:18px} .proj p{margin:2px 0 0;color:var(--dim)}
+.prog{min-width:220px} .bar{height:8px;border-radius:8px;background:var(--panel2);overflow:hidden;border:1px solid var(--line)} .bar i{display:block;height:100%;background:var(--DONE)}
+.prog b{font:700 12px var(--mono)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:14px 20px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px} .kpi b{display:block;font:800 22px var(--mono)} .kpi span{color:var(--dim);font-size:12px}
+.kpi.hot b{color:var(--warn)}
+nav{display:flex;gap:4px;padding:0 20px;border-bottom:1px solid var(--line);overflow-x:auto}
+nav button{background:none;border:0;color:var(--dim);padding:10px 14px;font:600 13px system-ui;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
+nav button[aria-selected=true]{color:var(--ink);border-color:var(--amber)}
+main{padding:16px 20px 40px}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:14px} @media(max-width:980px){.grid{grid-template-columns:minmax(0,1fr)}}
+.grid>*{min-width:0} html,body{max-width:100%;overflow-x:hidden}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px} .card h2{margin:0 0 10px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.graphwrap{overflow:auto;border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:8px}
+#graph{width:100%;min-width:820px;height:auto;display:block}
+svg text{font-family:var(--mono);fill:var(--ink)} .node rect{fill:var(--panel2);stroke:var(--line);stroke-width:1.5;rx:8} .node{cursor:pointer}
+.node .id{font-size:10px;fill:var(--dim)} .node .t{font-size:11px;font-weight:600}
+.node.s-READY rect{stroke:var(--READY)} .node.s-IN_PROGRESS rect{stroke:var(--IN_PROGRESS);stroke-width:2.5} .node.s-REVIEW rect{stroke:var(--REVIEW);stroke-width:2.5}
+.node.s-DONE rect{stroke:var(--DONE)} .node.s-DONE .t{fill:var(--dim)} .node.s-BLOCKED rect{stroke:var(--BLOCKED);stroke-dasharray:4 3}
+.node.dim{opacity:.22} .node.sel rect{stroke:var(--amber);stroke-width:3} .node.up rect{fill:color-mix(in srgb,var(--IN_PROGRESS) 22%,var(--panel2))} .node.down rect{fill:color-mix(in srgb,var(--bad) 22%,var(--panel2))}
+.node.origin rect{stroke:var(--bad);stroke-width:3;fill:color-mix(in srgb,var(--bad) 30%,var(--panel2))}
+.edge{fill:none;stroke:var(--line);stroke-width:1.4} .edge.hot{stroke:var(--amber);stroke-width:2.2} .edge.dim{opacity:.15}
+.pill{display:inline-block;padding:1px 8px;border-radius:99px;font:700 11px var(--mono);border:1px solid currentColor}
+.p-READY{color:var(--READY)} .p-BLOCKED{color:var(--BLOCKED)} .p-IN_PROGRESS{color:var(--IN_PROGRESS)} .p-REVIEW{color:var(--REVIEW)} .p-DONE{color:var(--DONE)}
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin:0 0 10px;color:var(--dim);font-size:12px} .legend span:before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;border:2px solid;margin-right:5px;vertical-align:-1px}
+.hint{margin-left:auto;font-style:normal;opacity:.85}
+.legend .READY:before{border-color:var(--READY)}.legend .IN_PROGRESS:before{border-color:var(--IN_PROGRESS)}.legend .REVIEW:before{border-color:var(--REVIEW)}.legend .DONE:before{border-color:var(--DONE)}.legend .BLOCKED:before{border-color:var(--BLOCKED);border-style:dashed}
+table{width:100%;border-collapse:collapse} th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top} th{color:var(--dim);font:600 11px var(--mono);letter-spacing:.06em;text-transform:uppercase}
+tr.click{cursor:pointer} tr.click:hover{background:var(--panel2)}
+.attn{list-style:none;margin:0;padding:0} .attn li{padding:8px 10px;margin-bottom:6px;border-left:3px solid var(--warn);background:var(--panel2);border-radius:6px;font-size:13px}
+.empty{color:var(--dim);font-style:italic;padding:8px 2px}
+.kv{display:grid;grid-template-columns:96px 1fr;gap:4px 10px;margin:8px 0} .kv dt{color:var(--dim)} .kv dd{margin:0;word-break:break-word}
+.chips{display:flex;gap:6px;flex-wrap:wrap} .chip{font:12px var(--mono);padding:1px 7px;border-radius:6px;background:var(--panel2);border:1px solid var(--line);cursor:pointer}
+.chip.warn{border-color:var(--warn);color:var(--warn)} .chip.bad{border-color:var(--bad);color:var(--bad)}
+h3{margin:14px 0 6px;font-size:12px;color:var(--dim);letter-spacing:.08em;text-transform:uppercase}
+ul.tight{margin:4px 0 0 18px;padding:0} ul.tight li{margin:2px 0}
+.tape{height:10px;background:repeating-linear-gradient(135deg,var(--amber) 0 12px,#111 12px 24px);opacity:.9}
+footer{color:var(--dim);font-size:12px;padding:0 20px 30px} 
+.hidden{display:none} button.btn{background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:5px 10px;cursor:pointer;font:600 12px system-ui}
+</style>
+</head>
+<body>
+<div class="tape" aria-hidden="true"></div>
+<header>
+  <div class="brand">WHO BROKE IT?<small>engineering dashboard</small></div>
+  <div class="proj"><h1 id="pname"></h1><p id="pgoal"></p></div>
+  <div class="prog"><div class="bar"><i id="pbar"></i></div><b id="ptext"></b></div>
+</header>
+<section class="kpis" id="kpis"></section>
+<nav role="tablist" id="tabs"></nav>
+<main>
+  <section id="tab-graph">
+    <div class="grid">
+      <div>
+        <div class="legend"><span class="READY">ready</span><span class="IN_PROGRESS">in progress</span><span class="REVIEW">review</span><span class="DONE">done</span><span class="BLOCKED">blocked</span><em class="hint">click a task, or pick a contract under "Contracts & blast"</em></div>
+        <div class="graphwrap"><svg id="graph" role="img" aria-label="Task dependency graph"></svg></div>
+      </div>
+      <aside>
+        <div class="card" id="detail"></div>
+        <div class="card" style="margin-top:14px"><h2>Needs attention</h2><ul class="attn" id="attn"></ul></div>
+      </aside>
+    </div>
+  </section>
+  <section id="tab-tasks" class="hidden"><div class="card"><h2>Tasks</h2><div id="tasks"></div></div></section>
+  <section id="tab-agents" class="hidden"><div class="grid"><div class="card"><h2>Agents</h2><div id="agents"></div></div><div class="card"><h2>Active intents</h2><div id="intents"></div></div></div>
+    <div class="card" style="margin-top:14px"><h2>Handoffs</h2><div id="handoffs"></div></div></section>
+  <section id="tab-contracts" class="hidden"><div class="card"><h2>Contracts and blast radius</h2><div id="contracts"></div></div></section>
+  <section id="tab-drift" class="hidden"><div class="grid"><div class="card"><h2>Product drift (requirement × layer)</h2><div id="product"></div></div><div class="card"><h2>Architecture, coupling, context</h2><div id="arch"></div></div></div>
+    <div class="card" style="margin-top:14px"><h2>Execution plan</h2><div id="plan"></div></div></section>
+</main>
+<footer id="foot"></footer>
+<script>
+const D = /*__WBI_DATA__*/null;
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+if (!D) { document.body.innerHTML = '<p style="padding:30px">No data. Generate this page with <code>wbi dashboard</code>.</p>'; throw 0; }
+if (new URLSearchParams(location.search).has('live')) setTimeout(() => location.reload(), 5000);
+
+const tasks = D.tasks || [], byId = Object.fromEntries(tasks.map(t => [t.id, t]));
+const handoffs = Object.fromEntries((D.handoffs || []).map(h => [h.taskId, h]));
+const S = D.status, done = S.progress.done, total = S.progress.total;
+let sel = null, hl = null; // selected task; highlighted contract {name, origin, direct, indirect}
+
+$('pname').textContent = D.project.name; $('pgoal').textContent = D.project.goal || '';
+$('pbar').style.width = S.progress.pct + '%'; $('ptext').textContent = `${S.progress.pct}%  (${done}/${total} tasks)`;
+document.title = D.project.name + ' · Who Broke It?';
+
+const driftCount = (D.drift.architecture||[]).length + (D.drift.context||[]).length + (D.drift.coupling||[]).length;
+const kpis = [
+  ['Active agents', (S.active||[]).length, ''], ['Ready', (S.ready||[]).length, ''], ['In review', (S.review||[]).length, ''],
+  ['Blocked', (S.blocked||[]).length, ''], ['Needs attention', (S.attention||[]).length, (S.attention||[]).length ? 'hot' : ''], ['Drift findings', driftCount, driftCount ? 'hot' : '']];
+$('kpis').innerHTML = kpis.map(k => `<div class="kpi ${k[2]}"><b>${k[1]}</b><span>${k[0]}</span></div>`).join('');
+
+// ---------- tabs
+const tabs = [['graph','Graph'],['tasks','Tasks'],['agents','Agents & handoffs'],['contracts','Contracts & blast'],['drift','Drift & plan']];
+$('tabs').innerHTML = tabs.map(t => `<button role="tab" data-t="${t[0]}" aria-selected="${t[0]==='graph'}">${t[1]}</button>`).join('');
+function show(name){ for (const t of tabs) { $('tab-'+t[0]).classList.toggle('hidden', t[0]!==name); }
+  document.querySelectorAll('#tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.t===name)); }
+$('tabs').onclick = e => { const b = e.target.closest('button'); if (b) show(b.dataset.t); };
+
+// ---------- graph layout: columns = longest dependency chain
+const level = {}; const lv = id => level[id] ??= (byId[id].dependsOn.filter(d => byId[d]).reduce((m,d) => Math.max(m, lv(d)+1), 0));
+tasks.forEach(t => lv(t.id));
+const cols = []; tasks.forEach(t => (cols[level[t.id]] ??= []).push(t));
+const NW = 160, NH = 46, GX = 44, GY = 14, pos = {};
+cols.forEach((c, i) => c.forEach((t, j) => pos[t.id] = {x: 12 + i*(NW+GX), y: 12 + j*(NH+GY)}));
+const GW = 24 + cols.length*(NW+GX) - GX, GH = 24 + Math.max(...cols.map(c => c.length), 1)*(NH+GY) - GY;
+
+const anc = id => { const out = new Set(), q = [id]; while (q.length) for (const d of byId[q.pop()].dependsOn) if (byId[d] && !out.has(d)) { out.add(d); q.push(d); } return out; };
+const dec = id => { const out = new Set(), q = [id]; while (q.length) { const c = q.pop(); for (const t of tasks) if (t.dependsOn.includes(c) && !out.has(t.id)) { out.add(t.id); q.push(t.id); } } return out; };
+
+function drawGraph(){
+  const up = sel ? anc(sel) : new Set(), down = sel ? dec(sel) : new Set();
+  let h = '';
+  for (const t of tasks) for (const d of t.dependsOn) { if (!pos[d]) continue;
+    const a = pos[d], b = pos[t.id], x1 = a.x+NW, y1 = a.y+NH/2, x2 = b.x, y2 = b.y+NH/2, mx = (x1+x2)/2;
+    let cls = 'edge';
+    if (sel) cls += (t.id===sel && up.has(d)) || (d===sel && down.has(t.id)) || (up.has(t.id)&&up.has(d)) || (down.has(t.id)&&down.has(d)) || (t.id===sel||d===sel) ? ' hot' : ' dim';
+    h += `<path class="${cls}" d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}"/>`; }
+  for (const t of tasks) { const p = pos[t.id]; let cls = `node s-${t.display}`;
+    if (hl) cls += t.id===hl.origin ? ' origin' : hl.direct.includes(t.id) || hl.indirect.includes(t.id) ? ' down' : ' dim';
+    else if (sel) cls += t.id===sel ? ' sel' : up.has(t.id) ? ' up' : down.has(t.id) ? ' down' : ' dim';
+    const who = t.agent ? ' · ' + t.agent.split('@')[0] : '';
+    h += `<g class="${cls}" data-id="${t.id}" transform="translate(${p.x},${p.y})"><title>${esc(t.id+' '+t.title+' — '+t.display)}</title><rect width="${NW}" height="${NH}"/>
+      <text class="id" x="10" y="16">${esc(t.id)} ${t.display==='DONE'?'✓':''}${esc(who)}</text><text class="t" x="10" y="34">${esc(t.title.length>21 ? t.title.slice(0,20)+'…' : t.title)}</text></g>`; }
+  $('graph').setAttribute('viewBox', `0 0 ${GW} ${GH}`);
+  $('graph').innerHTML = h;
+}
+$('graph').onclick = e => { const g = e.target.closest('.node'); if (g) { selectTask(g.dataset.id); } else { sel = null; hl = null; drawGraph(); drawDetail(); } };
+
+// ---------- detail panel
+function chips(list, kind){ return list && list.length ? `<div class="chips">${list.map(x => `<span class="chip ${kind||''}" ${byId[x]?`data-go="${x}"`:''}>${esc(x)}</span>`).join('')}</div>` : '<span class="empty">none</span>'; }
+function drawDetail(){
+  const el = $('detail');
+  if (hl) { const c = D.contracts.find(c => c.name===hl.name);
+    el.innerHTML = `<h2>Blast radius</h2><h3 style="margin-top:0">${esc(hl.name)} <span class="pill p-${hl.risk==='HIGH'?'REVIEW':hl.risk==='MEDIUM'?'IN_PROGRESS':'DONE'}">${hl.risk}</span></h3>
+      <dl class="kv"><dt>Owner</dt><dd>${chips([hl.origin])}</dd><dt>Direct</dt><dd>${chips(hl.direct,'warn')}</dd><dt>Indirect</dt><dd>${chips(hl.indirect,'bad')}</dd></dl>
+      <p class="mono" style="color:var(--dim)">${esc(c ? c.kind+' v'+c.version+' · '+c.shape : '')}</p><button class="btn" id="clr">clear</button>`;
+    $('clr').onclick = () => { hl = null; drawGraph(); drawDetail(); }; return; }
+  if (!sel) { el.innerHTML = '<h2>Task detail</h2><p class="empty">Click a task. Its upstream turns blue, everything it can break turns red.</p>'; return; }
+  const t = byId[sel], h = handoffs[sel];
+  el.innerHTML = `<h2>${esc(t.id)}</h2><h3 style="margin-top:0">${esc(t.title)} <span class="pill p-${t.display}">${t.display}</span></h3><p>${esc(t.goal)}</p>
+   <dl class="kv"><dt>Layer</dt><dd>${esc(t.layer)} / ${esc(t.component)}</dd><dt>Executor</dt><dd>${t.agent?esc(t.agent):'<span class="empty">unclaimed</span>'}</dd>
+   ${t.branch?`<dt>Branch</dt><dd class="mono">${esc(t.branch)}</dd>`:''}<dt>Depends on</dt><dd>${chips(t.dependsOn)}</dd>
+   <dt>Provides</dt><dd>${chips(t.provides)}</dd><dt>Consumes</dt><dd>${chips(t.consumes)}</dd>
+   <dt>Allowed</dt><dd class="mono">${esc(t.allowedPaths.join(', '))||'—'}</dd><dt>Restricted</dt><dd class="mono">${esc(t.restrictedPaths.join(', '))||'—'}</dd>
+   ${t.impact.length?`<dt>Impact</dt><dd>${chips(t.impact,'warn')} needs a human</dd>`:''}</dl>
+   <h3>Acceptance</h3><ul class="tight">${t.acceptance.map(a => `<li>${esc(a.text)} <span style="color:var(--dim)">${a.human?'(human sign-off)':a.check?'(auto)':'(attested)'}</span></li>`).join('')}</ul>
+   ${t.risks.length?`<h3>Risks</h3><ul class="tight">${t.risks.map(r=>`<li>${esc(r)}</li>`).join('')}</ul>`:''}
+   ${h?`<h3>Handoff</h3><p>${esc(h.implemented)} <span class="mono" style="color:var(--dim)">by ${esc(h.agentId)}</span></p>
+     <ul class="tight"><li>${h.changedFiles.length} file(s) changed${h.pr?`, PR #${h.pr}`:''}</li>${(h.contractChanges||[]).map(c=>`<li>contract <b>${esc(c.name)}</b> → v${c.version}${c.note?': '+esc(c.note):''}</li>`).join('')}
+     ${h.tests&&h.tests.ran?`<li>tests: ${esc(h.tests.summary||(h.tests.passed?'passed':'failed'))}</li>`:''}${(h.limitations||[]).map(l=>`<li>limitation: ${esc(l)}</li>`).join('')}</ul>`:''}`;
+}
+function selectTask(id){ sel = id; hl = null; drawGraph(); drawDetail(); show('graph'); }
+document.addEventListener('click', e => { const c = e.target.closest('[data-go]'); if (c) selectTask(c.dataset.go); });
+
+// ---------- attention
+$('attn').innerHTML = (S.attention||[]).length ? S.attention.map(a => `<li>${esc(a.replace(/^⚠ /,''))}</li>`).join('') : '<li style="border-color:var(--DONE)" class="empty">Nothing is on fire. Suspicious.</li>';
+
+// ---------- tasks table
+const order = {IN_PROGRESS:0,REVIEW:1,READY:2,BLOCKED:3,DONE:4};
+$('tasks').innerHTML = `<table><tr><th>ID</th><th>Task</th><th>Status</th><th>Executor</th><th>Depends on</th><th>Layer</th></tr>${
+  [...tasks].sort((a,b)=>order[a.display]-order[b.display]||a.id.localeCompare(b.id)).map(t => `<tr class="click" data-go="${t.id}"><td class="mono">${t.id}</td><td>${esc(t.title)}${t.impact.length?' <span class="chip warn">high-impact</span>':''}</td><td><span class="pill p-${t.display}">${t.display}</span></td><td class="mono">${esc(t.agent||'—')}</td><td class="mono">${esc(t.dependsOn.join(', ')||'—')}</td><td>${esc(t.layer)}</td></tr>`).join('')}</table>`;
+
+// ---------- agents, intents, handoffs
+const ago = ms => { const s = Math.max(0, (Date.now()-ms)/1000); return s<90?Math.round(s)+'s ago':s<5400?Math.round(s/60)+' min ago':s<172800?Math.round(s/3600)+' h ago':Math.round(s/86400)+' d ago'; };
+$('agents').innerHTML = (S.agents||[]).length ? `<table><tr><th>Agent</th><th>Task</th><th>Seen</th></tr>${S.agents.map(a => `<tr><td class="mono">${a.provider==='human'?'🧑':'🤖'} ${esc(a.id)}</td><td>${a.currentTask?`<span class="chip" data-go="${esc(a.currentTask)}">${esc(a.currentTask)}</span>`:'<span class="empty">idle</span>'}</td><td>${ago(a.heartbeat)}</td></tr>`).join('')}</table>` : '<p class="empty">No agents yet. The repo is eerily quiet.</p>';
+$('intents').innerHTML = (D.intents||[]).length ? `<table><tr><th>Who</th><th>Kind</th><th>Target</th></tr>${D.intents.map(i => `<tr><td class="mono">${esc(i.agentId)}<br><span style="color:var(--dim)">${esc(i.taskId)}</span></td><td class="mono">${esc(i.kind)}</td><td class="mono">${esc(i.target)}</td></tr>`).join('')}</table>` : '<p class="empty">Nobody has declared an intent. Brave. Or careless.</p>';
+$('handoffs').innerHTML = (D.handoffs||[]).length ? `<table><tr><th>Task</th><th>By</th><th>What</th><th>Files</th><th>Contract changes</th><th>Affected</th></tr>${D.handoffs.map(h => `<tr class="click" data-go="${esc(h.taskId)}"><td class="mono">${esc(h.taskId)}</td><td class="mono">${esc(h.agentId)}</td><td>${esc(h.implemented)}</td><td>${h.changedFiles.length}</td><td>${(h.contractChanges||[]).map(c=>esc(c.name)+' v'+c.version).join(', ')||'—'}</td><td class="mono">${esc((h.affected||[]).join(', ')||'—')}</td></tr>`).join('')}</table>` : '<p class="empty">No handoffs yet.</p>';
+
+// ---------- contracts & blast
+$('contracts').innerHTML = `<table><tr><th>Contract</th><th>Version</th><th>Owner</th><th>Direct</th><th>Indirect</th><th>Risk</th><th></th></tr>${D.contracts.map(c => { const b = D.blast[c.name] || {direct:[],indirect:[],risk:'LOW'};
+  return `<tr><td class="mono">${esc(c.name)}${c.public?' <span class="chip">public</span>':''}</td><td class="mono">v${c.version}</td><td><span class="chip" data-go="${esc(c.providedBy)}">${esc(c.providedBy)}</span></td><td>${b.direct.length}</td><td>${b.indirect.length}</td><td><span class="pill p-${b.risk==='HIGH'?'REVIEW':b.risk==='MEDIUM'?'IN_PROGRESS':'DONE'}">${b.risk}</span></td><td><button class="btn" data-blast="${esc(c.name)}">break it →</button></td></tr>`; }).join('')}</table>`;
+$('contracts').onclick = e => { const b = e.target.closest('[data-blast]'); if (!b) return; const c = D.contracts.find(c => c.name===b.dataset.blast), bl = D.blast[c.name];
+  sel = null; hl = {name: c.name, origin: c.providedBy, direct: bl.direct, indirect: bl.indirect, risk: bl.risk}; show('graph'); drawGraph(); drawDetail(); };
+
+// ---------- drift & plan
+const glyph = {done:'✓', wip:'…', todo:'✗', missing:'✗ (no task)'};
+$('product').innerHTML = (D.drift.product||[]).map(r => `<p><b class="mono">${esc(r.req)}</b> ${esc(r.text)} ${r.satisfied?'<span class="pill p-DONE">satisfied</span>':''}<br>${r.layers.map(l => `<span class="chip ${l.state==='done'?'':l.state==='wip'?'warn':'bad'}">${esc(l.layer)} ${glyph[l.state]||''}</span>`).join(' ')}</p>`).join('') || '<p class="empty">No requirements.</p>';
+const arch = [];
+for (const v of (D.drift.architecture||[])) arch.push(`<li><b>${esc(v.rule)}</b> ${esc(v.file)}${v.branch?' on '+esc(v.branch)+' (unmerged)':''}<br><code>${esc(v.excerpt)}</code></li>`);
+for (const c of (D.drift.coupling||[])) arch.push(`<li><b>coupling</b> ${esc(c.from)} imports ${esc(c.to)} code (${c.count}×) with no dependency<br><code>${esc(c.fromFile)} → ${esc(c.toFile)}</code></li>`);
+for (const c of (D.drift.context||[])) arch.push(`<li><b>stale</b> ${esc(c.task)} planned against ${esc(c.contract)} v${c.from}, now v${c.to}</li>`);
+$('arch').innerHTML = arch.length ? `<ul class="tight">${arch.join('')}</ul>` : '<p class="empty">No drift. Enjoy it while it lasts.</p>';
+const sim = D.simulate; $('plan').innerHTML = `<p>${sim.tasks} tasks · ${sim.parallelizable} can run in parallel · critical path ${sim.criticalPath.length}: <span class="mono">${esc(sim.criticalPath.join(' → '))}</span>${(sim.conflicts||[]).length?` · <b style="color:var(--warn)">${sim.conflicts.length} scope overlap(s)</b>`:''}${(sim.missingDeps||[]).length?` · <b style="color:var(--bad)">${sim.missingDeps.length} missing dependency(ies)</b>`:''}</p>` +
+  sim.waves.map((w,i) => `<p><b class="mono">WAVE ${i+1}</b> ${w.map(t => `<span class="chip" data-go="${t.id}">${t.id} ${esc(t.title)}</span>`).join(' ')}</p>`).join('');
+
+$('foot').innerHTML = `Generated ${esc(D.generated)} by <code>wbi dashboard</code>. This page is one file: no server, no network calls. Re-run the command to refresh, or use <code>wbi dashboard --serve</code>.`;
+// deep links: #task=TASK-007  #contract=BillingStatus  #tab=drift (handy for sharing and screenshots)
+(function(){ const h = new URLSearchParams(location.hash.slice(1));
+  if (h.get('contract')) { const c = D.contracts.find(c => c.name===h.get('contract')), bl = c && D.blast[c.name];
+    if (c) { hl = {name:c.name, origin:c.providedBy, direct:bl.direct, indirect:bl.indirect, risk:bl.risk}; } }
+  else if (h.get('task') && byId[h.get('task')]) sel = h.get('task');
+  if (h.get('tab')) show(h.get('tab')); })();
+drawGraph(); drawDetail();
+</script>
+</body>
+</html>
