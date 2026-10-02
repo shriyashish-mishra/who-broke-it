@@ -4,6 +4,7 @@ package state
 
 import (
 	"database/sql"
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -11,6 +12,9 @@ import (
 
 	"github.com/shriyashish-mishra/who-broke-it/internal/gitx"
 )
+
+// schemaVersion is stored in PRAGMA user_version; bump it whenever schema or migrateReplication changes.
+const schemaVersion = 2
 
 const schema = `
 CREATE TABLE IF NOT EXISTS agents (
@@ -51,16 +55,27 @@ func Open(path string) (*DB, error) {
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return nil, err
 	}
-	db, err := sql.Open("sqlite", "file:"+path+"?_pragma=busy_timeout(5000)&_pragma=journal_mode(WAL)&_txlock=immediate")
+	db, err := sql.Open("sqlite", "file:"+path+"?_pragma=busy_timeout(20000)&_pragma=journal_mode(WAL)&_txlock=immediate")
 	if err != nil {
 		return nil, err
 	}
 	db.SetMaxOpenConns(1)
-	if _, err := db.Exec(schema); err != nil {
+	// The common case (schema already current) must be read-only: every wbi invocation opens this database, and
+	// many agents start at once. Migrating on every start made them all fight for the write lock.
+	var v int
+	if err := db.QueryRow(`PRAGMA user_version`).Scan(&v); err != nil {
 		return nil, err
 	}
-	if err := migrateReplication(db); err != nil {
-		return nil, err
+	if v < schemaVersion {
+		if _, err := db.Exec(schema); err != nil {
+			return nil, err
+		}
+		if err := migrateReplication(db); err != nil { // idempotent, so concurrent first runs are safe
+			return nil, err
+		}
+		if _, err := db.Exec(fmt.Sprintf(`PRAGMA user_version = %d`, schemaVersion)); err != nil {
+			return nil, err
+		}
 	}
 	return &DB{db}, nil
 }

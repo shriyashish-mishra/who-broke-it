@@ -1,6 +1,7 @@
 package state
 
 import (
+	"database/sql"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -78,5 +79,45 @@ func TestContractVersionsAndAcksOnlyMoveForward(t *testing.T) {
 	_ = d.QueryRow(`SELECT version FROM contract_state WHERE name='C'`).Scan(&v)
 	if v != 3 {
 		t.Fatalf("an older event must not roll a contract back, got v%d", v)
+	}
+}
+
+func TestOpenIsReadOnlyOnceMigrated(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "s.db")
+	d, err := Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var v int
+	_ = d.QueryRow(`PRAGMA user_version`).Scan(&v)
+	if v != schemaVersion {
+		t.Fatalf("a fresh database must record its schema version, got %d", v)
+	}
+	_, _ = d.Exec(`INSERT INTO intents (agent_id,task_id,kind,target,status,created_at) VALUES ('a','T','MODIFY','x','active',1)`)
+	d.Close()
+	// reopening must not touch data or take the write path (no new outbox rows from migration UPDATEs)
+	d2, err := Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer d2.Close()
+	if n := d2.PendingCount(); n != 1 {
+		t.Fatalf("reopen changed the outbox: %d", n)
+	}
+	// a database from before sync (no uid column, no triggers, user_version 0) still upgrades
+	old := filepath.Join(t.TempDir(), "old.db")
+	raw, _ := sql.Open("sqlite", "file:"+old)
+	_, _ = raw.Exec(schema)
+	_, _ = raw.Exec(`DROP TABLE intents; CREATE TABLE intents (id INTEGER PRIMARY KEY AUTOINCREMENT, agent_id TEXT, task_id TEXT, kind TEXT, target TEXT, note TEXT, status TEXT DEFAULT 'active', created_at INTEGER); INSERT INTO intents(agent_id,task_id,kind,target,status,created_at) VALUES ('a','T','MODIFY','x','active',1)`)
+	raw.Close()
+	up, err := Open(old)
+	if err != nil {
+		t.Fatalf("upgrade: %v", err)
+	}
+	defer up.Close()
+	var uid string
+	_ = up.QueryRow(`SELECT COALESCE(uid,'') FROM intents`).Scan(&uid)
+	if uid == "" {
+		t.Fatal("pre-sync rows must get an identity during upgrade")
 	}
 }
