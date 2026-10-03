@@ -7,7 +7,7 @@ All notable changes. Format follows [Keep a Changelog](https://keepachangelog.co
 ### Added
 - Verified sync on **gitlab.com** (17/17 checks, same as GitHub); `scripts/verify-sync.sh` is now host-neutral.
 - Adapter verification for Codex CLI, Cursor Agent, OpenCode and Antigravity (see `docs/REAL-AGENTS.md`), the `wbi executor` command used by the commit hook, and `scripts/agent-harness/`.
-- Website redesigned as a playable, clearly-labelled-simulated incident investigation that teaches the real commands.
+- Website redesigned: a brand-only hero, then a 35-second clearly-labelled-simulated incident investigation that teaches `wbi status`, `wbi task` and `wbi blame`, followed by the full product sections. Source for the 9:16 launch video lives in `marketing/video/`.
 
 ### Fixed
 - Commits made by agents driven over MCP now get a `WBI-Agent` trailer (the hook asks wbi who holds the task).

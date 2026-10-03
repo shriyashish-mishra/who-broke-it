@@ -1,0 +1,290 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+:root{--bg:#0a0c10;--ink:#eceef3;--dim:#7d8699;--amber:#ffc531;--red:#ff4d4d;--green:#43c97a;--blue:#5b9dff;--mono:Menlo,"SF Mono",ui-monospace,Consolas,monospace;--sans:-apple-system,"SF Pro Display",system-ui,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:540px;height:960px;background:var(--bg);overflow:hidden;font-family:var(--mono);color:var(--ink)}
+#stage{position:absolute;inset:0;overflow:hidden}
+.tape{position:absolute;left:-40px;right:-40px;height:22px;background:repeating-linear-gradient(135deg,#ffc531 0 22px,#101010 22px 44px);z-index:30}
+.tape.t{top:0}.tape.b{bottom:0}
+#scan{position:absolute;inset:0;z-index:40;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 1px,transparent 1px 3px);mix-blend-mode:screen}
+#vig{position:absolute;inset:0;z-index:41;pointer-events:none;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.65) 100%)}
+#flash{position:absolute;inset:0;z-index:39;pointer-events:none;background:#ff2b2b;opacity:0}
+.scene{position:absolute;inset:22px 0 22px 0;opacity:0}
+.abs{position:absolute}
+.center{left:0;right:0;text-align:center}
+.glow-r{text-shadow:0 0 18px rgba(255,77,77,.7)}
+.glow-a{text-shadow:0 0 22px rgba(255,197,49,.55)}
+/* A: title */
+#A .w{font:800 138px/0.92 var(--mono);letter-spacing:-.07em}
+#A .q{color:var(--amber)}
+#A .sub{font:800 36px/1.2 var(--sans);letter-spacing:-.02em}
+/* B: git log */
+#B .hd{left:26px;top:34px;font:700 13px var(--mono);color:var(--dim);letter-spacing:.14em}
+#B .cnt{right:26px;top:34px;font:800 15px var(--mono);color:var(--amber)}
+#B .log{left:26px;right:26px;top:84px;bottom:60px;overflow:hidden}
+.ln{height:66px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;justify-content:center;gap:5px;padding-left:24px;position:relative}
+.ln .dot{position:absolute;left:0;top:25px;width:13px;height:13px;border-radius:50%;box-shadow:0 0 12px currentColor;background:currentColor}
+.ln .r1{display:flex;justify-content:space-between;font:800 19px/1 var(--mono)}
+.ln .r1 .h{color:#59627a;font-weight:600;font-size:15px}
+.ln .r2{font:600 15.5px/1 var(--mono);color:#a9b1c3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ln .r2 b{color:#7d8699;font-weight:600}
+/* C: incident */
+#C .bar{left:0;right:0;top:40px;text-align:center;font:800 17px var(--mono);letter-spacing:.2em;color:#fff;background:var(--red);padding:9px 0}
+#C .big{font:800 56px/1.02 var(--mono);letter-spacing:-.04em}
+#C .meta{font:700 19px/1.35 var(--mono);color:#ffb3b3}
+.bub{font:700 22px/1.25 var(--sans);padding:12px 18px;border-radius:20px;max-width:380px;position:absolute}
+.bub i{display:block;font:700 12px var(--mono);font-style:normal;color:var(--dim);margin-bottom:3px;letter-spacing:.08em}
+.bub.l{left:26px;background:#171b24;border:1px solid #2a3140}
+.bub.r{right:26px;background:#162038;border:1px solid #29406e}
+/* D: terminal */
+#D .win{left:22px;right:22px;top:86px;height:520px;background:#06080b;border:1px solid #232a36;border-radius:14px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+#D .wbar{height:34px;background:#12161e;border-bottom:1px solid #232a36;display:flex;gap:7px;align-items:center;padding:0 13px}
+#D .wbar i{width:11px;height:11px;border-radius:50%;display:block}
+#D pre{position:absolute;left:18px;right:14px;top:50px;font:600 17.5px/1.5 var(--mono);white-space:pre-wrap;color:#d8dce6}
+#D .cap{left:0;right:0;top:640px;text-align:center;font:800 30px/1.2 var(--sans);letter-spacing:-.02em}
+#D .step{left:0;right:0;top:40px;text-align:center;font:800 14px var(--mono);letter-spacing:.2em;color:var(--dim)}
+.ok{color:#43c97a}.no{color:#ff6b6b}.wn{color:#ffb454}.hd{color:#ffc531;font-weight:800}.dm{color:#7d8699}.bl{color:#5b9dff}
+.hit{background:rgba(255,77,77,.22);outline:2px solid #ff4d4d;border-radius:4px;padding:1px 4px;margin:0 -4px}
+.caret{display:inline-block;width:10px;height:19px;background:#ffc531;vertical-align:-3px}
+/* E: blast */
+#E svg{position:absolute;left:0;top:60px;width:540px;height:560px}
+#E .big{left:0;right:0;top:640px;text-align:center;font:800 50px/1.08 var(--sans);letter-spacing:-.035em}
+#E .sm{left:0;right:0;top:810px;text-align:center;font:700 18px var(--mono);color:var(--dim)}
+/* F: end */
+#F .t{font:800 100px/0.92 var(--mono);letter-spacing:-.07em}
+#F .s{font:800 28px/1.25 var(--sans);letter-spacing:-.02em}
+#F .u{font:800 17.5px var(--mono);color:var(--amber);letter-spacing:-.02em}
+#F .p{font:600 14px var(--mono);color:var(--dim);letter-spacing:.06em}
+#tag{position:absolute;left:0;right:0;bottom:36px;text-align:center;font:700 12px var(--mono);letter-spacing:.14em;color:#8a93a8;z-index:31;opacity:0}
+</style></head><body>
+<div id="stage">
+ <div class="tape t" id="tt"></div><div class="tape b" id="tb"></div>
+ <div id="flash"></div><div id="scan"></div><div id="vig"></div>
+
+ <div class="scene" id="A">
+  <div class="abs center" id="Aw" style="top:150px"></div>
+  <div class="abs center" id="As1" style="top:626px"></div>
+  <div class="abs center" id="As2" style="top:700px"></div>
+ </div>
+
+ <div class="scene" id="B">
+  <div class="abs hd">$ git log --all --oneline</div><div class="abs cnt" id="Bc"></div>
+  <div class="abs log" id="Bl"></div>
+ </div>
+
+ <div class="scene" id="C">
+  <div class="abs bar" id="Cbar">🚨 PRODUCTION INCIDENT</div>
+  <div class="abs center big glow-r" id="Cbig" style="top:120px"></div>
+  <div class="abs center meta" id="Cmeta" style="top:300px"></div>
+  <div class="bub l" id="Cb1" style="top:410px"><i>MAYA</i>Did you change payments?</div>
+  <div class="bub r" id="Cb2" style="top:512px"><i>SAM</i>No.</div>
+  <div class="bub l" id="Cb3" style="top:600px"><i>MAYA</i>Claude changed it.</div>
+  <div class="bub r" id="Cb4" style="top:702px"><i>SAM</i>Which Claude?</div>
+ </div>
+
+ <div class="scene" id="D">
+  <div class="abs step" id="Dstep"></div>
+  <div class="abs win"><div class="wbar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></div><pre id="Dpre"></pre></div>
+  <div class="abs cap" id="Dcap"></div>
+ </div>
+
+ <div class="scene" id="E">
+  <svg viewBox="0 0 540 620" id="Esvg"></svg>
+  <div class="abs big" id="Ebig"></div>
+  <div class="abs sm" id="Esm"></div>
+ </div>
+
+ <div class="scene" id="F">
+  <div class="abs center t" id="Ft" style="top:190px"></div>
+  <div class="abs center s" id="Fs" style="top:520px"></div>
+  <div class="abs center u" id="Fu" style="top:700px"></div>
+  <div class="abs center p" id="Fp" style="top:780px"></div>
+ </div>
+ <div id="tag">SIMULATED INCIDENT · REAL wbi COMMANDS</div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
+const ease=x=>1-Math.pow(1-clamp(x),3);
+const seg=(t,a,b)=>clamp((t-a)/(b-a));
+const rnd=n=>{const s=Math.sin(n*127.1+311.7)*43758.5453;return s-Math.floor(s)};
+const typed=(s,t,t0,cps)=>s.slice(0,Math.max(0,Math.min(s.length,Math.floor((t-t0)*cps))));
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const vis=(el,o,tf)=>{el.style.opacity=o;if(tf!==undefined)el.style.transform=tf};
+const TOTAL=26;
+
+/* scene windows */
+const W={A:[0,2.9],B:[2.6,7.3],C:[7.1,9.9],D:[9.7,19.6],E:[19.4,23.4],F:[23.2,26]};
+function fade(t,[a,b],i=.25,o=.25){return Math.min(seg(t,a,a+i),1-seg(t,b-o,b))}
+
+/* B data */
+const LOG=[
+ ['claude','#ffb454','wbi/TASK-003','feat(api): PaymentStatus','a91f2c7'],
+ ['codex','#5b9dff','wbi/TASK-007','feat(billing): dashboard','3be40d1'],
+ ['cursor','#43c97a','wbi/TASK-001','feat(ui): checkout flow','c7720e9'],
+ ['antigravity','#c58bff','wbi/TASK-004','chore(db): migration','19fa6b2'],
+ ['maya','#eceef3','main','merge TASK-001','e5d0442'],
+ ['claude','#ffb454','wbi/TASK-003','refactor: "small cleanup"','7b13aa8'],
+ ['codex','#5b9dff','wbi/TASK-007','fix(billing): totals','0c4de19'],
+ ['sam','#eceef3','wbi/TASK-003','review comments','42ab9f0'],
+ ['claude','#ffb454','wbi/TASK-003','feat(auth): token helper','d1e88a3'],
+ ['cursor','#43c97a','wbi/TASK-001','style: spacing','88f10b5'],
+ ['antigravity','#c58bff','wbi/TASK-004','fix(db): index','f2a07c6'],
+ ['codex','#5b9dff','wbi/TASK-010','wip: reconciliation','6e5d3a1'],
+ ['claude','#ffb454','wbi/TASK-003','tests: payment','2c9b7e4'],
+ ['maya','#eceef3','main','merge TASK-004','b30c1fd'],
+];
+
+/* D data */
+const CMDS=[
+ {cmd:'wbi status',cap:'First, see what’s happening.',step:'1 / 3',out:[
+  ['hd','WHO BROKE IT?'],['','PROJECT: shop-checkout'],['','12 tasks · 4 agents · 2 blocked'],['',''],
+  ['hd','ACTIVE'],['ok','● Claude    → TASK-003 PaymentStatus API'],['ok','● Codex     → TASK-007 Billing dashboard'],['ok','● Cursor    → TASK-001 Checkout flow'],['',''],
+  ['hd','ATTENTION'],['wn','⚠ TASK-003  PaymentStatus API'],['no','   CONTRACT CONFLICT']]},
+ {cmd:'wbi task TASK-003',cap:'Then, what was it supposed to do?',step:'2 / 3',out:[
+  ['hd','TASK-003'],['','Update PaymentStatus API'],['',''],
+  ['','Owner:     Sam'],['','Executor:  Claude Code'],['','Contract:  PaymentStatus'],['',''],
+  ['dm','Downstream tasks waiting on you:'],['wn','  TASK-010'],['wn','  TASK-014'],['',''],['dm','Allowed paths: src/api/**']]},
+ {cmd:'wbi blame',cap:'Now, who touched it?',step:'3 / 3',out:[
+  ['hd','PaymentStatus'],['',''],['dm','Changed by:'],['','  Claude Code'],['','  TASK-003'],['','  commit a91f2c7'],['',''],
+  ['hit','⚠ Undeclared: src/auth/payment-token.ts']]}
+];
+const D_T=[9.7,12.95,16.2,19.6];
+
+function tape(t){const o=(t*60)%44;$('tt').style.backgroundPosition=o+'px 0';$('tb').style.backgroundPosition=(-o)+'px 0'}
+
+function sceneA(t){
+  const g=t<.55||(t>1.55&&t<1.7)?1:0;
+  const s=Math.floor(t*30);
+  const dx=g?(rnd(s)-.5)*14:0, dy=g?(rnd(s+9)-.5)*6:0;
+  const k=ease(seg(t,0,.22));
+  const sh=g?`text-shadow:${-4-dx*.3}px 0 #ff4d4d,${4+dx*.3}px 0 #3df,0 0 30px rgba(255,197,49,.25)`:'text-shadow:0 0 34px rgba(255,197,49,.18)';
+  $('Aw').innerHTML=`<div class="w" style="transform:translate(${dx}px,${dy}px) scale(${1.25-.25*k});opacity:${Math.min(1,k*1.6)};${sh}">WHO<br>BROKE<br>IT<span class="q">?</span></div>`;
+  const s1=typed('4 AI agents. 1 repo.',t,0.95,34), s2=typed('Something broke.',t,1.65,30);
+  $('As1').innerHTML=`<div class="sub">${s1}</div>`;
+  $('As2').innerHTML=`<div class="sub no glow-r" style="color:#ff6b6b">${s2}</div>`;
+  vis($('A'),fade(t,W.A,.01,.3));
+}
+function sceneB(t){
+  const t0=W.B[0]+.2, per=.26;
+  let n=Math.floor((t-t0)/per)+1; n=Math.max(0,Math.min(LOG.length,n));
+  const rows=LOG.slice(0,n);
+  const vis_n=12, start=Math.max(0,rows.length-vis_n);
+  let h='';
+  rows.slice(start).forEach((r,i)=>{
+    const idx=start+i, age=(t-(t0+idx*per))/per, a=clamp(age,0,1);
+    const hot=r[2]==='wbi/TASK-003';
+    h+=`<div class="ln" style="opacity:${a};transform:translateX(${(1-ease(a))*-18}px)"><span class="dot" style="color:${r[1]}"></span><div class="r1"><span style="color:${r[1]}">${r[0]}</span><span class="h">${r[4]}</span></div><div class="r2"><b>${r[2]}</b> · ${esc(r[3])}</div></div>`;
+  });
+  $('Bl').innerHTML=h;
+  $('Bc').textContent=`${Math.min(17,3+n)} commits · 20 min`;
+  vis($('B'),fade(t,W.B,.3,.18));
+}
+function sceneC(t){
+  const a=W.C[0];
+  const flash=t<a+.9?(Math.floor((t-a)*14)%2===0?.55:.08):0;
+  $('flash').style.opacity=t>=a&&t<a+.9?flash:0;
+  const sh=t<a+1.0?(rnd(Math.floor(t*30))-.5)*10:0;
+  $('C').style.transform=`translate(${sh}px,${sh*.4}px)`;
+  const bigT=['PAYMENT','API: 500'];
+  $('Cbig').innerHTML=typed(bigT[0],t,a+.05,40)+'<br><span style="color:#ff6b6b">'+typed(bigT[1],t,a+.3,40)+'</span>';
+  $('Cmeta').innerHTML=seg(t,a+.55,a+.7)>0?'checkout failing · refunds stuck':'';
+  [['Cb1',a+.75],['Cb2',a+1.2],['Cb3',a+1.65],['Cb4',a+2.1]].forEach(([id,s])=>{const e=ease(seg(t,s,s+.18));vis($(id),e,`translateY(${(1-e)*14}px) scale(${.96+.04*e})`)});
+  vis($('C'),fade(t,W.C,.05,.25));
+}
+function colorize(line,t,reveal){
+  const [c,s]=line; let x=esc(s);
+  if(c==='hit') return `<span class="hit no">${x}</span>`;
+  return c?`<span class="${c}">${x}</span>`:x;
+}
+function sceneD(t){
+  let k=0;for(let i=0;i<3;i++) if(t>=D_T[i]) k=i;
+  const C=CMDS[k], s0=D_T[k], s1=D_T[k+1];
+  const local=t-s0;
+  const cmdTxt=typed('$ '+C.cmd,t,s0+.12,34);
+  const typedDone=cmdTxt.length>=('$ '+C.cmd).length;
+  const tOut=s0+.12+('$ '+C.cmd).length/34+.15;
+  let h=`<span class="bl">${esc(cmdTxt.slice(0,2))}</span>${esc(cmdTxt.slice(2))}`;
+  if(!typedDone) h+='<span class="caret"></span>';
+  h+='\n\n';
+  const nOut=Math.max(0,Math.min(C.out.length,Math.floor((t-tOut)/.1)+1));
+  for(let i=0;i<nOut;i++){
+    const [c,s]=C.out[i];
+    let line=colorize(C.out[i],t);
+    if(c==='hit'){const p=.5+.5*Math.sin((t-tOut)*14);line=`<span class="hit no" style="background:rgba(255,77,77,${.2+.25*p});box-shadow:0 0 ${10+16*p}px rgba(255,77,77,${.4+.4*p})">${esc(s)}</span>`}
+    h+=line+'\n';
+  }
+  $('Dpre').innerHTML=h;
+  // blame: reveal text
+  $('Dcap').innerHTML=C.cap;
+  let capO=ease(seg(t,tOut+.2,tOut+.5));
+  if(k===2){ const hitT=tOut+C.out.length*.1+.05; const th=seg(t,hitT,hitT+.2); capO=ease(seg(t,tOut+.1,tOut+.4)); if(th>0){$('Dcap').innerHTML=`<span class="no glow-r">THERE IT IS.</span>`;} }
+  vis($('Dcap'),capO);
+  $('Dstep').textContent=`COMMAND ${C.step}`;
+  const f=Math.min(seg(t,W.D[0],W.D[0]+.2),1-seg(t,W.D[1]-.3,W.D[1]));
+  vis($('D'),f);
+  // quick cut flicker at command switches
+  if(k>0&&t-s0<.08) $('D').style.opacity=.55;
+}
+let built=false;
+function buildE(){
+  if(built) return; built=true;
+  const NS='http://www.w3.org/2000/svg';
+  const svg=$('Esvg');
+  const nodes=[{id:'c',x:270,y:90,l:'PaymentStatus',s:'contract · TASK-003',c:'#ffc531'},
+   {id:'1',x:90,y:430,l:'TASK-010',s:'downstream task',c:'#ff4d4d'},
+   {id:'2',x:270,y:430,l:'Billing API',s:'consumer',c:'#ff4d4d'},
+   {id:'3',x:450,y:430,l:'Reconciliation',s:'downstream',c:'#ff4d4d'}];
+  let h='';
+  for(const n of nodes.slice(1)) h+=`<path id="e${n.id}" d="M270,150 C270,260 ${n.x},260 ${n.x},${n.y-50}" fill="none" stroke="#2a3140" stroke-width="3" stroke-dasharray="1000" stroke-dashoffset="1000"/>`;
+  for(const n of nodes){
+    h+=`<g id="n${n.id}" transform="translate(${n.x},${n.y})"><rect id="r${n.id}" x="${n.id==='c'?-118:-80}" y="-48" width="${n.id==='c'?236:160}" height="96" rx="14" fill="#10141b" stroke="${n.c==='#ffc531'?'#ffc531':'#2a3140'}" stroke-width="3"/><text x="0" y="-6" text-anchor="middle" font-family="Menlo,monospace" font-weight="800" font-size="${n.id==='c'?26:(n.l.length>12?16.5:19)}" fill="#eceef3">${n.l}</text><text x="0" y="24" text-anchor="middle" font-family="Menlo,monospace" font-size="14" fill="#7d8699">${n.s}</text></g>`;
+  }
+  svg.innerHTML=h;
+}
+function sceneE(t){
+  buildE();
+  const a=W.E[0];
+  const nodeC=ease(seg(t,a+.05,a+.4));
+  $('nc').style.opacity=nodeC; $('nc').setAttribute('transform',`translate(270,${90-(1-nodeC)*20}) scale(${.9+.1*nodeC})`);
+  [['1',a+.6],['2',a+.95],['3',a+1.3]].forEach(([id,s])=>{
+    const e=seg(t,s,s+.45), p=$('e'+id);
+    p.setAttribute('stroke-dashoffset',String(1000-1000*ease(e)));
+    p.setAttribute('stroke',e>.98?'#ff4d4d':'#ffc531');
+    const nd=$('n'+id), ne=ease(seg(t,s+.3,s+.6));
+    nd.style.opacity=ne;
+    const hit=seg(t,s+.45,s+.8);
+    const r=$('r'+id); r.setAttribute('stroke',hit>0?'#ff4d4d':'#2a3140'); r.setAttribute('fill',hit>0?'#2a1114':'#10141b');
+    const pulse=hit>0?(.5+.5*Math.sin((t-s)*12)):0;
+    nd.setAttribute('transform',`translate(${{'1':90,'2':270,'3':450}[id]},430) scale(${.92+.08*ne+pulse*.025})`);
+  });
+  const l1=typed('One change.',t,a+2.0,40), l2=typed('Three things at risk.',t,a+2.3,40);
+  $('Ebig').innerHTML=l1+'<br><span class="no glow-r" style="color:#ff6b6b">'+l2+'</span>';
+  $('Esm').textContent=seg(t,a+2.6,a+2.8)>0?'blast radius · wbi blast PaymentStatus':'';
+  vis($('E'),fade(t,W.E,.15,.25));
+}
+function sceneF(t){
+  const a=W.F[0], k=ease(seg(t,a,a+.3));
+  const g=t-a<.25?(rnd(Math.floor(t*30))-.5)*10:0;
+  $('Ft').innerHTML=`<div class="t" style="transform:translateX(${g}px) scale(${1.12-.12*k});opacity:${k};text-shadow:0 0 36px rgba(255,197,49,.2)">WHO<br>BROKE<br>IT<span style="color:#ffc531">?</span></div>`;
+  $('Fs').innerHTML=`<div class="s">${typed('One repo. Humans. AI agents.',t,a+.45,40)}<br><span style="color:#ffc531">${typed('Zero excuses.',t,a+1.15,30)}</span></div>`;
+  $('Fu').textContent=typed('github.com/shriyashish-mishra/who-broke-it',t,a+1.6,52);
+  $('Fp').textContent=seg(t,a+2.1,a+2.3)>0?'open source · MIT · one static binary':'';
+  vis($('F'),Math.min(seg(t,a,a+.01),1));
+}
+function setT(t){
+  tape(t);
+  $('flash').style.opacity=0;
+  ['A','B','C','D','E','F'].forEach(i=>{$(i).style.opacity=0;$(i).style.transform=''});
+  if(t<W.A[1]) sceneA(t);
+  if(t>=W.B[0]&&t<W.B[1]) sceneB(t);
+  if(t>=W.C[0]&&t<W.C[1]) sceneC(t);
+  if(t>=W.D[0]&&t<W.D[1]) sceneD(t);
+  if(t>=W.E[0]&&t<W.E[1]) sceneE(t);
+  if(t>=W.F[0]) sceneF(t);
+  // simulated-incident disclosure while the incident is on screen
+  $('tag').style.opacity=(t>=W.B[0]+.4&&t<W.F[0])?.85:0;
+}
+window.setT=setT; window.TOTAL=TOTAL; setT(0);
+</script></body></html>
