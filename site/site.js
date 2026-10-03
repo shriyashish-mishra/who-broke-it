@@ -309,3 +309,16 @@
     show(0);
   }
 })();
+
+(function(){
+  var b=document.getElementById('themeToggle'); if(!b) return;
+  var root=document.documentElement;
+  function paint(){var l=root.getAttribute('data-theme')==='light';b.textContent=l?'☾':'☀';b.setAttribute('aria-label',l?'Switch to dark mode':'Switch to light mode');}
+  b.addEventListener('click',function(){
+    var l=root.getAttribute('data-theme')==='light';
+    if(l) root.removeAttribute('data-theme'); else root.setAttribute('data-theme','light');
+    try{localStorage.setItem('wbi-theme',l?'dark':'light');}catch(e){}
+    paint();
+  });
+  paint();
+})();

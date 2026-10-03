@@ -179,3 +179,8 @@ html.js .inv #undecl:not(.hl){background:none;border-color:transparent;color:inh
 
 .about{padding:20px 22px 70px}.about-card{max-width:680px;margin:0 auto;padding:28px 30px;background:var(--card);border:1px solid var(--line);border-radius:14px}
 .about-k{font-size:12px;letter-spacing:.16em;color:var(--amber);margin:0 0 6px}.about-card h2{margin:0 0 10px;font-size:clamp(22px,3.4vw,28px)}.about-card p{color:var(--dim);margin:0 0 14px}.about-card p:last-child{margin:0}
+
+:root[data-theme="light"]{color-scheme:light;--bg:#f7f4ec;--bg2:#efebe0;--card:#fffdf7;--line:#ddd6c5;--ink:#1a1c22;--dim:#666c7a;--amber:#c98a00;--red:#d03a3a;--green:#1c9a55;--blue:#2865d6;--violet:#8442cf;--cyan:#0c8aa0;--warn:#bf6f12;--tapeink:#1a1a1a}
+:root[data-theme="light"] .scan{background:repeating-linear-gradient(0deg,rgba(0,0,0,.02) 0 1px,transparent 1px 3px)}
+.theme-toggle{display:inline-grid;place-items:center;width:34px;height:34px;padding:0;border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--ink);font:16px/1 var(--sans);cursor:pointer}
+.theme-toggle:hover{border-color:var(--amber)} .theme-toggle:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
