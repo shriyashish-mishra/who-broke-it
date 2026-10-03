@@ -11,6 +11,17 @@ import (
 	"github.com/shriyashish-mishra/who-broke-it/internal/engine"
 )
 
+// quietGit stops git from spawning detached background maintenance (gc --auto) in test repos. That process can
+// still be writing into .git when t.TempDir() cleanup runs, which fails the test with "directory not empty".
+func quietGit(t testing.TB) {
+	t.Helper()
+	t.Setenv("GIT_CONFIG_COUNT", "2")
+	t.Setenv("GIT_CONFIG_KEY_0", "gc.auto")
+	t.Setenv("GIT_CONFIG_VALUE_0", "0")
+	t.Setenv("GIT_CONFIG_KEY_1", "maintenance.auto")
+	t.Setenv("GIT_CONFIG_VALUE_1", "false")
+}
+
 // Git runs git in dir and fails the test on error.
 func Git(t testing.TB, dir string, args ...string) string {
 	t.Helper()
@@ -26,6 +37,7 @@ func Git(t testing.TB, dir string, args ...string) string {
 // MakeRepo creates a git repo (inside t.TempDir()) with one commit.
 func MakeRepo(t testing.TB, files map[string]string) string {
 	t.Helper()
+	quietGit(t)
 	t.Setenv("WBI_NO_GH", "1")
 	dir := filepath.Join(t.TempDir(), "repo")
 	if err := os.MkdirAll(dir, 0o755); err != nil {
@@ -159,6 +171,7 @@ func EditJSON(t testing.TB, path string, fn func(map[string]any)) {
 // MakeRepoAt is MakeRepo at an exact path (for tests that need sibling repos).
 func MakeRepoAt(t testing.TB, dir string) string {
 	t.Helper()
+	quietGit(t)
 	t.Setenv("WBI_NO_GH", "1")
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		t.Fatal(err)
