@@ -5,6 +5,15 @@ All notable changes. Format follows [Keep a Changelog](https://keepachangelog.co
 ## [Unreleased]
 
 ### Added
+- Verified sync on **gitlab.com** (17/17 checks, same as GitHub); `scripts/verify-sync.sh` is now host-neutral.
+- Adapter verification for Codex CLI, Cursor Agent, OpenCode and Antigravity (see `docs/REAL-AGENTS.md`), the `wbi executor` command used by the commit hook, and `scripts/agent-harness/`.
+- Website redesigned as a playable, clearly-labelled-simulated incident investigation that teaches the real commands.
+
+### Fixed
+- Commits made by agents driven over MCP now get a `WBI-Agent` trailer (the hook asks wbi who holds the task).
+- Test summaries no longer capture runtime warnings (e.g. Node's NO_COLOR/FORCE_COLOR notice).
+
+### Added
 - **Multi-repo links** (foundation): `wbi link add|remove|list|impact`. A task consumes `<repo>:<Contract>`; cross-repo drift reuses the banner / status / `wbi ack` flow, `wbi blast <repo>:<Contract>` shows impact in the consumer, and `wbi link impact <Contract>` shows consumers in linked repos. One hop per repo; local checkouts; committed graphs only.
 
 ## [0.2.0] - 2026-10-02

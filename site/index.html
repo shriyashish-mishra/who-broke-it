@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Who Broke It? One repo. Humans. AI agents. Zero excuses.</title>
-<meta name="description" content="Who Broke It? is the open-source coordination layer for AI-native engineering teams: one repo, many humans and coding agents, shared task graph, intent and conflict detection, blast radius, verified handoffs and a merge gate.">
+<meta name="description" content="Investigate a simulated production incident with the real wbi commands. Who Broke It? is the open-source coordination layer for AI-native engineering teams: shared task graph, intent and conflict detection, blast radius, verified handoffs and a merge gate.">
 <meta property="og:title" content="Who Broke It?">
 <meta property="og:description" content="One repo. Humans. AI agents. Zero excuses. The open-source coordination layer for AI-native engineering teams.">
 <meta property="og:type" content="website">
@@ -12,231 +12,620 @@
 <meta property="og:image" content="https://shriyashish-mishra.github.io/who-broke-it/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<script>document.documentElement.className+=' js'</script>
 <link rel="stylesheet" href="site.css">
-<noscript><style>.term pre .ln,.m{opacity:1!important;transform:none!important}</style></noscript>
 </head>
 <body>
-
+<div class="scan" aria-hidden="true"></div>
 <div class="tape" aria-hidden="true"></div>
 
 <header class="top">
   <a class="logo" href="#top" aria-label="Who Broke It? home"><span class="q">?</span> WHO BROKE IT?</a>
   <nav aria-label="Sections">
-    <a href="#problem">Problem</a><a href="#how">How it works</a><a href="#graph">Graph</a><a href="#agents">Agents</a><a href="#trust">Honesty</a><a href="#install">Install</a>
+    <a href="#realcli">Real CLI</a><a href="#proof">What's proven</a><a href="#install">Install</a>
     <a class="gh" href="https://github.com/shriyashish-mishra/who-broke-it" rel="noopener">GitHub ↗</a>
   </nav>
 </header>
 
+<div id="tracker" class="tracker" aria-live="polite" hidden>
+  <span class="simbadge">SIMULATED INCIDENT · NOT A LIVE AGENT</span>
+  <span class="trk-label mono">COMMANDS YOU'VE USED <b id="trkcount">0/10</b></span>
+  <ol class="chips" id="chips">
+    <li data-c="status">status</li><li data-c="tasks">tasks</li><li data-c="task">task</li><li data-c="graph">graph</li><li data-c="blame">blame</li><li data-c="intent">intent</li><li data-c="blast">blast</li><li data-c="simulate">simulate</li><li data-c="handoff">handoff</li><li data-c="pr">pr</li>
+  </ol>
+</div>
+
 <main id="top">
 
-<!-- ============================ HERO -->
-<section class="hero">
-  <p class="case mono">CASE FILE · REPO: <b>everything</b> · STATUS: <b class="hot">UNDER INVESTIGATION</b></p>
-  <h1>Who Broke It<span class="cursor">?</span></h1>
-  <p class="tag">One repo. Humans. AI agents. <em>Zero excuses.</em></p>
-  <p class="sub">The open-source coordination layer for AI-native engineering teams. Your agents write the code. <b>Who Broke It?</b> keeps the engineering from falling apart.</p>
+<!-- ================= 1. HERO ================= -->
+<section class="hero" id="hero">
+  <p class="pager mono"><span class="siren" aria-hidden="true">🚨</span> PRODUCTION INCIDENT <span class="dim">· INC-0184 · SEV-1</span></p>
+  <h1><span class="l1">PAYMENT API</span><span class="l2">IS ON <em class="fire">FIRE</em></span></h1>
+  <p class="tag">One repo. Humans. AI agents. <b>Zero excuses.</b></p>
   <div class="cta">
-    <div class="install" data-copy="curl -fsSL https://raw.githubusercontent.com/shriyashish-mishra/who-broke-it/main/install.sh | sh">
-      <code>curl -fsSL …/install.sh | sh</code><button type="button" aria-label="Copy install command">copy</button>
+    <button class="btn big" id="start" type="button">🔎 Investigate the incident</button>
+    <a class="btn ghost big" href="#realcli">View the real CLI</a>
+  </div>
+  <p class="nojs-note">JavaScript is off, so the interactive parts are hidden. The whole investigation is below as a plain transcript: every command, with its <b>simulated</b> output.</p>
+  <p class="fine mono">interactive demo · the incident is fictional · every command is real · every output in the story is <b>SIMULATED</b>, in wbi's real output format · genuine captures are <a href="#realcli">further down</a></p>
+</section>
+
+<!-- ================= 2. STANDUP ================= -->
+<section id="standup" class="case locked" aria-labelledby="h-standup">
+  <header class="casehead"><span class="num">02:14 AM</span><h2 id="h-standup">The incident call</h2><span class="sim">SIMULATED</span></header>
+  <div class="chat" id="chat" aria-label="Transcript of an incident call">
+    <p class="m a"><i>Maya</i>Did you change payments?</p>
+    <p class="m b"><i>Dev</i>Not me.</p>
+    <p class="m b"><i>Sam</i>I only changed the API.</p>
+    <p class="m a"><i>Maya</i>Claude changed the API.</p>
+    <p class="m b"><i>Sam</i>Which Claude?</p>
+  </div>
+  <p class="count mono after"><b>3 humans.</b> <b>4 agent sessions.</b> <b>1 repo.</b> <b class="hot">0 shared memory.</b></p>
+  <div class="after"><button class="btn big next" data-next="s1" type="button">Okay. Let's investigate.</button></div>
+</section>
+
+<!-- ================= 3. STEP 01 status ================= -->
+<section id="s1" class="case locked" aria-labelledby="h-s1">
+  <header class="casehead"><span class="num">STEP 01</span><h2 id="h-s1">What is actually happening?</h2><span class="sim">SIMULATED</span></header>
+  <p class="problem">Nobody has the whole picture. Start with the one view every human and every agent shares.</p>
+  <div class="term" data-cmd="wbi status" data-learn="status">
+    <div class="bar"><i></i><i></i><i></i><span>shop-checkout · simulated</span></div>
+    <pre class="cmd">$ wbi status</pre>
+    <pre class="out">
+WHO BROKE IT?
+
+PROJECT: shop-checkout
+Fix checkout payments and ship the mobile release
+
+Progress: ██░░░░░░░░░░░░░░░░░░ 13%  (1/8 tasks)
+
+ACTIVE
+● Claude   → TASK-003 Update PaymentStatus API  [2 commits]
+● Codex    → TASK-010 Payment reconciliation  [1 commit]
+● Antigravity → TASK-007 Billing dashboard  [1 commit]
+
+READY
+○ TASK-002 Add payment migration
+○ TASK-004 Payment webhook tests
+
+BLOCKED
+○ TASK-014 Mobile checkout
+  waiting for TASK-003
+○ TASK-016 Ship mobile release
+  waiting for TASK-014
+
+ATTENTION
+<mark>⚠ Intent collision: claude@sam MODIFY src/api/payment.ts (TASK-003) ↔ codex@dev MODIFY src/api/** (TASK-010)</mark></pre>
+  </div>
+  <div class="after">
+    <p class="take"><b>wbi status</b> is one shared view of what humans and agents are doing, with the problems pulled to the top.</p>
+    <button class="btn next" data-next="s2" type="button">Investigate TASK-003 →</button>
+  </div>
+</section>
+
+<!-- ================= 4. STEP 02 tasks ================= -->
+<section id="s2" class="case locked" aria-labelledby="h-s2">
+  <header class="casehead"><span class="num">STEP 02</span><h2 id="h-s2">Find the task</h2><span class="sim">SIMULATED</span></header>
+  <p class="problem">Two agents are in the same area of the codebase. Which tasks, and in what state is everything?</p>
+  <div class="term" data-cmd="wbi tasks" data-learn="tasks">
+    <div class="bar"><i></i><i></i><i></i><span>shop-checkout · simulated</span></div>
+    <pre class="cmd">$ wbi tasks</pre>
+    <pre class="out">
+TASK-001  DONE         frontend     Update checkout UI
+TASK-002  READY        database     Add payment migration
+<mark>TASK-003  IN_PROGRESS  backend      Update PaymentStatus API  (claude@sam)</mark>
+TASK-004  READY        testing      Payment webhook tests
+TASK-007  IN_PROGRESS  frontend     Billing dashboard  (antigravity@maya)
+<mark class="warm">TASK-010  IN_PROGRESS  backend      Payment reconciliation  (codex@dev)</mark>
+TASK-014  BLOCKED      mobile       Mobile checkout
+TASK-016  BLOCKED      release      Ship mobile release</pre>
+  </div>
+  <div class="after">
+    <p class="take">Every task has a status derived from the dependency graph, and an <b>executor</b>: the agent or human holding it.</p>
+    <button class="btn next" data-next="s3" type="button">Inspect TASK-003</button>
+  </div>
+</section>
+
+<!-- ================= 5. STEP 03 task ================= -->
+<section id="s3" class="case locked" aria-labelledby="h-s3">
+  <header class="casehead"><span class="num">STEP 03</span><h2 id="h-s3">What was Claude supposed to do?</h2><span class="sim">SIMULATED</span></header>
+  <p class="problem">Before blaming anyone: what exactly was this task allowed to touch?</p>
+  <div class="term" data-cmd="wbi task TASK-003" data-learn="task">
+    <div class="bar"><i></i><i></i><i></i><span>shop-checkout · simulated</span></div>
+    <pre class="cmd">$ wbi task TASK-003</pre>
+    <pre class="out">
+IN_PROGRESS  (IN_PROGRESS)
+
+# TASK-003: Update PaymentStatus API
+
+**Goal:** Add a "paused" state to PaymentStatus without breaking existing consumers.
+
+**Owner:** Sam  |  **Executor:** claude@sam  |  **Layer:** backend  |  **Branch:** wbi/TASK-003
+
+**Requirements:** REQ-002 (Customers can pay and see their payment status)
+
+## Depends on
+- TASK-001 Update checkout UI: DONE
+
+## Scope
+- Allowed paths: `src/api/payment.ts`, `src/api/payment.test.ts`
+<mark>- Restricted paths: `src/auth/**`, `migrations/**`</mark>
+
+## Contracts
+- PROVIDES **PaymentStatus** v1 (type): `'pending' | 'paid' | 'failed'`
+
+## Acceptance criteria
+1. Existing states are preserved _(attest in handoff)_
+2. The API contract is updated and versioned _(attest in handoff)_
+3. Test suite passes (npm test) _(auto-checked)_
+
+**High-impact (security, public-api):** a human must approve before this task is DONE.
+
+## Downstream tasks waiting on you
+TASK-014</pre>
+  </div>
+  <div class="after">
+    <p class="take">A wbi task is not a TODO. It is an <b>agent work packet</b>: ownership, dependencies, allowed files, contracts and acceptance criteria.</p>
+    <button class="btn next" data-next="s4" type="button">Follow the dependency →</button>
+  </div>
+</section>
+
+<!-- ================= 6. STEP 04 graph ================= -->
+<section id="s4" class="case locked" aria-labelledby="h-s4">
+  <header class="casehead"><span class="num">STEP 04</span><h2 id="h-s4">Open the Engineering Graph</h2><span class="sim">SIMULATED</span></header>
+  <p class="problem">TASK-003 provides a <b>contract</b>. Who else is built on it?</p>
+  <div class="term" data-cmd="wbi graph" data-learn="graph">
+    <div class="bar"><i></i><i></i><i></i><span>shop-checkout · simulated</span></div>
+    <pre class="cmd">$ wbi graph</pre>
+    <pre class="out">
+WAVE 1
+  TASK-001  DONE         frontend     Update checkout UI
+  TASK-002  READY        database     Add payment migration
+  TASK-004  READY        testing      Payment webhook tests
+WAVE 2
+  TASK-003  IN_PROGRESS  backend      Update PaymentStatus API
+      provides PaymentStatus
+      needs    TASK-001
+  TASK-007  IN_PROGRESS  frontend     Billing dashboard
+      needs    TASK-002, ⟨PaymentStatus⟩
+  TASK-010  IN_PROGRESS  backend      Payment reconciliation
+      needs    TASK-001, ⟨PaymentStatus⟩
+WAVE 3
+  TASK-014  BLOCKED      mobile       Mobile checkout
+      needs    TASK-003, ⟨PaymentStatus⟩
+WAVE 4
+  TASK-016  BLOCKED      release      Ship mobile release
+      needs    TASK-014</pre>
+  </div>
+  <div class="after">
+    <div class="boardwrap">
+      <p class="boardnote mono">DETECTIVE BOARD · <b>click a card</b> (or focus it and press Enter) · the picture <code>wbi dashboard</code> draws from the same files · <b>simulated data</b></p>
+      <div class="board"><svg id="board1" role="group" aria-label="Interactive engineering graph of the simulated incident"></svg></div>
+      <div class="detail" id="detail1" aria-live="polite"><p class="dim">Pick a card: a task, the contract, the agent, the file, the PR.</p></div>
     </div>
-    <a class="btn" href="demo-dashboard.html">See the live dashboard →</a>
-    <a class="btn ghost" href="https://github.com/shriyashish-mishra/who-broke-it">Star on GitHub</a>
+    <p class="take">wbi turns the repo into a <b>living graph</b> of goals, tasks, contracts, agents, commits and PRs, instead of disconnected tickets and diffs.</p>
+    <button class="btn next" data-next="s5" type="button">Who touched it? →</button>
   </div>
-  <p class="fine mono">single static binary · no server · no account · MIT · Linux · macOS · Windows</p>
-
-  <div class="lineup" aria-label="Suspects who touched the repo">
-    <figure><div class="face" style="--h:36">🤖</div><figcaption><b>Claude</b><span>touched the API</span></figcaption></figure>
-    <figure><div class="face" style="--h:205">🤖</div><figcaption><b>Codex</b><span>touched the schema</span></figcaption></figure>
-    <figure><div class="face" style="--h:275">🤖</div><figcaption><b>Gemini</b><span>touched the UI</span></figcaption></figure>
-    <figure><div class="face" style="--h:130">🧑</div><figcaption><b>Alice</b><span>touched "just one thing"</span></figcaption></figure>
-    <figure><div class="face" style="--h:350">🧑</div><figcaption><b>Bob</b><span>was on holiday (suspicious)</span></figcaption></figure>
-  </div>
-  <p class="verdict">Everyone touched the repo.<br><b>Now you can actually find out why.</b></p>
 </section>
 
-<!-- ============================ BEFORE / AFTER -->
-<section id="problem" class="block">
-  <div class="split">
-    <div>
-      <h2><span class="tagpill">BEFORE</span> The standup nobody wanted</h2>
-      <div class="chat" id="chat" aria-label="A chat about who changed payments">
-        <p class="m a"><i>Maya</i>Hey, did you change payments?</p>
-        <p class="m b"><i>Dev</i>Not me.</p>
-        <p class="m b"><i>Sam</i>I only changed the API.</p>
-        <p class="m a"><i>Maya</i>Claude changed the API.</p>
-        <p class="m b"><i>Sam</i>Which Claude?</p>
-        <p class="m dots"><i>everyone</i>…</p>
-      </div>
-      <p class="aside">Three humans, four agent sessions, one repo, zero shared memory.</p>
+<!-- ================= 7. STEP 05 blame ================= -->
+<section id="s5" class="case locked" aria-labelledby="h-s5">
+  <header class="casehead"><span class="num">STEP 05</span><h2 id="h-s5">Who touched it?</h2><span class="sim">SIMULATED</span></header>
+  <p class="problem">Not "who changed this line". Which <em>task</em> authorized the change, and which <em>agent</em> made it?</p>
+  <div class="term" data-cmd="wbi blame src/api/payment.ts" data-learn="blame">
+    <div class="bar"><i></i><i></i><i></i><span>shop-checkout · simulated</span></div>
+    <pre class="cmd">$ wbi blame src/api/payment.ts</pre>
+    <pre class="out">
+Last significant changes:
+
+🤖 Claude   TASK-003           4 min ago  feat(api): PaymentStatus API with paused  [wbi/TASK-003, unmerged]
+
+<mark>👀 Right now: claude@sam declared MODIFY src/api/payment.ts (TASK-003)</mark></pre>
+  </div>
+  <div class="term" data-cmd="wbi why src/api/payment.ts" data-learn="why">
+    <div class="bar"><i></i><i></i><i></i><span>shop-checkout · simulated</span></div>
+    <pre class="cmd">$ wbi why src/api/payment.ts</pre>
+    <pre class="out">
+Why does src/api/payment.ts exist?
+
+Introduced by:   TASK-003 Update PaymentStatus API
+Requirement:     REQ-002 Customers can pay and see their payment status
+Decision:        ADR-001 Contract-first parallel development
+Implemented by:  claude@sam / Sam
+Commit:          a91f2c7 feat(api): PaymentStatus API with paused</pre>
+  </div>
+  <div class="after">
+    <p class="take">Git tells you who changed a line. wbi adds <b>why it exists</b>: the task, the requirement and the agent, from commit trailers it installs.</p>
+    <p class="teaser mono">…but something doesn't look right.</p>
+    <button class="btn next" data-next="s6" type="button">Check what Claude said it would do →</button>
+  </div>
+</section>
+
+<!-- ================= 8. STEP 06 intent ================= -->
+<section id="s6" class="case locked" aria-labelledby="h-s6">
+  <header class="casehead"><span class="num">STEP 06</span><h2 id="h-s6">Check the declared intent</h2><span class="sim">SIMULATED</span></header>
+  <p class="problem">Before editing, an agent declares what it is about to touch. Here is what Claude declared, and Codex too.</p>
+  <div class="term" data-cmd="wbi intent" data-learn="intent">
+    <div class="bar"><i></i><i></i><i></i><span>shop-checkout · simulated</span></div>
+    <pre class="cmd">$ wbi intent</pre>
+    <pre class="out">
+#1   claude@sam      TASK-003  CREATE          src/api/payment.test.ts  6 min ago
+#2   claude@sam      TASK-003  MODIFY          src/api/payment.ts  6 min ago
+#3   claude@sam      TASK-003  CHANGE_CONTRACT PaymentStatus  5 min ago
+#4   claude@sam      TASK-003  DEPEND_ON       TASK-001  6 min ago
+#5   codex@dev       TASK-010  MODIFY          src/api/**  3 min ago
+<mark>⚠ collision: #2 ↔ #5 (src/api/payment.ts / src/api/**)</mark></pre>
+  </div>
+  <div class="quiz" id="quiz">
+    <p class="qq"><b>Your move, detective.</b> Git says Claude's branch changed these three files. <b>Which one was never declared?</b></p>
+    <div class="qopts">
+      <button type="button" class="qopt" data-ok="0"><code>src/api/payment.ts</code></button>
+      <button type="button" class="qopt" data-ok="0"><code>src/api/payment.test.ts</code></button>
+      <button type="button" class="qopt" data-ok="1"><code>src/auth/payment-token.ts</code></button>
     </div>
-    <div>
-      <h2><span class="tagpill ok">AFTER</span> One command</h2>
-      <div class="term" data-key="blame" data-cmd="wbi blame src/api/billing/"></div>
-      <div class="term" data-key="why" data-cmd="wbi why src/api/billing/status.ts" style="margin-top:14px"></div>
-      <p class="aside">The task, the requirement, the agent, the commit and the contract it changed, including work that has <em>not merged yet</em>.</p>
+    <p class="qfb mono" id="qfb" aria-live="polite"></p>
+  </div>
+  <div class="term" data-cmd="wbi check --base main --head wbi/TASK-003" data-learn="check" data-wait="quizdone">
+    <div class="bar"><i></i><i></i><i></i><span>merge gate · simulated</span></div>
+    <pre class="cmd">$ wbi check --base main --head wbi/TASK-003</pre>
+    <pre class="out">
+WBI CHECK  TASK-003  main...wbi/TASK-003, 3 file(s)
+
+<mark>✗ SCOPE_RESTRICTED       src/auth/payment-token.ts touches a path restricted for TASK-003  src/auth/payment-token.ts</mark>
+! NO_HANDOFF            TASK-003 has no handoff record on this branch (run: wbi handoff TASK-003 ...)
+
+FAIL  the Engineering Graph says this change should not merge as-is</pre>
+  </div>
+  <div class="after">
+    <p class="take">Agents <b>declare intent before editing</b>, and wbi checks the declaration against the task's scope and against other agents. Afterwards <code>wbi verify</code> and the merge gate flag any file <b>outside the task's allowed paths</b>. (Intent is cooperative; the gate is the enforcement.)</p>
+    <button class="btn next" data-next="s7" type="button">Check the blast radius →</button>
+  </div>
+</section>
+
+<!-- ================= 9. STEP 07 blast ================= -->
+<section id="s7" class="case locked" aria-labelledby="h-s7">
+  <header class="casehead"><span class="num">STEP 07</span><h2 id="h-s7">How far does this go?</h2><span class="sim">SIMULATED</span></header>
+  <p class="problem">Claude is changing <b>PaymentStatus</b>. Who built on it without knowing?</p>
+  <div class="term" data-cmd="wbi blast PaymentStatus" data-learn="blast">
+    <div class="bar"><i></i><i></i><i></i><span>shop-checkout · simulated</span></div>
+    <pre class="cmd">$ wbi blast PaymentStatus</pre>
+    <pre class="out">
+BLAST RADIUS  PaymentStatus (contract)
+
+Direct:
+  component mobile
+  component reconciliation
+  component billing-ui
+  TASK-007  consumes PaymentStatus
+  TASK-010  consumes PaymentStatus
+  TASK-014  consumes PaymentStatus
+
+Indirect:
+  component release
+  TASK-016  depends on TASK-014, which is affected
+
+Active agents:
+  Antigravity → TASK-007
+  Codex → TASK-010
+
+<mark>Risk: HIGH  2 agent(s) are actively building on this; 4 downstream tasks</mark></pre>
+  </div>
+  <div class="after">
+    <div class="stats" id="stats">
+      <div><b data-n="3">3</b><span>DIRECT CONSUMERS</span></div>
+      <div><b data-n="1">1</b><span>INDIRECT</span></div>
+      <div><b data-n="2">2</b><span>ACTIVE AGENTS</span></div>
+      <div class="risk"><b>HIGH</b><span>RISK</span></div>
+    </div>
+    <div class="boardwrap">
+      <div class="board"><svg id="board2" role="img" aria-label="Blast radius of PaymentStatus: three direct consumers and one indirect task"></svg></div>
+    </div>
+    <p class="take">One contract change can break work another agent <b>hasn't even seen yet</b>. Blast radius reads declared relationships, plus a static import scan for JS/TS, Python and Go.</p>
+    <button class="btn next" data-next="s8" type="button">Could we have seen this coming? →</button>
+  </div>
+</section>
+
+<!-- ================= 10. STEP 08 simulate ================= -->
+<section id="s8" class="case locked" aria-labelledby="h-s8">
+  <header class="casehead"><span class="num">STEP 08</span><h2 id="h-s8">Simulate before you break it</h2><span class="sim">SIMULATED</span></header>
+  <p class="problem">The plan itself had a hole. Run the plan before the agents do.</p>
+  <div class="term" data-cmd="wbi simulate" data-learn="simulate">
+    <div class="bar"><i></i><i></i><i></i><span>shop-checkout · simulated</span></div>
+    <pre class="cmd">$ wbi simulate</pre>
+    <pre class="out">
+EXECUTION PLAN
+
+8 tasks
+3 agents
+6 parallelizable tasks
+
+Critical path:
+4 tasks  TASK-001 → TASK-003 → TASK-014 → TASK-016
+
+Potential conflicts:
+1
+<mark>  TASK-003 ↔ TASK-010: src/api/payment.ts overlaps src/api/**</mark>
+
+Missing dependencies:
+2
+<mark>  TASK-007 consumes PaymentStatus but does not depend on TASK-003</mark>
+<mark>  TASK-010 consumes PaymentStatus but does not depend on TASK-003</mark>
+
+WAVE 1  (3 tasks, parallel)
+  TASK-001 Update checkout UI
+  TASK-002 Add payment migration  [needs approval: migration]
+  TASK-004 Payment webhook tests
+
+WAVE 2  (3 tasks, parallel)
+  TASK-003 Update PaymentStatus API  [needs approval: security, public-api]
+  TASK-007 Billing dashboard
+  TASK-010 Payment reconciliation
+
+≈ 4 sequential rounds with 3 agent(s).</pre>
+  </div>
+  <div class="after">
+    <p class="take"><b>wbi simulate</b> reasons over the dependency graph before agents start: overlapping scopes, missing dependencies, the critical path. This plan's gap is exactly why Claude and Codex collided.</p>
+    <button class="btn big next" data-next="chaos" type="button">💥 Now let's see it happen →</button>
+  </div>
+</section>
+
+<!-- ================= 11. CHAOS ================= -->
+<section id="chaos" class="case locked chaos" aria-labelledby="h-chaos">
+  <header class="casehead"><span class="num">REPLAY</span><h2 id="h-chaos">Release the agents</h2><span class="sim big">SIMULATED INCIDENT · THIS IS A WEBSITE DEMO · NOT LIVE AGENTS</span></header>
+  <p class="problem">Four workers, one repo. Watch what wbi catches. <span class="dim">(A scripted animation: no agent is running. Messages use wbi's real conflict codes.)</span></p>
+  <div class="arena" id="arena">
+    <div class="agents" id="agents">
+      <article class="agent" data-a="claude"><h3>🤖 Claude Code</h3><p class="at mono">TASK-003 · PaymentStatus API</p><p class="st" data-st>idle</p></article>
+      <article class="agent" data-a="codex"><h3>🤖 Codex</h3><p class="at mono">TASK-010 · Reconciliation</p><p class="st" data-st>idle</p></article>
+      <article class="agent" data-a="agy"><h3>🤖 Antigravity</h3><p class="at mono">TASK-007 · Billing dashboard</p><p class="st" data-st>idle</p></article>
+      <article class="agent" data-a="human"><h3>🧑 Human developer</h3><p class="at mono">TASK-001 · Checkout UI</p><p class="st" data-st>idle</p></article>
+    </div>
+    <div class="files" id="files">
+      <div class="file" data-f="checkout"><code>src/web/checkout/**</code></div>
+      <div class="file" data-f="billing"><code>src/web/billing/**</code></div>
+      <div class="file contract" data-f="payment"><code>src/api/payment.ts</code><span class="ver" id="ver">PaymentStatus v1</span></div>
+      <div class="file" data-f="auth"><code>src/auth/payment-token.ts</code></div>
     </div>
   </div>
-</section>
-
-<section class="block alt">
-  <h2 class="center">Agents can already write the code. Nobody coordinates it.</h2>
-  <div class="cards four">
-    <article><b>01</b><h3>They collide</h3><p>Two agents edit the same area. A merge conflict is the <em>good</em> outcome: the bad one is both being "right".</p></article>
-    <article><b>02</b><h3>Changes break strangers</h3><p>One agent bumps a type. Three other tasks, built against the old one, find out in CI. Or production.</p></article>
-    <article><b>03</b><h3>"Done" means "I said so"</h3><p>The agent reports success. Nothing checks scope, contracts, rules, or whether anyone asked for this.</p></article>
-    <article><b>04</b><h3>Nobody remembers why</h3><p>Six weeks later: why does this code exist, who wrote it, and which requirement was it for?</p></article>
+  <div class="chaosrow">
+    <button class="btn big boom" id="boom" type="button">💥 RELEASE THE AGENTS</button>
+    <div class="score mono" id="score" hidden><span>CAUGHT BY WBI <b id="caught">0</b></span><span>LANDED CLEAN <b id="clean">0</b></span></div>
+  </div>
+  <div class="term feed" data-static="1">
+    <div class="bar"><i></i><i></i><i></i><span>event feed · simulated</span></div>
+    <pre class="out" id="feed" aria-live="polite">Waiting for someone to press the button…</pre>
+  </div>
+  <div class="after" id="chaosafter">
+    <p class="take">Two changes landed clean. Three problems were caught <b>before merge</b>: a blocked contract edit, an out-of-scope file, and a contract bump that told everyone building on it.</p>
+    <button class="btn next" data-next="judge" type="button">But Claude says it's done →</button>
   </div>
 </section>
 
-<!-- ============================ HOW IT WORKS -->
-<section id="how" class="block">
-  <h2 class="center">How it works</h2>
-  <p class="lead center">The repo carries its own engineering context. Any agent that can run a shell command can play. Five are proven end to end.</p>
-  <div class="how">
-    <ol class="steps" id="steps" role="tablist" aria-label="Workflow steps"></ol>
-    <div class="stage">
-      <div class="stagehead mono" id="stagehead"></div>
-      <div class="term big" id="stageterm"></div>
-      <p class="stagenote" id="stagenote"></p>
-    </div>
+<!-- ================= 12. JUDGE ================= -->
+<section id="judge" class="case locked" aria-labelledby="h-judge">
+  <header class="casehead"><span class="num">STEP 09</span><h2 id="h-judge">THE AGENT SAYS IT'S DONE.</h2><span class="sim">SIMULATED</span></header>
+  <div class="says"><span class="who mono">🤖 Claude</span><q>Task complete.</q></div>
+  <p class="center"><button class="btn big prove" id="prove" type="button">Prove it.</button></p>
+  <div class="term" data-cmd="wbi handoff TASK-003 --summary &quot;PaymentStatus API: adds paused&quot; --tests &quot;npm test&quot; --contract &quot;PaymentStatus=adds paused&quot; --attest 1,2" data-learn="handoff" data-wait="prove">
+    <div class="bar"><i></i><i></i><i></i><span>shop-checkout · simulated</span></div>
+    <pre class="cmd">$ wbi handoff TASK-003 --summary "PaymentStatus API: adds paused" --tests "npm test" --contract "PaymentStatus=adds paused" --attest 1,2</pre>
+    <pre class="out">
+TASK-003 HANDOFF  by claude@sam
+
+Implemented:
+  PaymentStatus API: adds paused
+
+Changed:
+  src/api/payment.ts
+  src/api/payment.test.ts
+<mark>  src/auth/payment-token.ts</mark>
+
+Contract:
+  PaymentStatus → v2: adds paused
+
+Tests:
+  18 passed
+
+Known limitation:
+  Reconciliation adapter not updated
+
+Affected:
+  TASK-007
+  TASK-010
+  TASK-014
+  TASK-016
+
+TASK-003 VERIFICATION
+
+✓ Implementation       3 file(s) changed
+<mark>✗ Scope                outside allowed paths: src/auth/payment-token.ts</mark>
+✓ Contracts            PaymentStatus → v2 recorded and propagated
+✓ Dependencies         all upstream tasks DONE
+✓ Constitution         no machine-checkable rule violated
+✓ Tests                18 passed
+✓ Acceptance criteria  3/3
+
+Status: FAILED  sent back to IN_PROGRESS</pre>
+  </div>
+  <div class="after" data-key="judge1">
+    <p class="take verdict"><b>“Done” should be evidence, not a sentence.</b> The tests passed and the contract is recorded, and the verifier still sent it back: one file is outside the task's scope.</p>
+    <p class="center"><button class="btn" id="refix" type="button">Claude reverts the auth change and hands off again</button></p>
+  </div>
+  <div class="term" data-cmd="wbi handoff TASK-003 --summary &quot;PaymentStatus API: adds paused&quot; --tests &quot;npm test&quot; --attest 1,2" data-wait="refix">
+    <div class="bar"><i></i><i></i><i></i><span>shop-checkout · simulated</span></div>
+    <pre class="cmd">$ wbi handoff TASK-003 --summary "PaymentStatus API: adds paused" --tests "npm test" --attest 1,2</pre>
+    <pre class="out">
+✓ Implementation       2 file(s) changed
+✓ Scope                all changes inside allowed paths
+✓ Contracts            PaymentStatus → v2 recorded and propagated
+✓ Dependencies         all upstream tasks DONE
+✓ Constitution         no machine-checkable rule violated
+✓ Tests                18 passed
+✓ Acceptance criteria  3/3
+
+<mark class="ok">Status: READY FOR REVIEW  high-impact: wbi approve TASK-003</mark></pre>
+  </div>
+  <div class="after">
+    <p class="take">Contract and security changes always stop for a <b>human</b>. Sam reviews and approves; the context follows the work into the PR.</p>
+    <button class="btn next" data-next="prstep" type="button">Open the PR →</button>
   </div>
 </section>
 
-<!-- ============================ GRAPH -->
-<section id="graph" class="block alt">
-  <h2 class="center">The Engineering Graph</h2>
-  <p class="lead center">Goal → requirements → tasks → contracts → agents → commits → PRs, as plain files in your repo. This is a real plan, generated by <code>wbi plan</code> for a SaaS app. <b>Click a task. Or break a contract.</b></p>
-  <div class="graphbox">
-    <div class="contracts" id="contractbtns"><span class="mono dim">Break a contract:</span></div>
-    <div class="gscroll"><svg id="g" role="img" aria-label="Interactive task dependency graph"></svg></div>
-    <div class="ginfo" id="ginfo"><p class="dim">Click a task to trace what it depends on (blue) and what depends on it (red). Break a contract to see its blast radius. We'll tell you who to apologise to.</p></div>
-  </div>
-  <div class="term" data-key="blast" data-cmd="wbi blast BillingStatus" style="margin-top:18px"></div>
-</section>
+<!-- ================= 13. PR ================= -->
+<section id="prstep" class="case locked" aria-labelledby="h-pr">
+  <header class="casehead"><span class="num">STEP 10</span><h2 id="h-pr">The PR carries the context</h2><span class="sim">SIMULATED</span></header>
+  <div class="term" data-cmd="wbi pr TASK-003 --dry-run" data-learn="pr">
+    <div class="bar"><i></i><i></i><i></i><span>shop-checkout · simulated</span></div>
+    <pre class="cmd">$ wbi pr TASK-003 --dry-run</pre>
+    <pre class="out">
+# TASK-003: Update PaymentStatus API   (wbi/TASK-003 → main, labels: wbi, contract-change, high-impact)
 
-<!-- ============================ AGENTS -->
-<section id="agents" class="block">
-  <h2 class="center">Many agents, one repository</h2>
-  <p class="lead center">Each agent works in its own isolated worktree on its own task branch. They <em>declare intent</em> before touching code, and wbi checks the declaration against everyone else.</p>
-  <div class="lanes" id="lanes">
-    <div class="lane" data-who="claude"><span class="who">🤖 claude@maya</span><span class="task">TASK-007 · Billing API</span><code>wbi/TASK-007</code></div>
-    <div class="lane" data-who="codex"><span class="who">🤖 codex@devb</span><span class="task">TASK-010 · Analytics API</span><code>wbi/TASK-010</code></div>
-    <div class="lane" data-who="gemini"><span class="who">🤖 gemini@devc</span><span class="task">TASK-003 · Web app shell</span><code>wbi/TASK-003</code></div>
-    <div class="lane" data-who="alice"><span class="who">🧑 alice</span><span class="task">TASK-001 · Architecture</span><code>wbi/TASK-001</code></div>
-    <div class="lane" data-who="bob"><span class="who">🧑 bob</span><span class="task">TASK-002 · Database</span><code>wbi/TASK-002</code></div>
-  </div>
-  <div class="incident">
-    <button class="btn" id="replay" type="button">▶ Replay the incident</button>
-    <div class="alertbox" id="alertbox" aria-live="polite"></div>
-  </div>
-  <div class="two">
-    <div class="stack">
-      <div class="term" data-key="intents1" data-cmd="wbi intent declare MODIFY src/api/billing/plans.ts --task TASK-003   # gemini"></div>
-      <div class="term" data-key="intents2" data-cmd="wbi intent declare CHANGE_CONTRACT BillingStatus --task TASK-010   # codex"></div>
-    </div>
-    <div class="term" data-key="blocked" data-cmd="wbi claim TASK-007   # gemini, too early"></div>
-  </div>
-</section>
+## TASK-003: Update PaymentStatus API
 
-<!-- ============================ SYNC -->
-<section class="block alt" id="sync">
-  <h2 class="center">Two laptops. One task. Git decides.</h2>
-  <p class="lead center">No server, no account. Teammates on separate machines share state through the git remote you already have. A push to a ref is an atomic compare-and-swap, so exactly one claim wins.</p>
-  <div class="race" aria-label="Animated diagram of a claim race">
-    <div class="box"><div class="lap">💻 Alice<br><small>claude</small></div><div class="state" id="sa">TASK-003: free</div></div>
-    <div class="wire"><div class="pkt a" id="pa"></div><div class="pkt b" id="pb"></div><div class="remote">☁ git remote<br><small>refs/wbi/sync</small><div class="state" id="sr">log: empty</div></div></div>
-    <div class="box"><div class="lap">💻 Bob<br><small>codex</small></div><div class="state" id="sb">TASK-003: free</div></div>
-  </div>
-  <p class="center"><button class="btn" id="racebtn" type="button">▶ Both claim TASK-003 at once</button></p>
-  <div class="term" data-key="race" data-cmd="wbi sync   # what Bob actually saw" style="max-width:760px;margin:16px auto 0"></div>
-  <p class="fine center mono" style="margin-top:14px">Signed batches · team allow-list · offline-tolerant · compaction · <a href="https://github.com/shriyashish-mishra/who-broke-it/blob/main/docs/VERIFICATION.md">verified against real GitHub</a></p>
-</section>
+> PaymentStatus API: adds paused
 
-<!-- ============================ JUDGE -->
-<section class="block" id="judge">
-  <div class="split">
-    <div>
-      <h2>The agent says it's done.</h2>
-      <p class="lead">"Done" is a claim. The <b>Agent Judge</b> checks it against scope, contracts, your constitution, tests and acceptance criteria. Risky changes (migrations, security, public API) wait for a human. Criteria only a person can sign are never attested by an agent.</p>
-      <div class="gavel" id="gavel"><span>⚖</span><b id="gavelmsg">Objection: the agent says it's done.</b></div>
-      <button class="btn" id="judgebtn" type="button">Run the checks</button>
-    </div>
-    <div>
-      <div class="term" data-key="judge" data-cmd="wbi handoff TASK-010 --summary 'Analytics summary' --tests 'npm test'"></div>
-    </div>
+**Requirement:** REQ-002: Customers can pay and see their payment status
+**Decision:** ADR-001: Contract-first parallel development
+**Implemented by:** `claude@sam` (owner: Sam)
+
+### What changed
+- `src/api/payment.ts`
+- `src/api/payment.test.ts`
+
+### ⚠ Contract changes
+- **PaymentStatus** → v2: adds paused</pre>
+  </div>
+  <div class="after">
+    <article class="prcard" aria-label="Simulated pull request preview">
+      <header><span class="prstate">Open</span><b>TASK-003: Update PaymentStatus API</b><span class="prnum">#184</span><em class="simtag">SIMULATED PREVIEW</em></header>
+      <div class="prlabels"><span class="lab">wbi</span><span class="lab y">contract-change</span><span class="lab r">high-impact</span></div>
+      <dl class="prgrid">
+        <dt>Summary</dt><dd>PaymentStatus API: adds <code>paused</code></dd>
+        <dt>Files changed</dt><dd><code>src/api/payment.ts</code> · <code>src/api/payment.test.ts</code></dd>
+        <dt>Contracts changed</dt><dd><b>PaymentStatus</b> → v2</dd>
+        <dt>Tests</dt><dd>18 passed</dd>
+        <dt>Risks</dt><dd>TASK-007 and TASK-010 build on PaymentStatus</dd>
+        <dt>Downstream</dt><dd>TASK-007 · TASK-010 · TASK-014 · TASK-016</dd>
+        <dt>Handoff</dt><dd>by <code>claude@sam</code> · limitation: reconciliation adapter not updated</dd>
+        <dt>Verification</dt><dd class="g">✓ scope · ✓ contracts · ✓ tests · ✓ acceptance 3/3</dd>
+      </dl>
+      <footer class="mono">wbi check · PASS (human approval present)</footer>
+    </article>
+    <p class="take">Without <code>--dry-run</code>, <b>wbi pr</b> opens this PR through the GitHub CLI. The reviewer sees the task, the contract change and the evidence, not just a diff.</p>
+    <button class="btn next" data-next="later" type="button">Six weeks later… →</button>
   </div>
 </section>
 
-<!-- ============================ PR / GATE -->
-<section class="block alt" id="gate">
-  <h2 class="center">Handoff → pull request → merge gate</h2>
-  <p class="lead center"><code>wbi pr</code> opens a PR whose body is built from the handoff. The GitHub Action then enforces the graph on the diff. These are the real findings from the <a href="https://github.com/shriyashish-mishra/wbi-action-demo/pulls?q=is%3Apr">public demo repo</a>.</p>
-  <div class="prs">
-    <article class="pr ok"><header><span class="dot"></span><b>TASK-001: architecture notes</b><em>clean</em></header><ul><li class="g">✓ in scope</li><li class="g">✓ handoff record present</li><li class="g">✓ constitution</li></ul><footer>wbi check · PASS</footer></article>
-    <article class="pr bad"><header><span class="dot"></span><b>TASK-003: web shell</b><em>scope + constitution</em></header><ul><li class="r">✗ SCOPE_RESTRICTED <code>src/api/billing/steal.ts</code></li><li class="r">✗ CONSTITUTION C6: all billing mutations go through BillingService <code>src/web/shell/pay.ts</code></li><li class="y">! NO_HANDOFF</li></ul><footer>wbi check · FAIL</footer></article>
-    <article class="pr bad"><header><span class="dot"></span><b>TASK-010: analytics</b><em>contract tampering</em></header><ul><li class="r">✗ CONTRACT_NOT_OWNED BillingStatus is owned by TASK-007 but changed by TASK-010</li><li class="y">! UNMERGED_DEPENDENCY</li></ul><footer>wbi check · FAIL</footer></article>
-    <article class="pr bad"><header><span class="dot"></span><b>TASK-002: database</b><em>high-impact</em></header><ul><li class="r">✗ NEEDS_APPROVAL a migration needs a human reviewer</li><li class="y">! UNMERGED_DEPENDENCY</li></ul><footer>wbi check · FAIL until approved</footer></article>
+<!-- ================= 14. SIX WEEKS LATER ================= -->
+<section id="later" class="case locked quiet" aria-labelledby="h-later">
+  <header class="casehead"><span class="num">+ 6 WEEKS</span><h2 id="h-later">Six weeks later…</h2><span class="sim">SIMULATED</span></header>
+  <div class="says calm"><span class="who mono">New hire</span><q>Why does PaymentStatus work this way?</q></div>
+  <p class="notsam mono">Not: <s>"Ask Sam."</s></p>
+  <div class="term" data-cmd="wbi task TASK-003">
+    <div class="bar"><i></i><i></i><i></i><span>shop-checkout · simulated</span></div>
+    <pre class="cmd">$ wbi task TASK-003</pre>
+    <pre class="out">
+DONE  (DONE)
+
+# TASK-003: Update PaymentStatus API
+
+**Goal:** Add a "paused" state to PaymentStatus without breaking existing consumers.
+**Owner:** Sam  |  **Executor:** claude@sam  |  **Branch:** wbi/TASK-003
+**Requirements:** REQ-002 (Customers can pay and see their payment status)
+
+## Handoffs from upstream tasks
+### TASK-003 by claude@sam
+PaymentStatus API: adds paused
+- Contract PaymentStatus → v2: adds paused
+- Tests: 18 passed
+- Known limitation: Reconciliation adapter not updated</pre>
+  </div>
+  <div class="after">
+    <ol class="chain" aria-label="Traceability chain (simulated)">
+      <li>Goal<small>ship the mobile release</small></li><li>REQ-002<small>customers can pay</small></li><li>TASK-003<small>Update PaymentStatus API</small></li><li>claude@sam<small>executor</small></li><li>a91f2c7<small>commit</small></li><li>PR #184<small>reviewed + approved</small></li><li>PaymentStatus<small>contract v2</small></li><li>TASK-010<small>reconciliation</small></li>
+    </ol>
+    <p class="take big"><b>The repository remembers why the code exists.</b></p>
+    <p class="center"><a class="btn" href="#summary">The whole product, on one screen →</a> <button class="btn ghost" id="restart" type="button">↺ Replay the investigation</button></p>
   </div>
 </section>
 
-<!-- ============================ DASHBOARD -->
-<section class="block" id="dash">
-  <h2 class="center">A dashboard that is just a file</h2>
-  <p class="lead center"><code>wbi dashboard</code> writes one self-contained HTML file: no server, no network calls. Open it, commit it, host it anywhere static.</p>
-  <a class="shot" href="demo-dashboard.html"><img src="assets/dashboard.png" alt="The Who Broke It dashboard showing a task graph with the BillingStatus contract's blast radius highlighted" loading="lazy" width="1440" height="640"><span>Open the live demo dashboard →</span></a>
+<!-- ================= 15. PRODUCT IN ONE SCREEN ================= -->
+<section id="summary" class="block locked">
+  <h2 class="center">The product, on one screen</h2>
+  <div class="onescreen" aria-label="Diagram: the Engineering Graph connects tasks, agents and contracts through git to pull requests">
+    <div class="eg"><b>Engineering Graph</b><small>plain JSON in <code>.wbi/</code>, committed with your code</small></div>
+    <div class="trio"><div>Tasks</div><div>Agents</div><div>Contracts</div></div>
+    <div class="git"><b>Git</b><small>branches · worktrees · commits with task + agent trailers</small></div>
+    <div class="prs"><b>PRs + merge gate</b><small>handoff in the body, scope and contracts checked in CI</small></div>
+  </div>
+  <ul class="five">
+    <li><b>Coordinate agents</b> claims, worktrees, work packets</li>
+    <li><b>Track intent</b> declared before editing, checked against scope and others</li>
+    <li><b>Understand dependencies</b> tasks, contracts, blast radius</li>
+    <li><b>Detect risky changes</b> verifier and merge gate, human approval for high impact</li>
+    <li><b>Preserve context</b> blame and why, down to the requirement</li>
+  </ul>
 </section>
 
-<!-- ============================ HONESTY -->
-<section id="trust" class="block alt">
-  <h2 class="center">What's proven, and what isn't</h2>
-  <p class="lead center">Open-source tools lie by omission. Here is the whole truth. (<a href="https://github.com/shriyashish-mishra/who-broke-it/blob/main/docs/VERIFICATION.md">Full evidence and how to re-run it</a>)</p>
+<!-- ================= REAL CLI ================= -->
+<section id="realcli" class="block alt">
+  <h2 class="center">The real CLI <span class="realtag">REAL OUTPUT</span></h2>
+  <p class="lead center">Not simulated. These transcripts are captured by <code>scripts/site-data.py</code> from real runs of the project's demo scripts on a throwaway repo ("healthai"), with the agents' coding scripted. They are the same formats the story above imitates.</p>
+  <div class="tabs" role="tablist" id="rtabs" aria-label="Real command output"></div>
+  <div class="term big" id="rterm"></div>
+  <p class="fine center mono" style="margin-top:14px">And a <a href="demo-dashboard.html">real generated dashboard</a> from that same run:</p>
+  <a class="shot" href="demo-dashboard.html"><img src="assets/dashboard.png" alt="The wbi dashboard showing a task graph with the BillingStatus contract's blast radius highlighted" loading="lazy" width="1440" height="640"><span>Open the live demo dashboard →</span></a>
+</section>
+
+<!-- ================= PROOF ================= -->
+<section id="proof" class="block">
+  <h2 class="center">No bullshit: what's proven, and what isn't</h2>
+  <p class="lead center">Open-source tools lie by omission. The incident above is fiction and labeled as such. This is the real status. (<a href="https://github.com/shriyashish-mishra/who-broke-it/blob/main/docs/VERIFICATION.md">Full evidence and how to re-run it</a>)</p>
   <div class="truth">
     <div><h3 class="g">✓ Verified</h3><ul>
-      <li><b>Claude Code, Codex, Cursor Agent, OpenCode and Antigravity</b> each run end to end over MCP <em>and</em> the CLI protocol, judged from the recorded state, not the agent's word. Those runs found real problems (a sandbox that blocks <code>.git</code>, missing attribution over MCP) that we fixed or documented.</li>
+      <li><b>Claude Code, OpenAI Codex CLI, Cursor Agent, OpenCode and Google Antigravity</b> were each run end to end over MCP and the CLI protocol, judged from wbi's and git's recorded state, not from the agent's word. Those runs found real problems (a sandbox that blocks <code>.git</code>, missing attribution over MCP) that were fixed or documented. <a href="https://github.com/shriyashish-mishra/who-broke-it/blob/main/docs/REAL-AGENTS.md">Run record</a> · <a href="https://github.com/shriyashish-mishra/who-broke-it/blob/main/docs/ADAPTERS.md">adapters and required settings</a></li>
       <li>Linux, macOS and Windows CI, including a 24-process database stress test.</li>
-      <li>Sync run against <b>real GitHub</b> with two clones: signed batches, a forged batch rejected, the team allow-list, <code>--force-with-lease</code> compaction, and concurrent claim races with exactly one winner every time (17/17 checks).</li>
-      <li>The merge gate on real pull requests, installable via <code>curl</code>, Homebrew and <code>go install</code>.</li>
-      <li>Every transcript on this page is captured from a real run.</li></ul></div>
+      <li>Sync run against <b>real GitHub and gitlab.com</b> with two clones each: signed batches, a forged batch rejected, the team allow-list, <code>--force-with-lease</code> compaction, and concurrent claim races with exactly one winner every time (17/17 checks on each host).</li>
+      <li>The merge gate on real pull requests in the <a href="https://github.com/shriyashish-mishra/wbi-action-demo">public demo repo</a>; installable via <code>curl</code>, Homebrew and <code>go install</code>.</li>
+      <li>Every transcript in the "Real CLI" section is captured from a real run.</li></ul></div>
     <div><h3 class="y">◌ Not proven</h3><ul>
-      <li><b>Aider</b> cannot drive wbi itself (no shell), so it works only when a person runs <code>wbi</code>. <b>Gemini CLI</b> was not tested: Google rejected the account. <a href="https://github.com/shriyashish-mishra/who-broke-it/blob/main/docs/ADAPTERS.md">Adapter status and required settings →</a></li>
-      <li>Other versions of these tools, and Windows for any agent.</li>
-      <li>GitLab, Bitbucket and self-hosted git for sync: untested.</li>
+      <li>Other versions of those tools, and Windows for any agent.</li>
+      <li>Bitbucket and self-hosted GitLab/git for sync (see <a href="https://github.com/shriyashish-mishra/who-broke-it/blob/main/docs/VERIFICATION.md">VERIFICATION.md</a>).</li>
       <li>Slack and Discord notifications: tested against local webhook mocks, not the real services.</li>
       <li>Linear and Jira sync: not built (generic webhooks are).</li>
-      <li>Authorized teammates are trusted with each other: signatures stop outsiders and forgery, not insiders.</li></ul></div>
+      <li>Authorized teammates are trusted with each other: signatures stop outsiders and forgery, not insiders.</li>
+      <li>Intent is cooperative: agents must declare it; <code>wbi verify</code> and <code>wbi check</code> enforce scope after the fact.</li>
+      <li>The demo scripts are bash (Linux and macOS); the Go tests run on Windows in CI.</li>
+      <li><b>The incident story on this page</b> is a fictional, scripted demo with simulated output.</li></ul></div>
   </div>
 </section>
 
-<!-- ============================ INSTALL -->
-<section id="install" class="block">
-  <h2 class="center">Install it in 30 seconds</h2>
-  <div class="tabs" role="tablist" id="itabs">
-    <button role="tab" aria-selected="true" data-i="curl">curl</button><button role="tab" aria-selected="false" data-i="brew">Homebrew</button><button role="tab" aria-selected="false" data-i="go">go install</button><button role="tab" aria-selected="false" data-i="win">Windows</button>
-  </div>
-  <div class="itab" id="i-curl"><div class="install wide" data-copy="curl -fsSL https://raw.githubusercontent.com/shriyashish-mishra/who-broke-it/main/install.sh | sh"><code>curl -fsSL https://raw.githubusercontent.com/shriyashish-mishra/who-broke-it/main/install.sh | sh</code><button type="button">copy</button></div><p class="fine">Verifies the SHA-256 checksum and refuses to install on a mismatch.</p></div>
-  <div class="itab" id="i-brew" hidden><div class="install wide" data-copy="brew install shriyashish-mishra/tap/wbi"><code>brew install shriyashish-mishra/tap/wbi</code><button type="button">copy</button></div></div>
-  <div class="itab" id="i-go" hidden><div class="install wide" data-copy="go install github.com/shriyashish-mishra/who-broke-it/cmd/wbi@latest"><code>go install github.com/shriyashish-mishra/who-broke-it/cmd/wbi@latest</code><button type="button">copy</button></div><p class="fine">Needs Go 1.26+.</p></div>
-  <div class="itab" id="i-win" hidden><p>Download <code>wbi_&lt;version&gt;_windows_amd64.zip</code> from the <a href="https://github.com/shriyashish-mishra/who-broke-it/releases/latest">latest release</a>, unzip, and put <code>wbi.exe</code> on your PATH. Windows is covered by CI tests; the demo scripts are bash.</p></div>
-
-  <h3 class="center" style="margin-top:34px">Your first five minutes</h3>
-  <pre class="qs"><code><span class="c"># in any git repo with one commit</span>
+<!-- ================= FINAL CTA / INSTALL ================= -->
+<section id="install" class="block final">
+  <h2 class="center big">Okay. Your turn.</h2>
+  <pre class="qs"><code><span class="c"># install (pick one below)</span>
+brew install shriyashish-mishra/tap/wbi
+<span class="c"># then, in any git repo with a commit</span>
 wbi init
 wbi plan "Build a SaaS dashboard with auth, billing and analytics"
-wbi simulate --approve            <span class="c"># waves, critical path, conflicts</span>
-git add .wbi &amp;&amp; git commit -m "chore: engineering graph"
-
-wbi adapters install claude       <span class="c"># teach your agent the protocol</span>
-wbi status                        <span class="c"># mission control</span>
-wbi start TASK-001 --worktree     <span class="c"># an isolated branch + the full work packet</span></code></pre>
-  <p class="center"><a class="btn" href="https://github.com/shriyashish-mishra/who-broke-it#readme">Read the README</a> <a class="btn ghost" href="https://github.com/shriyashish-mishra/wbi-action-demo">Browse the demo repo</a></p>
+wbi status</code></pre>
+  <div class="tabs" role="tablist" id="itabs">
+    <button role="tab" aria-selected="true" data-i="brew">Homebrew</button><button role="tab" aria-selected="false" data-i="curl">curl</button><button role="tab" aria-selected="false" data-i="go">go install</button><button role="tab" aria-selected="false" data-i="win">Windows</button>
+  </div>
+  <div class="itab" id="i-brew"><div class="install wide" data-copy="brew install shriyashish-mishra/tap/wbi"><code>brew install shriyashish-mishra/tap/wbi</code><button type="button">copy</button></div></div>
+  <div class="itab" id="i-curl"><div class="install wide" data-copy="curl -fsSL https://raw.githubusercontent.com/shriyashish-mishra/who-broke-it/main/install.sh | sh"><code>curl -fsSL https://raw.githubusercontent.com/shriyashish-mishra/who-broke-it/main/install.sh | sh</code><button type="button">copy</button></div><p class="fine">Verifies the SHA-256 checksum and refuses to install on a mismatch.</p></div>
+  <div class="itab" id="i-go"><div class="install wide" data-copy="go install github.com/shriyashish-mishra/who-broke-it/cmd/wbi@latest"><code>go install github.com/shriyashish-mishra/who-broke-it/cmd/wbi@latest</code><button type="button">copy</button></div><p class="fine">Needs Go 1.26+.</p></div>
+  <div class="itab" id="i-win"><p>Download <code>wbi_&lt;version&gt;_windows_amd64.zip</code> from the <a href="https://github.com/shriyashish-mishra/who-broke-it/releases/latest">latest release</a>, unzip, and put <code>wbi.exe</code> on your PATH. Windows is covered by CI tests; the demo scripts are bash.</p></div>
+  <p class="center cta2"><a class="btn big" href="https://github.com/shriyashish-mishra/who-broke-it#readme">Install WBI</a> <a class="btn ghost big" href="https://github.com/shriyashish-mishra/who-broke-it">⭐ Star it on GitHub</a></p>
+  <p class="closer center">One repo. Humans. AI agents. Zero excuses.</p>
 </section>
 
 </main>
 
 <footer>
   <div class="tape" aria-hidden="true"></div>
-  <p><b>WHO BROKE IT?</b> · MIT licensed · <a href="https://github.com/shriyashish-mishra/who-broke-it">source</a> · <a href="https://github.com/shriyashish-mishra/who-broke-it/blob/main/docs/PROTOCOL.md">protocol</a> · <a href="https://github.com/shriyashish-mishra/who-broke-it/blob/main/CHANGELOG.md">changelog</a> · <a href="https://github.com/shriyashish-mishra/homebrew-tap">tap</a></p>
-  <p class="fine">Built so nobody has to ask <i>"which Claude?"</i> ever again.</p>
+  <p><b>WHO BROKE IT?</b> · MIT licensed · <a href="https://github.com/shriyashish-mishra/who-broke-it">source</a> · <a href="https://github.com/shriyashish-mishra/who-broke-it/blob/main/docs/PROTOCOL.md">protocol</a> · <a href="https://github.com/shriyashish-mishra/who-broke-it/blob/main/docs/ADAPTERS.md">adapters</a> · <a href="https://github.com/shriyashish-mishra/who-broke-it/blob/main/CHANGELOG.md">changelog</a> · <a href="https://github.com/shriyashish-mishra/homebrew-tap">tap</a> · <a href="https://github.com/shriyashish-mishra/wbi-action-demo">demo repo</a></p>
+  <p class="fine">The incident on this page (Maya, Dev, Sam, TASK-003, PR #184) is fictional. Nobody was paged. Built so nobody has to ask <i>"which Claude?"</i> ever again.</p>
 </footer>
 
 <script src="data.js"></script>
