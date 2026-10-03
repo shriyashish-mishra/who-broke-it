@@ -4,17 +4,17 @@ All notable changes. Format follows [Keep a Changelog](https://keepachangelog.co
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-10-03
+
 ### Added
 - Verified sync on **gitlab.com** (17/17 checks, same as GitHub); `scripts/verify-sync.sh` is now host-neutral.
 - Adapter verification for Codex CLI, Cursor Agent, OpenCode and Antigravity (see `docs/REAL-AGENTS.md`), the `wbi executor` command used by the commit hook, and `scripts/agent-harness/`.
 - Website redesigned: a brand-only hero, then a 35-second clearly-labelled-simulated incident investigation that teaches `wbi status`, `wbi task` and `wbi blame`, followed by the full product sections. Source for the 9:16 launch video lives in `marketing/video/`.
+- **Multi-repo links** (foundation): `wbi link add|remove|list|impact`. A task consumes `<repo>:<Contract>`; cross-repo drift reuses the banner / status / `wbi ack` flow, `wbi blast <repo>:<Contract>` shows impact in the consumer, and `wbi link impact <Contract>` shows consumers in linked repos. One hop per repo; local checkouts; committed graphs only.
 
 ### Fixed
-- Commits made by agents driven over MCP now get a `WBI-Agent` trailer (the hook asks wbi who holds the task).
+- Commits made by agents driven over MCP now get a `WBI-Agent` trailer (the hook asks wbi who holds the task). **Existing repos: run `wbi hook` once to install the updated hook.**
 - Test summaries no longer capture runtime warnings (e.g. Node's NO_COLOR/FORCE_COLOR notice).
-
-### Added
-- **Multi-repo links** (foundation): `wbi link add|remove|list|impact`. A task consumes `<repo>:<Contract>`; cross-repo drift reuses the banner / status / `wbi ack` flow, `wbi blast <repo>:<Contract>` shows impact in the consumer, and `wbi link impact <Contract>` shows consumers in linked repos. One hop per repo; local checkouts; committed graphs only.
 
 ## [0.2.0] - 2026-10-02
 
@@ -63,7 +63,8 @@ First public cut. Contains the task-branch naming bug above; use 0.1.1 or later.
 ### Added
 - Engineering Graph in `.wbi/`, planning, claims, work packets, intent registry, contract versioning and propagation, blast radius over declared relationships, the Agent Judge, drift, blame / why, simulation, MCP server (15 tools), agent instruction files, git-native cross-machine sync (claims race on a compare-and-swap push).
 
-[Unreleased]: https://github.com/shriyashish-mishra/who-broke-it/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/shriyashish-mishra/who-broke-it/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/shriyashish-mishra/who-broke-it/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/shriyashish-mishra/who-broke-it/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/shriyashish-mishra/who-broke-it/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/shriyashish-mishra/who-broke-it/releases/tag/v0.1.0

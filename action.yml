@@ -7,7 +7,7 @@ branding:
 
 inputs:
   version:
-    description: "wbi release to run (e.g. v0.2.0). Default: the version the action itself is pinned to (uses: ...@v0.2.0 runs wbi v0.2.0), or the latest release when the action is referenced by branch."
+    description: "wbi release to run (e.g. v0.2.1). Default: the version the action itself is pinned to (uses: ...@v0.2.1 runs wbi v0.2.1), or the latest release when the action is referenced by branch."
     default: ""
   base:
     description: "Base ref to diff against. Default: origin/<PR base branch>."

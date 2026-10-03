@@ -11,6 +11,8 @@
 
 **[Website](https://shriyashish-mishra.github.io/who-broke-it/)** · **[Live dashboard](https://shriyashish-mishra.github.io/who-broke-it/demo-dashboard.html)** · **[Demo repo with real PRs](https://github.com/shriyashish-mishra/wbi-action-demo)** · [Docs](docs/) · [What is verified](docs/VERIFICATION.md)
 
+<p align="center"><a href="https://shriyashish-mishra.github.io/who-broke-it/"><img src="docs/assets/wbi-demo.gif" alt="A fictional incident: wbi status, wbi task TASK-003 and wbi blame trace a broken payments contract to the task, agent and commit that changed it" width="300"></a><br><sub>A <b>simulated</b> incident, real commands. <a href="https://shriyashish-mishra.github.io/who-broke-it/">Play it yourself →</a></sub></p>
+
 ```text
 $ wbi blame src/api/billing/
 
@@ -25,7 +27,7 @@ Last significant changes:
 
 Your team now has Claude Code, Codex, Cursor and a few humans all committing to one repo. The agents are good at writing code. Nobody is good at answering *who owns this, what depends on it, what did that agent just change that breaks mine, and is it actually done?* That is what this answers, from files that live in your repo.
 
-> **Status:** v0.2, pre-1.0. Run end to end, over both MCP and the CLI protocol, with **Claude Code, OpenAI Codex CLI, Cursor Agent, OpenCode and Google Antigravity** ([ADAPTERS.md](docs/ADAPTERS.md), [evidence](docs/REAL-AGENTS.md)). Everything else is listed, with evidence, in [VERIFICATION.md](docs/VERIFICATION.md).
+> **Status:** v0.2.x, pre-1.0. Run end to end, over both MCP and the CLI protocol, with **Claude Code, OpenAI Codex CLI, Cursor Agent, OpenCode and Google Antigravity** ([ADAPTERS.md](docs/ADAPTERS.md), [evidence](docs/REAL-AGENTS.md)). Everything else is listed, with evidence, in [VERIFICATION.md](docs/VERIFICATION.md).
 
 ## Install
 
@@ -169,7 +171,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with: { fetch-depth: 0 }  # wbi diffs against the base branch
-      - uses: shriyashish-mishra/who-broke-it@v0.2.0
+      - uses: shriyashish-mishra/who-broke-it@v0.2.1
         with:
           require-handoff: true
           require-approval: true  # high-impact tasks need an approving review
@@ -177,7 +179,7 @@ jobs:
 
 **See it live:** [wbi-action-demo](https://github.com/shriyashish-mishra/wbi-action-demo) has real open PRs: one clean (passes), one that edits restricted billing code and bypasses `BillingService` (fails), one that bumps a contract it doesn't own (fails), and one high-impact migration waiting for human approval (fails until approved). Each shows inline annotations and a job summary.
 
-Pinning the Action (`@v0.2.0`) pins the `wbi` version it runs. The PR's task comes from the branch name (`wbi/TASK-7`), a `WBI-Task:` commit trailer, or `--task`. Findings appear as inline annotations. Locally: `wbi check --base main`.
+Pinning the Action (`@v0.2.1`) pins the `wbi` version it runs. The PR's task comes from the branch name (`wbi/TASK-7`), a `WBI-Task:` commit trailer, or `--task`. Findings appear as inline annotations. Locally: `wbi check --base main`.
 
 ## Notifications (Slack, Discord, any webhook)
 
