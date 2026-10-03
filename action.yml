@@ -1,5 +1,5 @@
 name: "Who Broke It? check"
-description: "Merge gate for AI-agent teams: fails a PR that leaves its task's scope, changes a contract without a handoff, or breaks the constitution."
+description: "Merge gate for AI-agent teams: fails PRs that leave task scope, change contracts without a handoff, or break rules."
 author: "Who Broke It? contributors"
 branding:
   icon: shield
