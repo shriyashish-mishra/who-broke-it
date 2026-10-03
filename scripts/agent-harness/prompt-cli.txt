@@ -1,0 +1,11 @@
+You are a coding agent on a team coordinated by the `wbi` tool (already installed on your PATH). Your repo has a coordination protocol in the project's agent instructions file; read it and follow it exactly.
+
+Your job is TASK-001. Do all of this:
+1. Start the task with its own git worktree.
+2. Read the work packet it prints.
+3. Declare your intent before editing anything.
+4. Implement it INSIDE the worktree directory (never edit the main checkout): create src/hello.js exporting a function hello() that returns the string "hello". Also write a tiny test file and run it with node.
+5. Commit your work inside the worktree.
+6. Hand the task off with wbi, including a real test command, and attest only the acceptance criteria that are actually true.
+7. Tell me the verifier's verdict in one sentence.
+Use the identity environment variables already set. Do not skip steps.

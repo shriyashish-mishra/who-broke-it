@@ -67,4 +67,4 @@ Nothing changes for agents: the same CLI / MCP calls work. When `wbi sync init` 
 
 ## Contributing an adapter
 
-Adapters are one registry entry each; see [ADAPTERS.md](ADAPTERS.md). Only Claude Code is verified; the rest are integration targets that need someone to run them (use the "I ran another agent" issue template).
+Adapters are one registry entry each; see [ADAPTERS.md](ADAPTERS.md). Five agents are verified, Aider is partial and Gemini CLI is untested (status table in ADAPTERS.md). To add or verify another, use the "I ran another agent" issue template.

@@ -17,7 +17,7 @@ All notable changes. Format follows [Keep a Changelog](https://keepachangelog.co
 - `wbi sync watch`: polling live mode.
 - `wbi notify`: Slack, Discord and generic JSON webhook notifications; the URL is read from a named environment variable and never stored.
 - `wbi dashboard` (`--out`, `--serve`, `--json`): a self-contained single-file HTML dashboard (graph with click-to-trace and contract blast radius, tasks, agents, intents, handoffs, drift, plan).
-- Adapter registry (`wbi adapters list`, `docs/ADAPTERS.md`): one entry per agent with an explicit verification status. Only Claude Code is marked verified.
+- Adapter registry (`wbi adapters list`, `docs/ADAPTERS.md`): one entry per agent with an explicit verification status. Statuses are pinned by a test and backed by [REAL-AGENTS.md](docs/REAL-AGENTS.md).
 - MCP tools `wbi_start_task`, `wbi_release_task`, `wbi_release_intents` (18 tools total).
 - Human-only acceptance criteria (`"human": true`): an agent cannot attest them; the task goes to review and `wbi approve` is the sign-off.
 - Claude Code is auto-detected (`CLAUDECODE=1`); claim errors now say who *you* are.

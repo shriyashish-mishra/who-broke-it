@@ -22,7 +22,7 @@ Go ≥ 1.26 and git are required. The binary is pure Go (no cgo) and has one thi
 
 ## Honesty rules (these matter more than style)
 
-* **Never mark something verified that was not run.** Adapters, platforms and hosts have an explicit status; a test pins which adapters are "verified". If you could not test something, say so in the PR and the docs.
+* **Never mark something verified that was not run.** Adapters, platforms and hosts have an explicit status; a test pins which adapters are "verified" and which are not. If you could not test something, say so in the PR and the docs.
 * **Test the thing, not the code's own output.** A test that reads back whatever the code produced cannot catch a corrupted value. Assert important strings as literals, and **mutation-check** tests that guard a safety property: break the code on purpose and confirm the test fails.
 * **Generated content stays generated.** The website's transcripts come from `scripts/site-data.py` (real demo runs). Re-run `make site-data` instead of editing `site/data.js`.
 

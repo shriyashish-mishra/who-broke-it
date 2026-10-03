@@ -25,7 +25,7 @@ Last significant changes:
 
 Your team now has Claude Code, Codex, Gemini CLI, Cursor and a few humans all committing to one repo. The agents are good at writing code. Nobody is good at answering *who owns this, what depends on it, what did that agent just change that breaks mine, and is it actually done?* That is what this answers, from files that live in your repo.
 
-> **Status:** v0.2, pre-1.0. Proven end to end with **Claude Code**; Codex, Gemini CLI, Cursor, OpenCode and Aider are integration targets that nobody has run yet ([ADAPTERS.md](docs/ADAPTERS.md)). Everything else is listed, with evidence, in [VERIFICATION.md](docs/VERIFICATION.md).
+> **Status:** v0.2, pre-1.0. Run end to end, over both MCP and the CLI protocol, with **Claude Code, OpenAI Codex CLI, Cursor Agent, OpenCode and Google Antigravity**; **Aider** works in a human-driven mode only. Gemini CLI could not be tested ([ADAPTERS.md](docs/ADAPTERS.md), [evidence](docs/REAL-AGENTS.md)). Everything else is listed, with evidence, in [VERIFICATION.md](docs/VERIFICATION.md).
 
 ## Install
 
@@ -255,7 +255,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/PROTOCOL.md](docs/PROTOC
 
 * **CLI works with every agent.** Any tool that can run shell commands can follow the protocol (`export WBI_AGENT=<tool>`). `wbi adapters install claude|codex|gemini|cursor|opencode|aider` (or `all` for the first four) writes a managed block into the file that tool reads: `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `.cursor/rules/wbi.mdc`, `CONVENTIONS.md`.
 * **MCP for tool-native use.** `wbi adapters mcp <agent>` prints the config snippet; `wbi mcp` is the server (18 tools).
-* **Know what is proven.** `wbi adapters list` shows each adapter's status. Only **Claude Code** is verified; the rest are documented integration targets ([docs/ADAPTERS.md](docs/ADAPTERS.md)). If you run one, [tell us what happened](https://github.com/shriyashish-mishra/who-broke-it/issues/new?template=agent_report.yml).
+* **Know what is proven.** `wbi adapters list` shows each adapter's status. Claude Code, Codex, Cursor Agent, OpenCode and Antigravity are verified; Aider is partial (a human drives `wbi`); Gemini CLI is untested ([docs/ADAPTERS.md](docs/ADAPTERS.md)). Some need specific settings, e.g. Codex's sandbox must be allowed to write `.git`. If you run one, [tell us what happened](https://github.com/shriyashish-mishra/who-broke-it/issues/new?template=agent_report.yml).
 * **Commit attribution.** `wbi init` installs a `prepare-commit-msg` hook that stamps `WBI-Task` / `WBI-Agent` trailers from the branch name and `$WBI_AGENT`.
 * **Add an adapter**: one registry entry; see [docs/ADAPTERS.md](docs/ADAPTERS.md).
 
@@ -265,7 +265,7 @@ Parallel agents, worktrees, task assignment, MCP, cloud agents, PR automation an
 
 ## What works today, and what does not (read this)
 
-**Real agents:** validated end to end with Claude Code over both MCP and the CLI protocol ([docs/REAL-AGENTS.md](docs/REAL-AGENTS.md): what it found and what changed). **Codex, Gemini CLI, Cursor, OpenCode and Aider are untested.** Their adapters follow each tool's documented conventions but have not been run.
+**Real agents:** Claude Code, Codex CLI, Cursor Agent, OpenCode and Antigravity were each run end to end over MCP and the CLI protocol, and judged from wbi's and git's recorded state ([docs/REAL-AGENTS.md](docs/REAL-AGENTS.md): what each run found and what changed). Aider works only when a human runs `wbi`. Gemini CLI was not tested (the account was rejected). Windows and other agent versions are untested.
 
 Works and is tested: 80+ test cases (`make test`: unit, end-to-end on real git repos, two-clone sync scenarios including deterministic races, docs-versus-code checks) run on Linux, macOS and Windows in CI, plus both demos. Evidence, including the real-GitHub sync run and what was *not* tested, is in [docs/VERIFICATION.md](docs/VERIFICATION.md).
 
@@ -285,7 +285,7 @@ Known limits of this prototype:
 
 What exists is listed above. What is next, roughly in order:
 
-1. **More agents verified.** Run Codex, Gemini CLI, Cursor, OpenCode or Aider through wbi and report what breaks ([template](https://github.com/shriyashish-mishra/who-broke-it/issues/new?template=agent_report.yml)). This is the most valuable contribution.
+1. **More agents and versions verified.** Gemini CLI, Windsurf, Copilot's agent mode, newer or older versions of the verified tools: run them through wbi and report what breaks ([template](https://github.com/shriyashish-mishra/who-broke-it/issues/new?template=agent_report.yml)). This is the most valuable contribution.
 2. **Multi-repo:** build on the `wbi link` foundation (shared dashboard, cross-repo notifications), if people need it.
 3. **Other hosts for sync:** verify GitLab, Bitbucket and self-hosted git.
 4. **Sync:** per-object permissions (today any authorized member can write any event), push-style wake-ups instead of polling.

@@ -127,6 +127,8 @@ func help() string {
 %s
   wbi adapters install <claude|codex|gemini|cursor|opencode|all>   write agent instruction files
   wbi adapters mcp <agent>              print MCP config      wbi mcp   run the MCP server
+  wbi hook                              (re)install the commit hook that stamps WBI-Task / WBI-Agent trailers
+  wbi executor <id>                     print the agent holding a task (used by the commit hook)
 `, render.Header(), d(version), d("The agents write the code. Who Broke It? coordinates the engineering."),
 		b("Setup"), b("Mission control"), b("Doing work"), d("(identify with --agent <tool> --as <human>, or $WBI_AGENT / $WBI_DEVELOPER)"), b(`Answering "who broke it?"`), b("Integrations"))
 }
@@ -222,11 +224,14 @@ func run(argv []string) error {
 		if restArg(0) == "list" || restArg(0) == "" {
 			fmt.Println(render.Bold("Agent adapters") + render.Dim("   (verified = run end to end with the real tool)"))
 			for _, ad := range engine.Adapters() {
-				st := render.Yellow("documented, untested")
-				if ad.Status == engine.Verified {
-					st = render.Green("verified")
+				st := render.Yellow("documented, not run")
+				switch ad.Status {
+				case engine.Verified:
+					st = render.Green("verified") + render.Dim("  "+ad.Tested)
+				case engine.Partial:
+					st = render.Yellow("partial") + render.Dim("  "+ad.Tested+" (see notes)")
 				}
-				fmt.Printf("  %-9s %-18s %-24s %s\n", ad.Name, ad.Display, ad.InstructionFile, st)
+				fmt.Printf("  %-12s %-30s %-24s %s\n", ad.Name, ad.Display, ad.InstructionFile, st)
 			}
 			return nil
 		}
@@ -243,7 +248,7 @@ func run(argv []string) error {
 			return err
 		}
 		if restArg(0) == "install" {
-			targets := []string{"claude", "codex", "gemini", "cursor"} // aider and opencode are opt-in: wbi adapters install aider
+			targets := []string{"claude", "codex", "antigravity", "cursor"} // others are opt-in: wbi adapters install aider|opencode|gemini
 			if t := restArg(1); t != "" && t != "all" {
 				targets = []string{t}
 			}
@@ -559,6 +564,10 @@ func execute(e *engine.Engine, cmd string, a args, ident engine.AgentOpts, rest 
 		}
 		if !rep.OK {
 			exitCode = 1
+		}
+	case "executor": // used by the commit hook: who holds this task? (empty output if nobody)
+		if st := e.State(strings.ToUpper(restArg(0))); st.AgentID != "" {
+			p(st.AgentID)
 		}
 	case "mcp":
 		return mcp.Serve(e, os.Stdin, os.Stdout)

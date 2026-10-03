@@ -57,7 +57,12 @@ func sh(cmd, cwd string) (bool, string) {
 	c := exec.CommandContext(ctx, "sh", "-c", cmd)
 	c.Dir = cwd
 	out, err := c.CombinedOutput()
-	lines := strings.Split(strings.TrimSpace(string(out)), "\n")
+	var lines []string
+	for _, l := range strings.Split(strings.TrimSpace(string(out)), "\n") {
+		if !noiseRe.MatchString(l) {
+			lines = append(lines, l)
+		}
+	}
 	if len(lines) > 3 {
 		lines = lines[len(lines)-3:]
 	}
@@ -67,6 +72,9 @@ func sh(cmd, cwd string) (bool, string) {
 	}
 	return err == nil, tail
 }
+
+// noiseRe matches runtime chatter that is not test evidence (e.g. Node's NO_COLOR/FORCE_COLOR warning).
+var noiseRe = regexp.MustCompile(`^\(node:\d+\) Warning:|^\(Use \x60node --trace-warnings|^\s*$`)
 
 func isWbi(f string) bool { return strings.HasPrefix(f, ".wbi/") }
 

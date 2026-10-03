@@ -1,0 +1,6 @@
+{"components":[{"id":"core","name":"Core","description":"core","paths":["src/**"],"dependsOn":[]}],
+ "requirements":[{"id":"REQ-001","text":"The app can greet","layers":["backend"]}],
+ "contracts":[{"name":"Greeting","kind":"function","providedBy":"TASK-001","shape":"hello(): string","description":"greeting fn","public":false}],
+ "tasks":[{"id":"TASK-001","title":"Hello module","goal":"Create src/hello.js exporting hello() that returns the string 'hello'","layer":"backend","component":"core","requirements":["REQ-001"],
+   "allowedPaths":["src/**"],"restrictedPaths":["migrations/**"],"provides":["Greeting"],"effort":1,
+   "acceptance":["src/hello.js exports a function hello() that returns 'hello'","hello() is covered by a passing test command"]}]}

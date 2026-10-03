@@ -37,21 +37,28 @@ func TestEveryAdapterInstallsIdempotentlyAndPreservesUserContent(t *testing.T) {
 
 func TestAdapterRegistryIsHonestAndConsistent(t *testing.T) {
 	seen := map[string]bool{}
-	verified := 0
+	status := map[string]string{}
 	for _, a := range engine.Adapters() {
 		if a.Name == "" || a.Display == "" || a.InstructionFile == "" || seen[a.Name] {
 			t.Fatalf("bad or duplicate adapter: %+v", a)
 		}
 		seen[a.Name] = true
-		if a.Status != engine.Verified && a.Status != engine.Documented {
+		status[a.Name] = a.Status
+		switch a.Status {
+		case engine.Verified, engine.Partial:
+			if a.Tested == "" || a.Notes == "" {
+				t.Errorf("%s is %s so it must record the tested version and setup notes", a.Name, a.Status)
+			}
+		case engine.Documented:
+			if a.Tested != "" {
+				t.Errorf("%s is only documented, it cannot have a tested version", a.Name)
+			}
+		default:
 			t.Fatalf("%s: unknown status %q", a.Name, a.Status)
 		}
-		if a.Status == engine.Verified {
-			verified++
-		}
 		cfg := engine.MCPConfig(a.Name, "/usr/local/bin/wbi")
-		if a.Status != engine.Verified && !strings.Contains(cfg, "not tested") && a.MCP != engine.MCPNone {
-			t.Errorf("%s is %q so its MCP snippet must say it is untested:\n%s", a.Name, a.Status, cfg)
+		if a.Status == engine.Documented && !strings.Contains(cfg, "not fully tested") {
+			t.Errorf("%s is documented only, so its snippet must say so:\n%s", a.Name, cfg)
 		}
 		if a.MCP == engine.MCPGeneric {
 			js := cfg[:strings.Index(cfg, "\n}\n")+2]
@@ -61,9 +68,21 @@ func TestAdapterRegistryIsHonestAndConsistent(t *testing.T) {
 			}
 		}
 	}
-	// Only Claude Code has been run for real. If this changes, docs/REAL-AGENTS.md must change with it.
-	if verified != 1 || !seen["claude"] {
-		t.Fatalf("exactly one verified adapter (claude) expected, got %d", verified)
+	// Pinned on purpose: this is the list of agents that were actually run (docs/REAL-AGENTS.md). Changing it
+	// means someone ran another agent, or something regressed. Update both together.
+	want := map[string]string{"claude": "verified", "codex": "verified", "antigravity": "verified", "cursor": "verified", "opencode": "verified", "aider": "partial", "gemini": "documented"}
+	for name, st := range want {
+		if status[name] != st {
+			t.Errorf("%s should be %s, is %q", name, st, status[name])
+		}
+	}
+	if len(status) != len(want) {
+		t.Errorf("unexpected adapters: %v", status)
+	}
+	// Codex needs two settings or it silently cannot work; the snippet must carry them.
+	codex := engine.MCPConfig("codex", "wbi")
+	if !strings.Contains(codex, "default_tools_approval_mode") || !strings.Contains(codex, "writable_roots") {
+		t.Errorf("codex snippet must include the required settings:\n%s", codex)
 	}
 	if _, err := engine.InstallGuidance(t.TempDir(), "nope"); err == nil {
 		t.Fatal("unknown adapter must error")

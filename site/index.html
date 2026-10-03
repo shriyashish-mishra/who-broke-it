@@ -91,7 +91,7 @@
 <!-- ============================ HOW IT WORKS -->
 <section id="how" class="block">
   <h2 class="center">How it works</h2>
-  <p class="lead center">The repo carries its own engineering context. Any agent that can run a shell command can play, and Claude Code is proven end to end.</p>
+  <p class="lead center">The repo carries its own engineering context. Any agent that can run a shell command can play. Five are proven end to end.</p>
   <div class="how">
     <ol class="steps" id="steps" role="tablist" aria-label="Workflow steps"></ol>
     <div class="stage">
@@ -192,13 +192,14 @@
   <p class="lead center">Open-source tools lie by omission. Here is the whole truth. (<a href="https://github.com/shriyashish-mishra/who-broke-it/blob/main/docs/VERIFICATION.md">Full evidence and how to re-run it</a>)</p>
   <div class="truth">
     <div><h3 class="g">✓ Verified</h3><ul>
-      <li><b>Claude Code</b> run end to end over MCP <em>and</em> the CLI protocol. It found five real problems we then fixed.</li>
+      <li><b>Claude Code, Codex, Cursor Agent, OpenCode and Antigravity</b> each run end to end over MCP <em>and</em> the CLI protocol, judged from the recorded state, not the agent's word. Those runs found real problems (a sandbox that blocks <code>.git</code>, missing attribution over MCP) that we fixed or documented.</li>
       <li>Linux, macOS and Windows CI, including a 24-process database stress test.</li>
       <li>Sync run against <b>real GitHub</b> with two clones: signed batches, a forged batch rejected, the team allow-list, <code>--force-with-lease</code> compaction, and concurrent claim races with exactly one winner every time (17/17 checks).</li>
       <li>The merge gate on real pull requests, installable via <code>curl</code>, Homebrew and <code>go install</code>.</li>
       <li>Every transcript on this page is captured from a real run.</li></ul></div>
-    <div><h3 class="y">◌ Integration targets (not run)</h3><ul>
-      <li><b>Codex CLI, Gemini CLI, Cursor, OpenCode, Aider.</b> The adapter architecture supports them, and the files follow their docs, but nobody has run those agents through wbi yet. <a href="https://github.com/shriyashish-mishra/who-broke-it/blob/main/docs/ADAPTERS.md">Help verify one →</a></li>
+    <div><h3 class="y">◌ Not proven</h3><ul>
+      <li><b>Aider</b> cannot drive wbi itself (no shell), so it works only when a person runs <code>wbi</code>. <b>Gemini CLI</b> was not tested: Google rejected the account. <a href="https://github.com/shriyashish-mishra/who-broke-it/blob/main/docs/ADAPTERS.md">Adapter status and required settings →</a></li>
+      <li>Other versions of these tools, and Windows for any agent.</li>
       <li>GitLab, Bitbucket and self-hosted git for sync: untested.</li>
       <li>Slack and Discord notifications: tested against local webhook mocks, not the real services.</li>
       <li>Linear and Jira sync: not built (generic webhooks are).</li>

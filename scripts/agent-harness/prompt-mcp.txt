@@ -1,0 +1,6 @@
+You are a coding agent on a team coordinated by wbi. For ALL coordination use ONLY the `wbi` MCP tools (do not run the wbi command line). Your job is TASK-001:
+1. wbi_start_task for TASK-001 (it returns a worktree path, called workdir).
+2. wbi_declare_intent (CREATE) for src/hello.js before editing anything.
+3. In the workdir ONLY, create src/hello.js exporting hello() that returns "hello" (CommonJS), plus src/hello.test.js asserting it; run the test with node; git add and git commit in the workdir.
+4. wbi_submit_handoff with summary, run_tests "node src/hello.test.js", and attested_criteria only for criteria that are true.
+5. Reply with the verifier's verdict in one sentence.
