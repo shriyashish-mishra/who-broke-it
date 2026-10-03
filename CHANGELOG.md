@@ -4,6 +4,11 @@ All notable changes. Format follows [Keep a Changelog](https://keepachangelog.co
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-10-03
+
+### Changed
+- GitHub Action: shortened the description to fit the Marketplace 125-character limit, so the Action can be listed. No change to `wbi` itself.
+
 ## [0.2.1] - 2026-10-03
 
 ### Added
