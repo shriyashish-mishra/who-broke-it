@@ -77,7 +77,7 @@ var registry = []Adapter{
 	{Name: "codex", Display: "OpenAI Codex CLI", InstructionFile: "AGENTS.md", MCP: MCPCodexTOML, Status: Verified, Tested: "codex-cli 0.160.0",
 		Notes: "CLI protocol and MCP both run end to end. Two settings are REQUIRED: (1) Codex's workspace-write sandbox makes .git read-only, which breaks git worktrees, commits and wbi's state database, so add the repo's .git to sandbox_workspace_write.writable_roots; (2) non-interactive Codex blocks MCP tool calls that need approval, so set default_tools_approval_mode = \"approve\" on the wbi server. Without (1) Codex stops and reports the failure; it does not work around it."},
 	{Name: "antigravity", Display: "Google Antigravity CLI (agy)", InstructionFile: "GEMINI.md", MCP: MCPAgy, Status: Verified, Tested: "agy 1.2.16",
-		Notes: "CLI protocol and MCP both run end to end (run with --dangerously-skip-permissions for headless use). It reads GEMINI.md. `agy mcp add` edits your GLOBAL Antigravity config (no project scope); remove it with `agy mcp remove wbi`. It reported its own agent name as 'gemini' when the instructions said gemini, so identity is whatever the agent chooses."},
+		Notes: "CLI protocol and MCP both run end to end (run with --dangerously-skip-permissions for headless use). It reads GEMINI.md. `agy mcp add` edits your GLOBAL Antigravity config (no project scope); remove it with `agy mcp remove wbi`. Identity is whatever name the agent passes (it took its name from the wording of the instruction file), so treat it as a label, not authentication."},
 	{Name: "cursor", Display: "Cursor Agent", InstructionFile: ".cursor/rules/wbi.mdc", MCP: MCPGeneric, Status: Verified, Tested: "cursor-agent 2026.10.01",
 		Wrap: func(b string) string {
 			return "---\ndescription: Team coordination via Who Broke It?\nalwaysApply: true\n---\n" + b
@@ -85,10 +85,6 @@ var registry = []Adapter{
 		Notes: "CLI protocol and MCP both run end to end (headless: cursor-agent -p --force; MCP also needs --approve-mcps and a .cursor/mcp.json)."},
 	{Name: "opencode", Display: "OpenCode", InstructionFile: "AGENTS.md", MCP: MCPOpenCode, Status: Verified, Tested: "opencode v2.0.22",
 		Notes: "CLI protocol and MCP both run end to end (opencode run \"...\"; MCP via opencode.json in the repo)."},
-	{Name: "aider", Display: "Aider", InstructionFile: "CONVENTIONS.md", MCP: MCPNone, Status: Partial, Tested: "aider 0.86.2",
-		Notes: "Aider edits files but does not run shell commands on its own, so it cannot drive the protocol: asked to, it wrote straight into the main checkout. Works in HUMAN-DRIVEN mode: a person runs `wbi start --worktree` and `wbi intent`, runs aider inside the worktree (its commits get the wbi trailers), then runs `wbi handoff`. Verified in that mode only."},
-	{Name: "gemini", Display: "Gemini CLI", InstructionFile: "GEMINI.md", MCP: MCPGeneric, Status: Documented,
-		Notes: "Not run: Google rejected the test account for Gemini CLI (\"migrate to Antigravity\"). The Antigravity adapter above reads the same GEMINI.md and is verified."},
 }
 
 // Adapters returns the registry (stable order).

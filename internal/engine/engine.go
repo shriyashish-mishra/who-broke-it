@@ -179,7 +179,7 @@ func (e *Engine) Agents() []model.Agent {
 func (e *Engine) ResolveAgent(o AgentOpts) (model.Agent, error) {
 	provider := strings.ToLower(firstNonEmpty(o.Agent, os.Getenv("WBI_AGENT"), DetectProvider()))
 	if provider == "" {
-		return model.Agent{}, model.Errf("Which agent are you? Pass --agent <claude|codex|gemini|cursor|aider|human|...> or set WBI_AGENT.")
+		return model.Agent{}, model.Errf("Which agent are you? Pass --agent <claude|codex|cursor|opencode|antigravity|human|...> or set WBI_AGENT.")
 	}
 	developer := firstNonEmpty(o.As, os.Getenv("WBI_DEVELOPER"), gitx.UserName(e.Root()))
 	if developer == "" {

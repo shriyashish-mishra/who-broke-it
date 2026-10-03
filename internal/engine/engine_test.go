@@ -14,7 +14,7 @@ import (
 var (
 	claude = engine.AgentOpts{Agent: "claude", As: "Maya"}
 	codex  = engine.AgentOpts{Agent: "codex", As: "DevB"}
-	gemini = engine.AgentOpts{Agent: "gemini", As: "DevC"}
+	cursor = engine.AgentOpts{Agent: "cursor", As: "DevC"}
 )
 
 func ptr[T any](v T) *T { return &v }
@@ -194,17 +194,17 @@ func TestIntentRegistryCatchesConflictsBeforeCodeExists(t *testing.T) {
 		}
 	}
 	must(e.Claim("TASK-007", claude, false))
-	must(e.Claim("TASK-003", gemini, false))
+	must(e.Claim("TASK-003", cursor, false))
 	r, err := e.DeclareIntent(claude, "TASK-007", model.Modify, "src/api/billing/**", "")
 	if err != nil || r.Blocked {
 		t.Fatalf("own scope must not block: %v %+v", err, r)
 	}
-	wander, _ := e.DeclareIntent(gemini, "TASK-003", model.Modify, "src/api/billing/plans.ts", "")
+	wander, _ := e.DeclareIntent(cursor, "TASK-003", model.Modify, "src/api/billing/plans.ts", "")
 	c := codes(wander.Conflicts)
 	if !wander.Blocked || !c["RESTRICTED_PATH"] || !c["OWNERSHIP_CONFLICT"] {
 		t.Fatalf("wander: %+v", wander.Conflicts)
 	}
-	contract, _ := e.DeclareIntent(gemini, "TASK-003", model.ChangeContract, "BillingStatus", "")
+	contract, _ := e.DeclareIntent(cursor, "TASK-003", model.ChangeContract, "BillingStatus", "")
 	if !codes(contract.Conflicts)["CONTRACT_NOT_OWNED"] || !contract.Blocked {
 		t.Fatalf("contract: %+v", contract.Conflicts)
 	}
@@ -221,7 +221,7 @@ func TestIntentRegistryCatchesConflictsBeforeCodeExists(t *testing.T) {
 func TestContractChangePropagatesBlastSeesAgentsAckClearsDrift(t *testing.T) {
 	dir, e := testutil.PlannedRepo(t)
 	through(t, e, "TASK-001", "TASK-002", "TASK-004")
-	if _, err := e.Claim("TASK-008", gemini, true); err != nil { // UI builds against the published contract early
+	if _, err := e.Claim("TASK-008", cursor, true); err != nil { // UI builds against the published contract early
 		t.Fatal(err)
 	}
 	t8, _ := e.Task("TASK-008")
@@ -229,7 +229,7 @@ func TestContractChangePropagatesBlastSeesAgentsAckClearsDrift(t *testing.T) {
 		t.Fatal("no staleness before the change")
 	}
 	before := e.Blast("BillingStatus")
-	if before.Risk != "HIGH" || len(before.ActiveAgents) != 1 || before.ActiveAgents[0].AgentID != "gemini@devc" {
+	if before.Risk != "HIGH" || len(before.ActiveAgents) != 1 || before.ActiveAgents[0].AgentID != "cursor@devc" {
 		t.Fatalf("blast before: %+v", before)
 	}
 	has := func(s []string, v string) bool {
@@ -259,11 +259,11 @@ func TestContractChangePropagatesBlastSeesAgentsAckClearsDrift(t *testing.T) {
 		t.Fatalf("stale: %+v", stale)
 	}
 	found := false
-	for _, n := range e.Inbox("gemini@devc", false) {
+	for _, n := range e.Inbox("cursor@devc", false) {
 		found = found || strings.Contains(n.Msg, "BillingStatus changed to v2 by TASK-007")
 	}
 	if !found {
-		t.Fatal("gemini must be notified")
+		t.Fatal("cursor must be notified")
 	}
 	ctx, _ := e.Context("TASK-008")
 	if !strings.Contains(ctx, "Contract changes since you started") || !strings.Contains(ctx, "v1 → v2") {

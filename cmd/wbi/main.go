@@ -125,7 +125,7 @@ func help() string {
   wbi decide "<title>" --why "..."      record an architecture decision
 
 %s
-  wbi adapters install <claude|codex|gemini|cursor|opencode|all>   write agent instruction files
+  wbi adapters install <claude|codex|antigravity|cursor|opencode|all>   write agent instruction files
   wbi adapters mcp <agent>              print MCP config      wbi mcp   run the MCP server
   wbi hook                              (re)install the commit hook that stamps WBI-Task / WBI-Agent trailers
   wbi executor <id>                     print the agent holding a task (used by the commit hook)
@@ -248,7 +248,7 @@ func run(argv []string) error {
 			return err
 		}
 		if restArg(0) == "install" {
-			targets := []string{"claude", "codex", "antigravity", "cursor"} // others are opt-in: wbi adapters install aider|opencode|gemini
+			targets := []string{"claude", "codex", "antigravity", "cursor"} // opencode is opt-in: wbi adapters install opencode
 			if t := restArg(1); t != "" && t != "all" {
 				targets = []string{t}
 			}

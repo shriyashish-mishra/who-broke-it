@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
-# Verify wbi's cross-machine sync against a REAL git host, with two (then three) independent clones.
+# Verify wbi's cross-machine sync against a REAL git host (GitHub, GitLab, ...), with two (then three) independent clones.
 # It uses one unique custom ref (refs/wbi/verify-<timestamp>) in a scratch repo and deletes it afterwards.
 #
-#   scripts/verify-github-sync.sh https://github.com/OWNER/SCRATCH_REPO.git [path/to/wbi]
+#   scripts/verify-sync.sh https://github.com/OWNER/SCRATCH_REPO.git [path/to/wbi]
 #
 # The scratch repo must already contain a .wbi graph on its default branch (wbi init + wbi plan, committed)
 # and you must be able to push to it. Exit status is the number of failed checks.
 set -uo pipefail
-URL="${1:?usage: verify-github-sync.sh <repo-url> [wbi-binary]}"
+URL="${1:?usage: verify-sync.sh <repo-url> [wbi-binary]}"
 WBI="${2:-wbi}"
 TS=$(date +%s); REF="refs/wbi/verify-$TS"
 W=$(mktemp -d)
 FAILS=0
-export WBI_NO_GH=1
+export WBI_NO_GH=1 NO_COLOR=1; unset FORCE_COLOR   # output is parsed below, so colours must be off
 pass() { printf '  \033[32mPASS\033[0m %s\n' "$*"; }
 fail() { printf '  \033[31mFAIL\033[0m %s\n' "$*"; FAILS=$((FAILS+1)); }
 check() { local msg="$1"; shift; if "$@" >/dev/null 2>&1; then pass "$msg"; else fail "$msg"; fi; }
@@ -23,7 +23,7 @@ trap cleanup EXIT
 clone() { git clone -q "$URL" "$W/$1" && ( cd "$W/$1" && git config user.name "$2" && git config user.email "$1@example.com" && "$WBI" sync init --ref "$REF" >/dev/null ); }
 alice() { ( cd "$W/a" && WBI_AGENT=claude WBI_DEVELOPER=Alice "$WBI" "$@" ); }
 bob()   { ( cd "$W/b" && WBI_AGENT=codex  WBI_DEVELOPER=Bob   "$WBI" "$@" ); }
-carol() { ( cd "$W/c" && WBI_AGENT=gemini WBI_DEVELOPER=Carol "$WBI" "$@" ); }
+carol() { ( cd "$W/c" && WBI_AGENT=opencode WBI_DEVELOPER=Carol "$WBI" "$@" ); }
 # prints the owning agent of $TASK as seen by a clone, or nothing if unowned (an owned line ends in "(agent@dev)")
 owner() { "$@" tasks 2>/dev/null | awk -v t="$TASK" '$1==t && $NF ~ /^\(.*\)$/ {gsub(/[()]/,"",$NF); print $NF}'; }
 fetchref() { git -C "$W/$1" fetch -q origin "+$REF:refs/wbi/chk" 2>/dev/null; }
@@ -32,16 +32,16 @@ echo "scratch repo: $URL"; echo "ref:          $REF"; echo "binary:       $("$WB
 clone a Alice; clone b Bob
 check "task graph present in the scratch repo" test -d "$W/a/.wbi/tasks"
 
-section "1. signed batches replicate through GitHub, on a custom ref"
+section "1. signed batches replicate through the host, on a custom ref"
 alice claim TASK-001 >/dev/null 2>&1
 fetchref a
 FILE=$(git -C "$W/a" ls-tree -r --name-only refs/wbi/chk 2>/dev/null | grep '^log/' | head -1)
-check "GitHub accepted a push to $REF" test -n "$FILE"
+check "the host accepted a push to $REF" test -n "$FILE"
 check "the published batch carries an ed25519 signature header" bash -c "git -C '$W/a' show 'refs/wbi/chk:$FILE' | head -1 | grep -q '\"sig\"'"
 bob sync >/dev/null 2>&1
 TASK=TASK-001; check "bob (separate clone) sees alice's claim" test "$(owner bob)" = "claude@alice"
 
-section "2. a forged batch pushed to GitHub is rejected"
+section "2. a forged batch pushed to the host is rejected"
 fetchref b
 TIP=$(git -C "$W/b" rev-parse refs/wbi/chk); FILE=$(git -C "$W/b" ls-tree -r --name-only "$TIP" | grep '^log/' | head -1)
 BODY=$(git -C "$W/b" show "$TIP:$FILE"); FORGED=$(printf '%s\n' "$BODY" | sed 's/claude@alice/mallory@evil/g')
@@ -57,7 +57,7 @@ check "the forged owner never appears" test "$(owner bob)" = "claude@alice"
 
 section "3. compaction with --force-with-lease on a custom ref (and it purges the forged data)"
 OUT=$(alice sync compact 2>&1); echo "$OUT" | sed 's/^/        /'
-check "compaction succeeded against GitHub" grep -q "compacted" <<<"$OUT"
+check "compaction succeeded against the host" grep -q "compacted" <<<"$OUT"
 fetchref a
 check "the remote log is now exactly one commit" test "$(git -C "$W/a" rev-list --count refs/wbi/chk)" = "1"
 check "the forged file is gone from the remote" bash -c "! git -C '$W/a' ls-tree -r --name-only refs/wbi/chk | grep -q mallory"
@@ -76,7 +76,7 @@ BOBKEY=$(bob team key | head -1)
 alice team add "$BOBKEY" --name Bob >/dev/null 2>&1; alice sync >/dev/null 2>&1
 check "after being authorized, bob's earlier claim applies" test "$(owner alice)" = "codex@bob"
 
-section "5. concurrent claims racing through GitHub (6 rounds, both signed)"
+section "5. concurrent claims racing through the host (6 rounds, both signed)"
 alice team enforce off >/dev/null 2>&1
 WINS=0
 for i in 1 2 3 4 5 6; do

@@ -13,8 +13,6 @@ An adapter tells wbi three things about a coding agent: **which file it reads fo
 | **Cursor Agent** | `.cursor/rules/wbi.mdc` | CLI, MCP | ✅ verified (2026.10.01) | `cursor-agent -p --force`; MCP: `.cursor/mcp.json` + `--approve-mcps` |
 | **OpenCode** | `AGENTS.md` | CLI, MCP | ✅ verified (v2.0.22) | MCP: `opencode.json` in the repo |
 | **Google Antigravity** (`agy`) | `GEMINI.md` | CLI, MCP | ✅ verified (1.2.16) | `--dangerously-skip-permissions` headless; `agy mcp add` edits global config |
-| **Aider** | `CONVENTIONS.md` | human-driven only | 🔶 partial (0.86.2) | a person runs `wbi`; Aider edits inside the worktree. It cannot run the protocol itself (no shell). |
-| **Gemini CLI** | `GEMINI.md` | CLI, MCP | ◌ not run | Google rejected the test account; Antigravity reads the same file |
 
 A test pins this exact list, so this page and the code cannot drift apart silently. `wbi adapters mcp <agent>` prints the config *with* the setup notes above.
 

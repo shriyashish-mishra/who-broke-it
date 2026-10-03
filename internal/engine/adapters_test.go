@@ -70,7 +70,7 @@ func TestAdapterRegistryIsHonestAndConsistent(t *testing.T) {
 	}
 	// Pinned on purpose: this is the list of agents that were actually run (docs/REAL-AGENTS.md). Changing it
 	// means someone ran another agent, or something regressed. Update both together.
-	want := map[string]string{"claude": "verified", "codex": "verified", "antigravity": "verified", "cursor": "verified", "opencode": "verified", "aider": "partial", "gemini": "documented"}
+	want := map[string]string{"claude": "verified", "codex": "verified", "antigravity": "verified", "cursor": "verified", "opencode": "verified"}
 	for name, st := range want {
 		if status[name] != st {
 			t.Errorf("%s should be %s, is %q", name, st, status[name])

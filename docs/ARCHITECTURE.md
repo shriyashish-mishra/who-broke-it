@@ -97,7 +97,7 @@ The core (`Engine`, pure analyzers) knows nothing about MCP or any vendor. MCP a
 
 **Verification** (`engine/judge.go`). Checks: implementation (non-empty diff), scope (allowed/restricted), contracts (only the provider changes a contract; not built on stale versions), dependencies, constitution (forbid rules on the added lines), tests (evidence from the handoff), acceptance criteria (auto-checks run in the task workdir; others require attestation). Any ✗ → `FAILED` and the task returns to `IN_PROGRESS` with a notification. All ✓ → `DONE`, or `REVIEW` ("READY FOR REVIEW") when the task has any `impact` tag.
 
-**Attribution** (`engine/insight.go`). `git log --branches --source` over the path (so *unmerged agent branches are included*), then parse `WBI-Task` / `WBI-Agent` trailers, `Co-Authored-By` (recognizes Claude/Codex/Gemini/Cursor/Aider/Copilot), `TASK-nnn` in messages, and `(#123)` PR numbers.
+**Attribution** (`engine/insight.go`). `git log --branches --source` over the path (so *unmerged agent branches are included*), then parse `WBI-Task` / `WBI-Agent` trailers, `Co-Authored-By` (recognizes common agent names), `TASK-nnn` in messages, and `(#123)` PR numbers.
 
 ## Worktrees and identity
 

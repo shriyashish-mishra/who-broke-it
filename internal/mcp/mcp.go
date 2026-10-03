@@ -66,7 +66,7 @@ func obj(props M, required ...string) M {
 
 var str = M{"type": "string"}
 var who = M{
-	"agent":     M{"type": "string", "description": "Your tool name (claude, codex, gemini, cursor...). Defaults to $WBI_AGENT."},
+	"agent":     M{"type": "string", "description": "Your tool name (claude, codex, cursor, opencode...). Defaults to $WBI_AGENT."},
 	"developer": M{"type": "string", "description": "Human you work for. Defaults to $WBI_DEVELOPER / git user."},
 }
 

@@ -5,7 +5,7 @@ Any tool that can run a shell command can follow the [protocol](PROTOCOL.md). Pi
 ## Level 0: instructions only (works today for every agent)
 
 ```bash
-wbi adapters install all        # CLAUDE.md, AGENTS.md, GEMINI.md, .cursor/rules/wbi.mdc
+wbi adapters install all        # CLAUDE.md, AGENTS.md, GEMINI.md (Antigravity), .cursor/rules/wbi.mdc
 ```
 
 This inserts a managed block (`<!-- wbi:begin --> … <!-- wbi:end -->`) that teaches the agent the loop: identify → `wbi start` → declare intent → code → `wbi handoff`. Re-running updates the block in place and never touches the rest of the file.
@@ -14,7 +14,7 @@ This inserts a managed block (`<!-- wbi:begin --> … <!-- wbi:end -->`) that te
 |---|---|
 | Claude Code | `CLAUDE.md` |
 | Codex, OpenCode, generic | `AGENTS.md` |
-| Gemini CLI | `GEMINI.md` |
+| Google Antigravity | `GEMINI.md` |
 | Cursor | `.cursor/rules/wbi.mdc` |
 
 Set identity per terminal: `export WBI_AGENT=codex WBI_DEVELOPER="Dev B"`.
@@ -26,7 +26,7 @@ Set identity per terminal: `export WBI_AGENT=codex WBI_DEVELOPER="Dev B"`.
 ```bash
 wbi adapters mcp claude    # claude mcp add wbi --env WBI_AGENT=claude -- wbi mcp   (+ .mcp.json)
 wbi adapters mcp codex     # ~/.codex/config.toml [mcp_servers.wbi]
-wbi adapters mcp gemini    # JSON mcpServers block
+wbi adapters mcp antigravity   # agy mcp add ...
 wbi adapters mcp cursor
 ```
 
@@ -67,4 +67,4 @@ Nothing changes for agents: the same CLI / MCP calls work. When `wbi sync init` 
 
 ## Contributing an adapter
 
-Adapters are one registry entry each; see [ADAPTERS.md](ADAPTERS.md). Five agents are verified, Aider is partial and Gemini CLI is untested (status table in ADAPTERS.md). To add or verify another, use the "I ran another agent" issue template.
+Adapters are one registry entry each; see [ADAPTERS.md](ADAPTERS.md). Five agents are verified (status table in ADAPTERS.md). To add or verify another, use the "I ran another agent" issue template.

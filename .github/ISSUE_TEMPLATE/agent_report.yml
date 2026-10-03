@@ -1,17 +1,17 @@
 name: I ran another agent through wbi
-description: Ran an agent, or another version of one, through wbi (Gemini CLI, Windsurf, Copilot, a newer Codex...). Negative results are as useful as positive ones.
+description: Ran an agent, or another version of one, through wbi (Windsurf, Copilot, a newer Codex...). Negative results are as useful as positive ones.
 labels: [adapter, verification]
 title: "[agent] <tool and version>: "
 body:
   - type: markdown
     attributes:
       value: |
-        Claude Code, Codex, Cursor Agent, OpenCode and Antigravity have been run end to end; Aider is partial; the rest are untested (see `docs/REAL-AGENTS.md`). A real run, including failures, is how that changes. Negative results are just as useful.
+        Claude Code, Codex, Cursor Agent, OpenCode and Antigravity have been run end to end; the rest are untested (see `docs/REAL-AGENTS.md`). A real run, including failures, is how that changes. Negative results are just as useful.
   - type: input
     id: agent
     attributes:
       label: Agent and version
-      placeholder: "Codex CLI 0.x / Gemini CLI 0.x / Cursor 1.x"
+      placeholder: "Windsurf 1.x / Codex CLI 0.x / Cursor 1.x"
     validations: { required: true }
   - type: dropdown
     id: transport

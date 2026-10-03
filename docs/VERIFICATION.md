@@ -8,8 +8,8 @@ Claims in this project are only as good as the evidence. This page lists what wa
 |---|---|---|
 | Unit and end-to-end behaviour on **Linux, macOS and Windows** | CI matrix on every push (`go vet`, `go test ./...`, 24-process SQLite stress test; Windows included) | `make test` |
 | Two "machines" (separate clones) coordinate through a plain git remote | Tests with a bare remote and real worktrees; claim races, offline queueing, contract propagation | `go test ./internal/replicate` |
-| **Sync on real GitHub**: custom ref accepted, signed batches replicate, a forged batch pushed to GitHub is rejected, the team allow-list quarantines then applies a member, `--force-with-lease` compaction works and purges the forged data, 6/6 concurrent claim races have exactly one winner, 3/3 compactions racing live claims lose nothing | `scripts/verify-github-sync.sh` against the public demo repo (unique throwaway ref, deleted afterwards). 17/17 checks passed. | `scripts/verify-github-sync.sh <repo-url> <wbi>` |
-| **Claude Code, Codex, Cursor Agent, OpenCode and Antigravity** each drove wbi end to end over MCP *and* the CLI protocol; Aider works with a human running `wbi` | Real runs on 2026-10-03, judged from wbi's database and git, not the agent's report; recorded with versions and findings in [REAL-AGENTS.md](REAL-AGENTS.md) | `/tmp`-style harness described in that file |
+| **Sync on real GitHub and on gitlab.com**: custom ref accepted, signed batches replicate, a forged batch pushed to GitHub is rejected, the team allow-list quarantines then applies a member, `--force-with-lease` compaction works and purges the forged data, 6/6 concurrent claim races have exactly one winner, 3/3 compactions racing live claims lose nothing | `scripts/verify-sync.sh` against the public demo repo (unique throwaway ref, deleted afterwards). 17/17 checks passed on each host (GitHub on 2026-10-02, gitlab.com on 2026-10-03 via a private throwaway project, deleted afterwards). | `scripts/verify-sync.sh <repo-url> <wbi>` |
+| **Claude Code, Codex, Cursor Agent, OpenCode and Antigravity** each drove wbi end to end over MCP *and* the CLI protocol | Real runs on 2026-10-03, judged from wbi's database and git, not the agent's report; recorded with versions and findings in [REAL-AGENTS.md](REAL-AGENTS.md) | `/tmp`-style harness described in that file |
 | The merge gate and `wbi pr` on **real pull requests** | Public demo repo [wbi-action-demo](https://github.com/shriyashish-mishra/wbi-action-demo): a clean PR passes; scope, constitution, contract-tampering and high-impact PRs fail with the right annotations | open a PR there |
 | Install paths: `curl` installer (checksum verified, refuses on mismatch), Homebrew tap, `go install`, release archives | Run against the published release; Homebrew install/uninstall and the tamper test were executed | `docs/RELEASING.md` step 7 |
 | Documentation matches the implementation | Tests fail if the README or docs mention a command, adapter or Action input that does not exist (mutation-checked) | `go test ./cmd/wbi -run Doc` |
@@ -17,10 +17,8 @@ Claims in this project are only as good as the evidence. This page lists what wa
 
 ## Not verified (so don't rely on it)
 
-- **Gemini CLI**: Google rejected the test account ("migrate to Antigravity"), so it was not run. Antigravity, which reads the same `GEMINI.md`, was.
 - **Other versions** of the verified agents, and Windows for any agent.
-- **Aider driving the protocol itself**: it cannot (no shell); only the human-driven mode was verified. See [ADAPTERS.md](ADAPTERS.md).
-- **GitLab, Bitbucket, self-hosted git** as the sync remote. Only GitHub and local bare repos were tested. If a host blocks `refs/wbi/*`, use `wbi sync init --ref refs/heads/wbi-sync` (tested on a plain git remote, not on those hosts).
+- **Bitbucket and self-hosted GitLab/git** as the sync remote. GitHub, gitlab.com and local bare repos were tested. If a host blocks `refs/wbi/*`, use `wbi sync init --ref refs/heads/wbi-sync` (tested on a plain git remote, not on those hosts).
 - **Slack and Discord notifications** were tested against local HTTP servers that mimic the webhook contract, **not** against real Slack or Discord endpoints.
 - **Linear and Jira**: not built.
 - **Windows demo scripts** (they are bash). The Go tests run on Windows in CI; the demos run on Linux and macOS.

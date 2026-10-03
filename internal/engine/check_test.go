@@ -91,7 +91,7 @@ func TestCheckContractRules(t *testing.T) {
 	}
 
 	// 4. changing a shape without bumping the version is caught
-	wd = worktreeFor(t, e, "TASK-011", gemini)
+	wd = worktreeFor(t, e, "TASK-011", cursor)
 	editContract(t, wd, "AnalyticsEvent", func(c map[string]any) { c["shape"] = "{ different: true }" })
 	testutil.CommitAll(t, wd, "silent shape change")
 	if rep := check(t, e, engine.CheckOpts{Head: "wbi/TASK-011"}); !codesOf(rep, "error")["CONTRACT_UNVERSIONED"] {

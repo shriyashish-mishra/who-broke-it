@@ -23,9 +23,9 @@ Last significant changes:
 → 3 downstream task(s) affected: TASK-008, TASK-009, TASK-016
 ```
 
-Your team now has Claude Code, Codex, Gemini CLI, Cursor and a few humans all committing to one repo. The agents are good at writing code. Nobody is good at answering *who owns this, what depends on it, what did that agent just change that breaks mine, and is it actually done?* That is what this answers, from files that live in your repo.
+Your team now has Claude Code, Codex, Cursor and a few humans all committing to one repo. The agents are good at writing code. Nobody is good at answering *who owns this, what depends on it, what did that agent just change that breaks mine, and is it actually done?* That is what this answers, from files that live in your repo.
 
-> **Status:** v0.2, pre-1.0. Run end to end, over both MCP and the CLI protocol, with **Claude Code, OpenAI Codex CLI, Cursor Agent, OpenCode and Google Antigravity**; **Aider** works in a human-driven mode only. Gemini CLI could not be tested ([ADAPTERS.md](docs/ADAPTERS.md), [evidence](docs/REAL-AGENTS.md)). Everything else is listed, with evidence, in [VERIFICATION.md](docs/VERIFICATION.md).
+> **Status:** v0.2, pre-1.0. Run end to end, over both MCP and the CLI protocol, with **Claude Code, OpenAI Codex CLI, Cursor Agent, OpenCode and Google Antigravity** ([ADAPTERS.md](docs/ADAPTERS.md), [evidence](docs/REAL-AGENTS.md)). Everything else is listed, with evidence, in [VERIFICATION.md](docs/VERIFICATION.md).
 
 ## Install
 
@@ -51,7 +51,7 @@ wbi plan "Build a SaaS dashboard with auth, billing and analytics"
 wbi simulate --approve                     # waves, critical path, overlapping scopes; you approve the plan
 git add -A && git commit -m "chore: engineering graph"
 
-wbi adapters install claude                # writes the protocol into CLAUDE.md (also: codex, gemini, cursor, ...)
+wbi adapters install claude                # writes the protocol into CLAUDE.md (also: codex, antigravity, cursor, opencode)
 wbi status                                 # mission control
 wbi start TASK-001 --worktree --agent claude
 ```
@@ -110,8 +110,8 @@ Build a multi-tenant SaaS dashboard with authentication, billing, analytics and 
 Progress: ██████░░░░░░░░░░░░░░ 31%  (4/16 tasks)
 
 ACTIVE
-● Gemini   → TASK-003 Web app shell  [1 commit]
-● Gemini   → TASK-008 Billing UI
+● Cursor   → TASK-003 Web app shell  [1 commit]
+● Cursor   → TASK-008 Billing UI
 ● Codex    → TASK-010 Analytics API
 
 READY
@@ -128,7 +128,7 @@ ATTENTION
 
 ## Teams on separate machines
 
-Your teammates are on their own laptops with their own Claude / Codex / Gemini accounts. `wbi` shares coordination state through the git remote you already use. No server, no account, nothing to host:
+Your teammates are on their own laptops with their own Claude / Codex / Cursor accounts. `wbi` shares coordination state through the git remote you already use. No server, no account, nothing to host:
 
 ```bash
 wbi sync init                       # once; writes .wbi/project.json
@@ -230,7 +230,7 @@ When the backend hands off a change to `PaymentStatus` and it lands, the SDK's t
 ## Architecture
 
 ```text
- Claude Code     Codex       Gemini CLI     Cursor     custom agent        humans
+ Claude Code     Codex       Antigravity    Cursor     custom agent        humans
       │            │             │            │             │                │
       └────────────┴──────┬──────┴────────────┴─────────────┘                │
             MCP (wbi mcp) │  or plain CLI/ JSON (wbi …)                       │
@@ -253,9 +253,9 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/PROTOCOL.md](docs/PROTOC
 
 ## Using it with your agents
 
-* **CLI works with every agent.** Any tool that can run shell commands can follow the protocol (`export WBI_AGENT=<tool>`). `wbi adapters install claude|codex|gemini|cursor|opencode|aider` (or `all` for the first four) writes a managed block into the file that tool reads: `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `.cursor/rules/wbi.mdc`, `CONVENTIONS.md`.
+* **CLI works with every agent.** Any tool that can run shell commands can follow the protocol (`export WBI_AGENT=<tool>`). `wbi adapters install claude|codex|antigravity|cursor|opencode` (or `all` for the first four) writes a managed block into the file that tool reads: `CLAUDE.md`, `AGENTS.md`, `GEMINI.md` (Antigravity), `.cursor/rules/wbi.mdc`.
 * **MCP for tool-native use.** `wbi adapters mcp <agent>` prints the config snippet; `wbi mcp` is the server (18 tools).
-* **Know what is proven.** `wbi adapters list` shows each adapter's status. Claude Code, Codex, Cursor Agent, OpenCode and Antigravity are verified; Aider is partial (a human drives `wbi`); Gemini CLI is untested ([docs/ADAPTERS.md](docs/ADAPTERS.md)). Some need specific settings, e.g. Codex's sandbox must be allowed to write `.git`. If you run one, [tell us what happened](https://github.com/shriyashish-mishra/who-broke-it/issues/new?template=agent_report.yml).
+* **Know what is proven.** `wbi adapters list` shows each adapter's status and the version that was run. All five (Claude Code, Codex, Cursor Agent, OpenCode, Antigravity) are verified ([docs/ADAPTERS.md](docs/ADAPTERS.md)); some need specific settings, e.g. Codex's sandbox must be allowed to write `.git`. If you run another one, [tell us what happened](https://github.com/shriyashish-mishra/who-broke-it/issues/new?template=agent_report.yml).
 * **Commit attribution.** `wbi init` installs a `prepare-commit-msg` hook that stamps `WBI-Task` / `WBI-Agent` trailers from the branch name and `$WBI_AGENT`.
 * **Add an adapter**: one registry entry; see [docs/ADAPTERS.md](docs/ADAPTERS.md).
 
@@ -265,7 +265,7 @@ Parallel agents, worktrees, task assignment, MCP, cloud agents, PR automation an
 
 ## What works today, and what does not (read this)
 
-**Real agents:** Claude Code, Codex CLI, Cursor Agent, OpenCode and Antigravity were each run end to end over MCP and the CLI protocol, and judged from wbi's and git's recorded state ([docs/REAL-AGENTS.md](docs/REAL-AGENTS.md): what each run found and what changed). Aider works only when a human runs `wbi`. Gemini CLI was not tested (the account was rejected). Windows and other agent versions are untested.
+**Real agents:** Claude Code, Codex CLI, Cursor Agent, OpenCode and Antigravity were each run end to end over MCP and the CLI protocol, and judged from wbi's and git's recorded state ([docs/REAL-AGENTS.md](docs/REAL-AGENTS.md): what each run found and what changed). Windows and other agent versions are untested.
 
 Works and is tested: 80+ test cases (`make test`: unit, end-to-end on real git repos, two-clone sync scenarios including deterministic races, docs-versus-code checks) run on Linux, macOS and Windows in CI, plus both demos. Evidence, including the real-GitHub sync run and what was *not* tested, is in [docs/VERIFICATION.md](docs/VERIFICATION.md).
 
@@ -274,7 +274,7 @@ Known limits of this prototype:
 * **Sync is eventually consistent and trusts *team members* with each other.** Every published batch is ed25519-signed; a forged or tampered batch is always rejected, and with `wbi team join --enforce` only keys listed in `.wbi/team.json` (changed via PR) are applied. That protects against outsiders and forgery. It does **not** stop an authorized member from publishing events about someone else's task: there is no per-object permission.
 * **Claims are only atomic while you are online.** Offline claims are optimistic and can lose when you reconnect (you are told, and the claim is dropped).
 * **Log growth:** `wbi sync compact` replaces the history with one snapshot (guarded by a lease, so it cannot clobber a concurrent push). Run it occasionally; nothing runs it for you.
-* **Hosts:** sync was verified against **GitHub** (signing, forged-batch rejection, allow-list, `--force-with-lease` compaction, concurrent races) and plain bare git remotes. GitLab, Bitbucket and self-hosted git are untested; if one blocks `refs/wbi/*`, use the branch fallback above. Slack/Discord notifications were tested against local webhook mocks only.
+* **Hosts:** sync was verified against **GitHub** and **gitlab.com** (17/17 checks each: signing, forged-batch rejection, allow-list, `--force-with-lease` compaction, concurrent races) and plain bare git remotes. Bitbucket and self-hosted GitLab/git are untested; if one blocks `refs/wbi/*`, use the branch fallback above. Slack/Discord notifications were tested against local webhook mocks only.
 * **Intent is cooperative at edit time.** Agents must call it (the instruction files and MCP make that easy). The merge gate (`wbi check`) is what enforces the rules, after the fact, on the PR.
 * **The built-in planner is template-based** (auth, billing, analytics, assistant, notifications, mobile, multi-tenant, plus a generic fallback). It inspects your repo for stack, layout, test command and relevant files, but it is not an architect. For LLM-authored plans use `wbi plan --prompt` (prints a prompt + JSON schema for any agent), or `--agent-cmd "<cmd>"` (pipes the prompt to your agent CLI and ingests its JSON), or `--from plan.json`.
 * **Blast radius is declared relationships plus a best-effort static import scan** (JS/TS, Python, Go). It does not follow tsconfig/webpack aliases, computed dynamic imports, reflection, generated code, or other languages. It surfaces *undeclared coupling* (code in one task's area importing another's with no dependency edge) in `wbi blast`, `wbi drift` and `wbi check`.
@@ -285,9 +285,9 @@ Known limits of this prototype:
 
 What exists is listed above. What is next, roughly in order:
 
-1. **More agents and versions verified.** Gemini CLI, Windsurf, Copilot's agent mode, newer or older versions of the verified tools: run them through wbi and report what breaks ([template](https://github.com/shriyashish-mishra/who-broke-it/issues/new?template=agent_report.yml)). This is the most valuable contribution.
+1. **More agents and versions verified.** Windsurf, Copilot's agent mode, newer or older versions of the verified tools: run them through wbi and report what breaks ([template](https://github.com/shriyashish-mishra/who-broke-it/issues/new?template=agent_report.yml)). This is the most valuable contribution.
 2. **Multi-repo:** build on the `wbi link` foundation (shared dashboard, cross-repo notifications), if people need it.
-3. **Other hosts for sync:** verify GitLab, Bitbucket and self-hosted git.
+3. **Other hosts for sync:** verify Bitbucket and self-hosted GitLab/git.
 4. **Sync:** per-object permissions (today any authorized member can write any event), push-style wake-ups instead of polling.
 5. **Bridges:** Linear and Jira via the generic webhook sink, if someone needs them.
 
@@ -300,7 +300,7 @@ make test         # go vet + go test (unit + end-to-end on real temp git repos)
 make demo         # one machine, three agents
 make demo-team    # two machines sharing a git remote
 make site-data    # regenerate the website's transcripts from real demo runs
-scripts/verify-github-sync.sh <scratch-repo-url> bin/wbi   # sync against a real host
+scripts/verify-sync.sh <scratch-repo-url> bin/wbi   # sync against a real host
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). MIT licensed.

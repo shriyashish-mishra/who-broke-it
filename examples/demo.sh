@@ -4,7 +4,7 @@
 # Everything wbi does here is real: real git repo, real branches and worktrees, real commits,
 # real SQLite coordination state. The only simulated part is the *coding*: each agent's turn is
 # a scripted commit, because this demo must run offline without anyone's AI subscription.
-# Swap any step for a real `claude` / `codex` / `gemini` session and the coordination is identical.
+# Swap any step for a real `claude` / `codex` / `cursor` session and the coordination is identical.
 set -euo pipefail
 
 HERE="$(cd "$(dirname "$0")/.." && pwd)"
@@ -73,8 +73,8 @@ commit_in "$DEMO/.wbi/worktrees/TASK-002" codex DevB "feat(db): tenant-scoped sc
 as codex DevB bash -c "cd '$DEMO/.wbi/worktrees/TASK-002' && '$WBI_BIN' handoff TASK-002 --summary 'Tenant-scoped schema + initial migration' --tests 'echo 18 passed' --attest 1,2"
 wbi approve TASK-002 --as Maya
 
-step "5. Dev C's Gemini tries TASK-007 too early: wbi explains the block"
-as gemini DevC wbi claim TASK-007 || true
+step "5. Dev C's Cursor tries TASK-007 too early: wbi explains the block"
+as cursor DevC wbi claim TASK-007 || true
 
 step "6. Auth API (Claude) → approved → the graph opens up"
 as claude Maya wbi start TASK-004 --worktree | tail -4
@@ -87,21 +87,21 @@ as claude Maya bash -c "cd '$DEMO/.wbi/worktrees/TASK-004' && '$WBI_BIN' handoff
 wbi approve TASK-004 --as Maya
 wbi status
 
-step "7. Three agents in parallel: Billing API (Claude), Web shell (Gemini), then Intent conflicts"
+step "7. Three agents in parallel: Billing API (Claude), Web shell (Cursor), then Intent conflicts"
 as claude Maya wbi start TASK-007 --worktree | tail -4
-as gemini DevC wbi start TASK-003 --worktree | tail -4
+as cursor DevC wbi start TASK-003 --worktree | tail -4
 as claude Maya wbi intent declare MODIFY 'src/api/billing/**' --task TASK-007
-echo; echo "Gemini (TASK-003) wanders into billing code, and Codex tries to change BillingStatus. wbi catches both BEFORE any code is written:"
-as gemini DevC wbi intent declare MODIFY 'src/api/billing/plans.ts' --task TASK-003 || true
+echo; echo "Cursor (TASK-003) wanders into billing code, and Codex tries to change BillingStatus. wbi catches both BEFORE any code is written:"
+as cursor DevC wbi intent declare MODIFY 'src/api/billing/plans.ts' --task TASK-003 || true
 as codex DevB wbi claim TASK-010 --force >/dev/null
 as codex DevB wbi intent declare CHANGE_CONTRACT BillingStatus --task TASK-010 || true
 
-step "8. Contract-first: Gemini starts Billing UI early against the published contract (--force)"
-as gemini DevC wbi claim TASK-008 --force
+step "8. Contract-first: Cursor starts Billing UI early against the published contract (--force)"
+as cursor DevC wbi claim TASK-008 --force
 write "$DEMO/.wbi/worktrees/TASK-003/src/web/shell/layout.tsx" <<'EOF'
 export const Layout = () => null;
 EOF
-commit_in "$DEMO/.wbi/worktrees/TASK-003" gemini DevC "feat(web): app shell"
+commit_in "$DEMO/.wbi/worktrees/TASK-003" cursor DevC "feat(web): app shell"
 
 step "9. Claude finishes Billing API and CHANGES BillingStatus ('paused'): watch it propagate"
 write "$DEMO/.wbi/worktrees/TASK-007/src/api/billing/status.ts" <<'EOF'
@@ -111,9 +111,9 @@ commit_in "$DEMO/.wbi/worktrees/TASK-007" claude Maya "feat(billing): status end
 as claude Maya bash -c "cd '$DEMO/.wbi/worktrees/TASK-007' && '$WBI_BIN' handoff TASK-007 --summary 'Billing API v2' --tests 'echo 24 passed' --contract 'BillingStatus=now supports paused' --limitation 'Refund API not implemented' --attest 1,2"
 wbi approve TASK-007 --as Maya
 
-step "10. Blast radius, Gemini's inbox, and mission control"
+step "10. Blast radius, Cursor's inbox, and mission control"
 wbi blast BillingStatus
-echo; echo "Gemini's inbox:"; as gemini DevC wbi inbox
+echo; echo "Cursor's inbox:"; as cursor DevC wbi inbox
 wbi status
 
 step "11. The Judge: 'done' is not DONE. Codex ships a constitution violation in Analytics"

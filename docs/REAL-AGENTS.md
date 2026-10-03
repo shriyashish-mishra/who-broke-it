@@ -8,7 +8,6 @@ Scripted demos prove the coordination logic; they cannot prove that a real agent
 |---|---|---|---|
 | **Claude Code** | 2.1.287 | MCP (`.mcp.json` from `wbi adapters mcp claude`) | Listed ready tasks, claimed one, read its packet, declared an out-of-scope intent and correctly interpreted the `OUT_OF_SCOPE` / `RISKY_PATH` warnings (7 turns, about $0.11) |
 | **Claude Code** | 2.1.287 | CLI, following the `CLAUDE.md` block from `wbi adapters install claude`, **no `WBI_*` env set** | Auto-detected as `claude`, started a worktree, wrote and committed a file, handed off, read the verifier (9 turns, about $0.13) |
-| Codex, Gemini CLI, Cursor, OpenCode, Aider | n/a | n/a | **Not tested.** Not installed on the machine this was built on. The adapters for them are written from their documented conventions and should be treated as unverified. |
 
 ## What the real agent found (and what changed)
 
@@ -33,7 +32,7 @@ If you run another agent through wbi, please open an issue with what happened. T
 
 ---
 
-# Round 2: five more agents (2026-10-03)
+# Round 2: five agents (2026-10-03)
 
 Same task for every agent, defined in [`scripts/agent-harness/`](../scripts/agent-harness/): a fresh git repo with a one-task plan (*create `src/hello.js` exporting `hello()` returning `"hello"`, with a test*), the tool's own instruction file installed by `wbi adapters install`, and a prompt asking it to follow the protocol. **A run only counts if wbi's database and git agree**: task `DONE`, an isolated worktree, the code in the worktree and *not* on main, intents declared before editing, commits carrying `WBI-Task`/`WBI-Agent` trailers, and a handoff record. What the agent said about itself was not evidence.
 
@@ -43,8 +42,6 @@ Same task for every agent, defined in [`scripts/agent-harness/`](../scripts/agen
 | **Cursor Agent** (2026.10.01) | ✅ | ✅ | `cursor-agent -p --force`; MCP also `--approve-mcps` |
 | **OpenCode** (v2.0.22) | ✅ | ✅ | `opencode run "..."`; MCP via `opencode.json` |
 | **Google Antigravity CLI** (`agy` 1.2.16) | ✅ | ✅ | `--dangerously-skip-permissions`; reads `GEMINI.md`; `agy mcp add` is global-only |
-| **Aider** (0.86.2) | ❌ cannot drive it | n/a (no MCP) | ✅ **human-driven**: a person runs `wbi`, Aider edits in the worktree |
-| **Gemini CLI** (0.62.0) | not run | not run | Google rejected the account: "migrate to the Antigravity suite" |
 
 ## What the runs found
 
@@ -52,13 +49,12 @@ Same task for every agent, defined in [`scripts/agent-harness/`](../scripts/agen
 2. **Codex over MCP also needs tool approval.** Non-interactive Codex blocks MCP calls that need approval ("approval policy is never"). `default_tools_approval_mode = "approve"` on the wbi server fixes it. (My first MCP attempt also hung because `codex exec` waited on stdin; closing stdin fixed it. That was my harness, not wbi.)
 3. **Attribution gap over MCP (fixed).** An MCP-driven agent's identity lives in the MCP server's environment, not in the shell where it runs `git commit`, so those commits had `WBI-Task` but no `WBI-Agent`. The commit hook now asks `wbi executor <task>` when `WBI_AGENT` is unset. Run `wbi hook` to refresh an existing repo's hook.
 4. **Test evidence was polluted by runtime warnings (fixed).** Several handoffs recorded Node's "NO_COLOR is ignored due to FORCE_COLOR" warning as the *test summary*. wbi now filters that class of line out of command output before summarising it.
-5. **Aider cannot run the protocol.** Asked to follow it, Aider's model correctly reasoned it has no shell, never ran `wbi start`, and wrote `src/hello.js` straight into the main checkout (exactly what the protocol forbids). In human-driven mode it behaves well: edits land in the worktree and its commits get the trailers via the hook.
-6. **Identity is whatever the agent says.** Antigravity read `GEMINI.md` and reported its agent name as `gemini` over MCP. wbi trusts the agent's declaration (as it must); the field is a label, not authentication.
-7. **A failing test command is caught.** In the Aider run my own handoff used a wrong path for `--tests` and the Judge sent the task back to `IN_PROGRESS` ("`✗ Tests`"), as designed. Note `--tests` runs *inside the worktree*.
+5. **Identity is whatever the agent says.** Over MCP, Antigravity and Cursor each chose their own agent/developer names in tool calls (one took its name from the wording of the instruction file). wbi trusts the agent's declaration (as it must); the field is a label, not authentication.
+6. **A failing test command is caught.** In one run a handoff used a wrong path for `--tests` and the Judge sent the task back to `IN_PROGRESS` ("`✗ Tests`"), as designed. Note `--tests` runs *inside the worktree*.
 
 ## Caveats on this evidence
 
 - **One task, one run per transport per agent** (plus reruns noted above). This shows the protocol is workable with each tool, not that it is reliable across tasks, models or versions.
-- Models differ run to run; Aider used a free OpenRouter model (`qwen/qwen3.8-27b:free`) because the default had been retired. A stronger model might also fail the same way for the same structural reason (no shell), but that is untested.
+- Models differ run to run, so a second run could behave differently.
 - Everything ran on macOS only, in a temp repo, with permissions relaxed as each tool's headless mode requires. Real teams will use stricter policies; item 1 shows what that can change.
 - These tools update often. The versions above are the only ones tested.

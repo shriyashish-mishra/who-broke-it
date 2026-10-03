@@ -14,7 +14,7 @@ Existing tools coordinate *which files are touched right now* (locks, claims) or
 
 ## Who it is for
 
-* **Primary:** a small team (2–10) building a product with a mix of agents (Claude Code, Codex, Gemini CLI, Cursor, Aider…) in one GitHub repo: hackathon teams, startups, internal tools teams.
+* **Primary:** a small team (2–10) building a product with a mix of agents (Claude Code, Codex, Cursor, OpenCode, Antigravity…) in one GitHub repo: hackathon teams, startups, internal tools teams.
 * **Secondary:** a single developer running several agents in parallel worktrees who wants them not to collide.
 * **Later:** orgs wanting governance (audit, permissions, approvals) over agent-authored change.
 
